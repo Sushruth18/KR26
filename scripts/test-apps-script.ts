@@ -4,7 +4,7 @@
  */
 import assert from 'node:assert/strict';
 import { createGasRuntime, createOpenRuntime, type GasRuntime } from '../mock/gas-runtime';
-import { normEmail, normId, normPhone, normText } from '../src/lib/validation';
+import { isValidId, normEmail, normId, normPhone, normText } from '../src/lib/validation';
 
 let passed = 0;
 const failures: string[] = [];
@@ -155,6 +155,50 @@ t('email failure (quota/outage) does NOT fail the registration', () => {
   assert.equal(rt.mail.sent.length, 0);
 });
 
+console.log('\nRegister — any USN format is accepted (no college/format check)');
+t("another college's USN 1TD24CS001 registers, and the duplicate check still catches it", () => {
+  const rt = createOpenRuntime();
+  const r = reg(rt, { id: '1TD24CS001' });
+  assert.equal(r.ok, true);
+  assert.equal(regRow(rt, 2)[5], '1TD24CS001');
+  assert.deepEqual(reg(rt, { id: ' 1td24 cs001 ', name: 'Someone Else' }), { ok: false, code: 'DUPLICATE', regId: r.regId });
+});
+t('an odd value "abc-123" registers (stored as ABC-123), and "ABC - 123" is caught as a duplicate', () => {
+  const rt = createOpenRuntime();
+  const r = reg(rt, { id: 'abc-123' });
+  assert.equal(r.ok, true);
+  assert.equal(regRow(rt, 2)[5], 'ABC-123');
+  assert.deepEqual(reg(rt, { id: 'ABC - 123', name: 'Someone Else' }), { ok: false, code: 'DUPLICATE', regId: r.regId });
+});
+t('exactly 20 characters accepted; inner spaces removed before the length check', () => {
+  const rt = createOpenRuntime();
+  assert.equal(reg(rt, { id: 'A'.repeat(20) }).ok, true);
+  assert.equal(reg(rt, { id: `${'B'.repeat(10)}   ${'B'.repeat(10)}` }).ok, true);
+});
+t('team members with any USN format register and are duplicate-checked', () => {
+  const rt = createOpenRuntime();
+  assert.equal(rt.post({ ...quiz, id: '1TD24CS001', members: [{ name: 'Ravi K', id: 'abc-123', phone: '9845011111' }] }).ok, true);
+  assert.equal(regRow(rt, 2)[12], 'ABC-123');
+  const r = rt.post({ ...quiz, id: 'xyz 9', members: [{ name: 'Meera S', id: 'ABC-123', phone: '9845022222' }] });
+  assert.deepEqual(r, { ok: false, code: 'DUPLICATE', regId: 'KR26-QIZ-0001' });
+  assert.equal(rt.post({ ...quiz, id: 'xyz 9', members: [{ name: 'Meera S', id: '1td24cs001', phone: '9845022222' }] }).code, 'DUPLICATE');
+});
+t('lookup works with a non-BMSIT USN', () => {
+  const rt = createOpenRuntime();
+  reg(rt, { id: '1TD24CS001' });
+  assert.deepEqual(rt.post({ action: 'lookup', id: '1td24cs001', phone: '9845012345' }), {
+    ok: true,
+    passes: [{ regId: 'KR26-ESY-0001', event: 's-essay', name: 'Ananya Rao' }],
+  });
+});
+t('client isValidId and Code.gs validId_ agree for student USNs', () => {
+  const server = createOpenRuntime().ctx.validId_ as (s: string, c: string) => boolean;
+  for (const raw of ['1TD24CS001', 'abc-123', '1BY23CS001', 'X'.repeat(20), 'X'.repeat(21), '', 'ಕನ್ನಡ', '#/!']) {
+    const s = normId(raw);
+    assert.equal(server(s, 'students'), isValidId(s, 'students'), `validId(${JSON.stringify(raw)})`);
+  }
+});
+
 console.log('\nRegister — DUPLICATE (per event, across all team member IDs)');
 t('same USN again for the same event → DUPLICATE with the existing regId', () => {
   const rt = createOpenRuntime();
@@ -240,7 +284,8 @@ const cases: [string, Record<string, unknown>, string][] = [
   ['unknown event', { eventId: 'x-rap-battle' }, 'eventId'],
   ['name with digits', { name: 'R2D2' }, 'name'],
   ['name one char', { name: 'A' }, 'name'],
-  ['USN wrong college code', { id: '1RV23CS001' }, 'id'],
+  ['USN empty', { id: '   ' }, 'id'],
+  ['USN longer than 20 characters', { id: '1BY23CS0011BY23CS0011' }, 'id'],
   ['department not in list', { department: 'Physics' }, 'department'],
   ['Other department empty', { department: 'Other', departmentOther: ' ' }, 'departmentOther'],
   ['even semester 2', { semester: 2 }, 'semester'],
@@ -273,8 +318,12 @@ t('team: duplicate USN inside the team → members.0.id', () => {
   const r = createOpenRuntime().post({ ...quiz, members: [{ name: 'Ravi K', id: '1BY23CS010', phone: '9845011111' }] });
   assert.deepEqual(r, { ok: false, code: 'VALIDATION', field: 'members.0.id' });
 });
-t('team: member with an employee ID on a student event → members.0.id', () => {
-  const r = createOpenRuntime().post({ ...quiz, members: [{ name: 'Ravi K', id: 'EMP77', phone: '9845011111' }] });
+t('team: member USN longer than 20 characters → members.0.id', () => {
+  const r = createOpenRuntime().post({ ...quiz, members: [{ name: 'Ravi K', id: 'X'.repeat(21), phone: '9845011111' }] });
+  assert.equal(r.field, 'members.0.id');
+});
+t('team: empty member USN → members.0.id', () => {
+  const r = createOpenRuntime().post({ ...quiz, members: [{ name: 'Ravi K', id: ' ', phone: '9845011111' }] });
   assert.equal(r.field, 'members.0.id');
 });
 t('team: missing team name → teamName', () => {
@@ -387,7 +436,7 @@ t('5 failed lookups for one ID → RATE_LIMITED, even with the right phone', () 
 console.log('\nClient/server parity');
 t('normalisers in validation.ts and Code.gs give identical results', () => {
   const rt = createOpenRuntime();
-  const inputs = ['  1by 23cs001 ', '+91 98450-12345', '919845012345', '09845012345', ' A.  B   ', 'ಶ್ರೀ  ನಿವಾಸ್', ' X@Y.CO ', '', '\t', 'emp 10 42'];
+  const inputs = ['  1by 23cs001 ', ' 1td24cs001', 'abc-123', 'abc - 123', '+91 98450-12345', '919845012345', '09845012345', ' A.  B   ', 'ಶ್ರೀ  ನಿವಾಸ್', ' X@Y.CO ', '', '\t', 'emp 10 42'];
   for (const s of inputs) {
     assert.equal((rt.ctx.normText_ as (v: string) => string)(s), normText(s), `normText(${JSON.stringify(s)})`);
     assert.equal((rt.ctx.normId_ as (v: string) => string)(s), normId(s), `normId(${JSON.stringify(s)})`);

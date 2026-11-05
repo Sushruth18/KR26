@@ -32,7 +32,6 @@ export function StepDetails({ event }: { event: CompetitionEvent }) {
       <TextField<F>
         name="id"
         label={student ? t('register.usn') : t('register.empId')}
-        hint={student ? t('register.usnHint') : undefined}
         autoCapitalize="characters"
         autoCorrect="off"
         spellCheck={false}

@@ -52,11 +52,6 @@ if (site && events) {
     if (e.teamSize.min > e.teamSize.max) errors.push(`events.json: ${e.id} teamSize.min > max`);
     if (e.prizes.type === 'cash' && e.category === 'faculty') errors.push(`events.json: ${e.id} faculty events award mementos`);
   }
-  try {
-    new RegExp(site.usnRegex);
-  } catch {
-    errors.push('site.json: usnRegex is not a valid regular expression');
-  }
   if (new Date(site.registrationOpen) >= new Date(site.registrationClose)) {
     errors.push('site.json: registrationOpen must be before registrationClose');
   }

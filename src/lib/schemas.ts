@@ -94,7 +94,6 @@ export const siteSchema = z.object({
   instagramUrl: z.union([z.literal(''), z.string().url()]),
   contactEmail: z.union([z.literal(''), z.string().email()]),
   madeBy: z.string(),
-  usnRegex: z.string(),
   minFormSeconds: z.number().min(0),
   mapQuery: z.string().min(1),
   departments: z.array(z.string().min(1)).min(1),

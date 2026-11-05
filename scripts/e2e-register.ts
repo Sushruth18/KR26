@@ -332,12 +332,18 @@ async function main() {
     const msgs = await page.$$eval('.field-error', (els) => els.map((e) => e.textContent));
     expect((await step(page)) === 'details', 'stays on details');
     const focused = await page.evaluate(() => document.activeElement?.id);
-    await typeInto(page, '#f-id', '1RV23CS001');
+    await typeInto(page, '#f-id', 'X'.repeat(21));
     await typeInto(page, '#f-phone', '12345');
     await page.click('[data-testid=next]');
     await sleep(300);
     const usnMsg = await page.$eval('#f-id-error', (e) => e.textContent);
-    return `${msgs.length} inline Kannada errors (${msgs.slice(0, 3).join(' / ')}…); focus moved to #${focused}; wrong college USN → "${usnMsg}"`;
+    expect(usnMsg?.includes('೨೦'), `21-char USN → length message, got "${usnMsg}"`);
+    // Any format is accepted: another college's USN clears the error.
+    await typeInto(page, '#f-id', '1TD24CS001');
+    await page.click('[data-testid=next]');
+    await sleep(300);
+    expect(!(await page.$('#f-id-error')), '1TD24CS001 accepted by the client');
+    return `${msgs.length} inline Kannada errors (${msgs.slice(0, 3).join(' / ')}…); focus moved to #${focused}; 21-char USN → "${usnMsg}"; 1TD24CS001 → no error`;
   });
 
   await scenario(browser, '09-too-fast-honeypot-en', 'en', async (page) => {
@@ -410,6 +416,43 @@ async function main() {
     writeFileSync(resolve(OUT, `kannada-${png.name}`), png.bytes);
     await page.screenshot({ path: resolve(OUT, '12-pass-on-screen.png') });
     return `team pass ${r.regId}; PNG saved as kannada-${png.name} (${png.bytes.readUInt32BE(16)}×${png.bytes.readUInt32BE(20)}) for visual check`;
+  });
+
+  await scenario(browser, '13-any-usn-1TD24CS001-en', 'en', async (page) => {
+    const p: Person = { eventId: 's-debate', name: 'Kiran T', id: '1td24cs001', dept: 'CSE', sem: '3', phone: '9845066666', email: 'kiran@example.com' };
+    await fillToReview(page, p);
+    const r = await submit(page);
+    expect(r.kind === 'success', `1TD24CS001 should register, got ${JSON.stringify(r)}`);
+    const passText = await page.$eval('[data-testid=pass-card]', (e) => e.textContent ?? '');
+    await fillToReview(page, { ...p, id: '1TD24 CS001', name: 'Someone Else', phone: '9845066667', email: 'other@example.com' });
+    const dup = await submit(page);
+    expect(dup.kind === 'error' && dup.code === 'DUPLICATE' && dup.regId === r.regId, `expected DUPLICATE ${r.regId}, got ${JSON.stringify(dup)}`);
+    return `non-BMSIT USN 1td24cs001 → ${r.regId}${passText.includes('Kiran T') ? ' (pass shown)' : ''}; "1TD24 CS001" again → DUPLICATE ${dup.regId}`;
+  });
+
+  await scenario(browser, '14-any-usn-abc-123-team-kn', 'kn', async (page) => {
+    const p: Person = {
+      eventId: 's-treasure-hunt', name: 'Nandini B', id: 'abc-123', dept: 'ISE', sem: '5', phone: '9845077770', email: 'nandini@example.com',
+      team: { teamName: 'Hudukata', members: [
+        { name: 'Pavan M', id: 'zz 9/1', phone: '9845077771' },
+        { name: 'Rekha L', id: '1TD24EC010', phone: '9845077772' },
+      ] },
+    };
+    await fillToReview(page, p);
+    const review = await page.$eval('[data-testid=register-form]', (e) => e.textContent ?? '');
+    expect(review.includes('ABC-123') && review.includes('ZZ9/1'), 'review shows normalised odd IDs');
+    const r = await submit(page);
+    expect(r.kind === 'success', `abc-123 team should register, got ${JSON.stringify(r)}`);
+    // A different team whose member is "ABC - 123" (the earlier registrant) is caught.
+    await fillToReview(page, {
+      ...p, id: 'new-one', phone: '9845077773', email: 'x2@example.com', team: { teamName: 'Matte', members: [
+        { name: 'Usha K', id: 'qq1', phone: '9845077774' },
+        { name: 'Nandini B', id: 'ABC - 123', phone: '9845077770' },
+      ] },
+    });
+    const dup = await submit(page);
+    expect(dup.kind === 'error' && dup.code === 'DUPLICATE' && dup.regId === r.regId, `expected DUPLICATE ${r.regId}, got ${JSON.stringify(dup)}`);
+    return `registrant "abc-123" + members "zz 9/1", "1TD24EC010" → ${r.regId}; new team with member "ABC - 123" → DUPLICATE ${dup.regId}`;
   });
 
   await browser.close();

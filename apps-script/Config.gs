@@ -7,7 +7,6 @@
 // ============================================================================
 
 var CONFIG = {
-  "usnRegex": "^1BY\\d{2}[A-Z]{2}\\d{3}$",
   "minFormMs": 3000,
   "departments": [
     "CSE",
@@ -44,6 +43,9 @@ var CONFIG = {
       "pattern": "^[A-Za-z\\u0C80-\\u0CFF\\u200C\\u200D. ]+$",
       "min": 2,
       "max": 60
+    },
+    "usn": {
+      "max": 20
     },
     "empId": {
       "pattern": "^[A-Z0-9]+$",

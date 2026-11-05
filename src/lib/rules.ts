@@ -6,6 +6,8 @@
 export const RULES = {
   /** Letters (Latin or Kannada, incl. vowel signs and ZWJ/ZWNJ used in conjuncts), spaces and "." */
   name: { pattern: '^[A-Za-z\\u0C80-\\u0CFF\\u200C\\u200D. ]+$', min: 2, max: 60 },
+  /** USN after normalising (spaces removed, upper-cased). Any format is accepted — only the length is limited. */
+  usn: { max: 20 },
   /** Employee ID after normalising (spaces removed, upper-cased). */
   empId: { pattern: '^[A-Z0-9]+$', max: 20 },
   phone: { pattern: '^[6-9]\\d{9}$' },

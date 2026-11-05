@@ -13,7 +13,6 @@ export function buildGasConfigSource(root = process.cwd()): string {
   const events = eventsSchema.parse(read('events.json'));
 
   const config = {
-    usnRegex: site.usnRegex,
     minFormMs: Math.round(site.minFormSeconds * 1000),
     departments: site.departments,
     semesters: site.semesters,

@@ -287,7 +287,7 @@ Rangoli is new this year and fits the theme perfectly — give its card a kolam-
 - `guests.json` — `[{ name:{kn,en}, title:{kn,en}, photo }]`
 - `team.json` — `[{ group:{kn,en}, members:[{ name:{kn,en}, role:{kn,en}, photo, linkedin?, instagram? }] }]`
 - `gallery.json` — `{ photos:[{ year, src, alt:{kn,en}, caption? }], reels:[{ year, poster, video?|url?, title }] }`
-- `site.json` — `competitionsStart` ("2026-11-20T09:00:00+05:30" — TODO-CONFIRM start time), `competitionsEnd` ("2026-11-20T18:00:00+05:30" — TODO-CONFIRM), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), registration open/close ISO (`registrationClose` "2026-11-18T23:59:00+05:30"), `prizePoolTotal` (39000), Instagram URL, contact email, USN regex.
+- `site.json` — `competitionsStart` ("2026-11-20T09:00:00+05:30" — TODO-CONFIRM start time), `competitionsEnd` ("2026-11-20T18:00:00+05:30" — TODO-CONFIRM), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), registration open/close ISO (`registrationClose` "2026-11-18T23:59:00+05:30"), `prizePoolTotal` (39000), Instagram URL, contact email.
 
 Validate every data file with a zod schema at build time (a small `scripts/validate-data.ts` run in `prebuild`).
 
@@ -312,11 +312,11 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
   6. Send confirmation email with `MailApp` (wrapped in try/catch — failure must not fail the registration). Mention in README that consumer Gmail accounts have a daily email quota.
   7. Return `{ ok:true, regId, event, name }`.
 - Error codes: `VALIDATION`, `CLOSED`, `FULL`, `DUPLICATE`, `SERVER`. Always return JSON via `ContentService` with `MimeType.JSON`.
-- Normalise: trim, collapse spaces, uppercase USN, strip `+91`/spaces from phone, lowercase email.
+- Normalise: trim, collapse spaces, remove all spaces in and uppercase USN/employee ID, strip `+91`/spaces from phone, lowercase email.
 
 ### Validation rules (shared: `src/lib/validation.ts` and mirrored in `Code.gs`)
 - Name: 2–60 chars, letters (Kannada or Latin), spaces, `.`
-- USN: configurable regex in `site.json`, default `^1BY\d{2}[A-Z]{2}\d{3}$` (BMSIT VTU format) — TODO-CONFIRM against a few real USNs, including lateral-entry and any newer format.
+- USN: **no format check** — any value is accepted (a real USN like `1TD24CS001` was rejected by the old BMSIT-only regex, so it was removed). Only: required, trimmed, inner spaces removed, uppercased, ≤ 20 characters (`RULES.usn.max` in `src/lib/rules.ts`). Normalisation (`normId` / `normId_`) is identical in the browser and Code.gs so the duplicate check still works.
 - Employee ID: non-empty, ≤ 20 chars, alphanumeric.
 - Phone: `^[6-9]\d{9}$` after normalising.
 - Email: standard format.
@@ -404,7 +404,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 ### Registration architecture (Phase 2 — refines §7)
 - **One server implementation.** `apps-script/Code.gs` is the only server code. `apps-script/Config.gs` is **generated** (`npm run gas:config`, also on every build) from `site.json`, `events.json` and `src/lib/rules.ts` — never edit it by hand. Validation rules live in `src/lib/rules.ts`; semesters/departments in `site.json` (`semesters.default` = odd semesters 1,3,5,7; `byDepartment` MBA/MCA = 1,3). Client (`src/lib/validation.ts`) and server read the same lists.
 - **Mock = real Code.gs.** `mock/gas-runtime.ts` runs Code.gs in a Node VM with fake Sheet/Lock/Cache/Mail services; `mock/vite-plugin-mock-gas.ts` serves it at `/mock-api` in `npm run dev` only. Force outcomes with `?mock=duplicate|full|closed|deadline|validation|server|network|slow|statusdown` on any page or the dev-only panel (bottom-left). Mock data is in memory and resets when the dev server restarts.
-- **Tests:** `npm run test:server` (Code.gs logic, 62 cases), `npm run e2e` (browser, needs `npm run dev`; `E2E_BASE` for another port), `npm run race -- <url>` (last-seat concurrency; must be run against the deployed script — the mock is single-threaded).
+- **Tests:** `npm run test:server` (Code.gs logic, 70 cases), `npm run e2e` (browser, needs `npm run dev`; `E2E_BASE` for another port), `npm run race -- <url>` (last-seat concurrency; must be run against the deployed script — the mock is single-threaded).
 - **Sheet column `member_ids`** (not `member_usns`): holds USNs or employee IDs. `user_agent` dropped.
 - **Team size counts the registrant** (Group Dance 6–12 = registrant + 5–11 member rows). Photo/video consent optional; rules consent required.
 - **Extra codes:** `CLOSED` carries `reason: NOT_OPEN | DEADLINE`; `SERVER` may carry `reason: BUSY` (lock timeout); lookup returns `NOT_FOUND` / `RATE_LIMITED` (5 failures per ID per 10 min). Client adds `NETWORK` and `CONFIG` (endpoint not set).

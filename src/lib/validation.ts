@@ -25,8 +25,8 @@ export const isValidName = (s: string) =>
   s.length >= RULES.name.min && s.length <= RULES.name.max && test(RULES.name.pattern, s);
 export const isValidPhone = (s: string) => test(RULES.phone.pattern, s);
 export const isValidEmail = (s: string) => s.length <= RULES.email.max && test(RULES.email.pattern, s);
-export function isValidId(s: string, category: CompetitionEvent['category'], usnRegex: string) {
-  if (category === 'students') return new RegExp(usnRegex).test(s);
+export function isValidId(s: string, category: CompetitionEvent['category']) {
+  if (category === 'students') return s.length >= 1 && s.length <= RULES.usn.max;
   return s.length >= 1 && s.length <= RULES.empId.max && test(RULES.empId.pattern, s);
 }
 export function semestersFor(site: SiteConfig, department: string): number[] {
@@ -106,7 +106,7 @@ export function registrationSchema(event: CompetitionEvent | undefined, site: Si
       else if (!ok) add([path], key);
     };
     required('name', v.name, isValidName(normText(v.name)), 'errors.name');
-    required('id', v.id, isValidId(normId(v.id), event.category, site.usnRegex), event.category === 'students' ? 'errors.usn' : 'errors.empId');
+    required('id', v.id, isValidId(normId(v.id), event.category), event.category === 'students' ? 'errors.usn' : 'errors.empId');
 
     const dept = normText(v.department);
     if (!dept) add(['department'], 'errors.department');
@@ -135,7 +135,7 @@ export function registrationSchema(event: CompetitionEvent | undefined, site: Si
         required(`members.${i}.name`, m.name, isValidName(normText(m.name)), 'errors.name');
         const mid = normId(m.id);
         if (!mid) add(['members', i, 'id'], 'errors.required');
-        else if (!isValidId(mid, event.category, site.usnRegex)) {
+        else if (!isValidId(mid, event.category)) {
           add(['members', i, 'id'], event.category === 'students' ? 'errors.usn' : 'errors.empId');
         } else if (seen.has(mid)) add(['members', i, 'id'], 'errors.memberDuplicate');
         seen.add(mid);

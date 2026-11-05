@@ -15,7 +15,6 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 - [ ] `instagramUrl` — empty, footer icon hidden
 - [ ] `contactEmail` — empty, hidden
 - [ ] `madeBy` — empty, hidden
-- [ ] `usnRegex` — default `^1BY\d{2}[A-Z]{2}\d{3}$`; check against real USNs (lateral entry, newer formats)
 - [ ] `departments` — draft list (CSE, ISE, AIML, ECE, EEE, ETE, Mech, Civil, MBA, MCA + Other)
 - [ ] `semesters` — odd semesters 1, 3, 5, 7 for engineering; **MBA/MCA 1, 3** (confirm). Lateral-entry students?
 - [ ] Competition duration for the calendar file — `.ics` uses 2 hours once a start time is set (`src/lib/ics.ts`)

@@ -96,7 +96,7 @@ function validName_(s) {
   return s.length >= r.min && s.length <= r.max && matches_(r.pattern, s);
 }
 function validId_(s, category) {
-  if (category === 'students') return matches_(CONFIG.usnRegex, s);
+  if (category === 'students') return s.length >= 1 && s.length <= CONFIG.rules.usn.max;
   return s.length >= 1 && s.length <= CONFIG.rules.empId.max && matches_(CONFIG.rules.empId.pattern, s);
 }
 function validPhone_(s) {

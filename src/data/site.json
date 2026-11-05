@@ -11,7 +11,6 @@
   "instagramUrl": "",
   "contactEmail": "",
   "madeBy": "",
-  "usnRegex": "^1BY\\d{2}[A-Z]{2}\\d{3}$",
   "minFormSeconds": 3,
   "mapQuery": "BMS Institute of Technology and Management, Avalahalli, Yelahanka, Bengaluru",
   "departments": ["CSE", "ISE", "AIML", "ECE", "EEE", "ETE", "Mech", "Civil", "MBA", "MCA"],
