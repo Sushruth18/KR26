@@ -19,9 +19,12 @@ import './styles/index.css';
 
 import './i18n';
 import { applyDeviceFlags } from './hooks/useMotionPrefs';
+import { captureMockFlagFromUrl } from './lib/mockFlag';
 import App from './App';
 
 applyDeviceFlags();
+
+if (import.meta.env.DEV) captureMockFlagFromUrl();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

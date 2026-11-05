@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "vite",
     "validate": "tsx scripts/validate-data.ts",
-    "prebuild": "npm run validate",
+    "prebuild": "npm run gas:config && npm run validate",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gas:config": "tsx scripts/build-gas-config.ts",
+    "test:server": "tsx scripts/test-apps-script.ts",
+    "e2e": "tsx scripts/e2e-register.ts",
+    "race": "tsx scripts/race-test.ts"
   },
   "dependencies": {
     "@fontsource/baloo-tamma-2": "^5.3.0",
@@ -42,6 +46,7 @@
     "globals": "^17.14.0",
     "postcss": "^8.5.32",
     "prettier": "^3.9.10",
+    "puppeteer-core": "^25.16.0",
     "tailwindcss": "^3.4.19",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",

@@ -1,0 +1,425 @@
+/**
+ * End-to-end test of the registration flow against the dev server's mock endpoint (real Code.gs).
+ *   1. npm run dev            (in another terminal)
+ *   2. npm run e2e            (E2E_BASE, E2E_OUT, CHROME_PATH env vars optional)
+ * Drives the real form in headless Chrome at 360×800, one fresh browser profile per scenario.
+ * Writes screenshots, the downloaded pass PNG and .ics, and results.json to E2E_OUT.
+ */
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import puppeteer, { type Browser, type Page } from 'puppeteer-core';
+
+const BASE = process.env.E2E_BASE ?? 'http://localhost:5173';
+const OUT = resolve(process.env.E2E_OUT ?? 'e2e-output');
+const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+mkdirSync(OUT, { recursive: true });
+
+interface Result {
+  name: string;
+  ok: boolean;
+  detail: string;
+  consoleErrors: string[];
+  ms: number;
+}
+const results: Result[] = [];
+
+interface Person {
+  eventId: string;
+  name: string;
+  id: string;
+  dept: string;
+  sem?: string;
+  phone: string;
+  email: string;
+  team?: { teamName: string; members: { name: string; id: string; phone: string }[] };
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function newPage(browser: Browser, lang: 'kn' | 'en', errors: string[]) {
+  const ctx = await browser.createBrowserContext();
+  const page = await ctx.newPage();
+  await page.setViewport({ width: 360, height: 800, deviceScaleFactor: 1 });
+  await page.evaluateOnNewDocument((l) => localStorage.setItem('kr26.lang', l), lang);
+  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  page.on('pageerror', (e) => errors.push(String(e)));
+  return page;
+}
+
+async function step(page: Page) {
+  return page.$eval('[data-testid=register-form]', (f) => f.getAttribute('data-step'));
+}
+async function waitStep(page: Page, s: string) {
+  await page.waitForFunction((x) => document.querySelector('[data-testid=register-form]')?.getAttribute('data-step') === x, { timeout: 10000 }, s);
+}
+async function noHorizontalScroll(page: Page) {
+  return page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+}
+async function typeInto(page: Page, sel: string, text: string) {
+  await page.click(sel, { count: 3 });
+  await page.keyboard.press('Backspace');
+  await page.type(sel, text);
+}
+
+/** Fills every step and stops on Review (consent ticked) without submitting. */
+async function fillToReview(page: Page, p: Person, mock = '', waitMinTime = true) {
+  const t0 = Date.now();
+  await page.goto(`${BASE}/register?event=${p.eventId}${mock ? `&mock=${mock}` : '&mock='}`, { waitUntil: 'networkidle0' });
+  await page.waitForSelector('[data-testid=event-summary]');
+  await page.waitForFunction(() => !document.querySelector('[data-testid=seats-left] .skeleton'), { timeout: 15000 });
+  const formReady = Date.now(); // ≈ when the form mounted (the server's min-time clock starts there)
+  const overflow: boolean[] = [await noHorizontalScroll(page)];
+  await page.click('[data-testid=next]');
+  await waitStep(page, 'details');
+  await typeInto(page, '#f-name', p.name);
+  await typeInto(page, '#f-id', p.id);
+  await page.select('#f-department', p.dept);
+  if (p.sem) await page.select('#f-semester', p.sem);
+  await typeInto(page, '#f-phone', p.phone);
+  await typeInto(page, '#f-email', p.email);
+  overflow.push(await noHorizontalScroll(page));
+  await page.click('[data-testid=next]');
+  if (p.team) {
+    await waitStep(page, 'team');
+    await typeInto(page, '#f-teamName', p.team.teamName);
+    for (const [i, m] of p.team.members.entries()) {
+      if (!(await page.$(`#f-members-${i}-name`))) await page.click('[data-testid=add-member]');
+      await typeInto(page, `#f-members-${i}-name`, m.name);
+      await typeInto(page, `#f-members-${i}-id`, m.id);
+      await typeInto(page, `#f-members-${i}-phone`, m.phone);
+    }
+    overflow.push(await noHorizontalScroll(page));
+    await page.click('[data-testid=next]');
+  }
+  await waitStep(page, 'review');
+  await page.click('#f-consentRules');
+  overflow.push(await noHorizontalScroll(page));
+  if (waitMinTime) {
+    const elapsed = Date.now() - formReady;
+    if (elapsed < 3500) await sleep(3500 - elapsed); // a human takes > 3 s; the server rejects faster
+  }
+  return { overflowFree: overflow.every(Boolean), fillMs: Date.now() - t0 };
+}
+
+/** Clicks submit and waits for the pass page or an error alert. */
+async function submit(page: Page, timeout = 15000) {
+  await page.click('[data-testid=submit]');
+  await page.waitForFunction(
+    () => location.pathname === '/register/success' || document.querySelector('[data-testid=submit-error]'),
+    { timeout },
+  );
+  if (new URL(page.url()).pathname === '/register/success') {
+    await page.waitForSelector('[data-testid=pass-reg-id]');
+    return { kind: 'success' as const, regId: await page.$eval('[data-testid=pass-reg-id]', (e) => e.textContent?.trim() ?? '') };
+  }
+  return page.$eval('[data-testid=submit-error]', (e) => ({
+    kind: 'error' as const,
+    code: e.getAttribute('data-code') ?? '',
+    text: e.textContent?.trim() ?? '',
+    regId: e.querySelector('[data-testid=existing-reg-id]')?.textContent?.trim() ?? '',
+  }));
+}
+
+/** Intercepts <a download> clicks and returns the downloaded file's bytes. */
+async function captureDownload(page: Page, buttonSel: string) {
+  await page.evaluate(() => {
+    const w = window as unknown as { __dl: { name: string; href: string }[] };
+    w.__dl = [];
+    HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+      if (this.download) w.__dl.push({ name: this.download, href: this.href });
+    };
+  });
+  await page.click(buttonSel);
+  await page.waitForFunction(() => (window as unknown as { __dl: unknown[] }).__dl.length > 0, { timeout: 30000 });
+  const file = await page.evaluate(async () => {
+    const d = (window as unknown as { __dl: { name: string; href: string }[] }).__dl[0]!;
+    const buf = new Uint8Array(await (await fetch(d.href)).arrayBuffer());
+    let bin = '';
+    buf.forEach((b) => (bin += String.fromCharCode(b)));
+    return { name: d.name, b64: btoa(bin) };
+  });
+  return { name: file.name, bytes: Buffer.from(file.b64, 'base64') };
+}
+
+async function scenario(browser: Browser, name: string, lang: 'kn' | 'en', fn: (page: Page) => Promise<string>, allowErrors?: RegExp) {
+  const errors: string[] = [];
+  const page = await newPage(browser, lang, errors);
+  const t0 = Date.now();
+  let ok = true;
+  let detail: string;
+  try {
+    detail = await fn(page);
+  } catch (e) {
+    ok = false;
+    detail = `FAILED: ${(e as Error).message}`;
+  }
+  await page.screenshot({ path: resolve(OUT, `${name}.png`), fullPage: true }).catch(() => undefined);
+  const unexpected = errors.filter((e) => !(allowErrors && allowErrors.test(e)));
+  if (unexpected.length) ok = false;
+  results.push({ name, ok, detail, consoleErrors: unexpected, ms: Date.now() - t0 });
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name} (${Math.round((Date.now() - t0) / 100) / 10}s)\n      ${detail}${unexpected.length ? `\n      console: ${unexpected.join(' | ')}` : ''}`);
+  await page.browserContext().close();
+}
+
+function expect(cond: unknown, msg: string): asserts cond {
+  if (!cond) throw new Error(msg);
+}
+
+const ananya: Person = { eventId: 's-essay', name: 'ಅನನ್ಯಾ ರಾವ್', id: '1by23cs101', dept: 'CSE', sem: '3', phone: '+91 98450 12345', email: 'Ananya@Example.com' };
+const poem = (n: number): Person => ({ eventId: 's-poem', name: 'Rahul Shetty', id: `1BY22IS${String(200 + n)}`, dept: 'ISE', sem: '5', phone: `98450${String(20000 + n)}`, email: `rahul${n}@example.com` });
+
+async function main() {
+  await fetch(`${BASE}/mock-api/__reset`, { method: 'POST' }).catch(() => {
+    throw new Error(`Dev server not reachable at ${BASE} — run "npm run dev" first.`);
+  });
+  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox'] });
+
+  await scenario(browser, '01-success-individual-kn', 'kn', async (page) => {
+    const fill = await fillToReview(page, ananya);
+    const r = await submit(page);
+    expect(r.kind === 'success', `expected success, got ${JSON.stringify(r)}`);
+    expect(r.regId === 'KR26-ESY-0001', `regId ${r.regId}`);
+    const passText = await page.$eval('[data-testid=pass-card]', (e) => e.textContent ?? '');
+    expect(passText.includes('ದಿನ ೧ · ೨೦ ನವೆಂಬರ್'), 'pass shows Day 1 in Kannada numerals');
+    expect(passText.includes('ಪ್ರಬಂಧ ಬರಹ'), 'pass shows Kannada event name');
+    expect(passText.includes('TBA'), 'pass shows TBA for unconfirmed time/venue');
+    expect(passText.includes('೨೧ ನವೆಂಬರ್'), 'pass invites to Day 2 (21 Nov)');
+    await page.screenshot({ path: resolve(OUT, '01-pass-screen.png') });
+
+    const png = await captureDownload(page, '[data-testid=download-png]');
+    writeFileSync(resolve(OUT, png.name), png.bytes);
+    expect(png.bytes.subarray(1, 4).toString() === 'PNG', 'file is a PNG');
+    const w = png.bytes.readUInt32BE(16);
+    const h = png.bytes.readUInt32BE(20);
+    const cardW = await page.$eval('[data-testid=pass-card]', (e) => e.getBoundingClientRect().width);
+    expect(Math.abs(w - cardW * 2) <= 2, `PNG width ${w} should be 2× card width ${cardW}`);
+
+    const ics = await captureDownload(page, '[data-testid=download-ics]');
+    writeFileSync(resolve(OUT, ics.name), ics.bytes);
+    const text = ics.bytes.toString('utf8');
+    const lines = text.split('\r\n');
+    expect(!/[^\r]\n/.test(text), 'all line breaks are CRLF');
+    expect(lines.every((l) => Buffer.byteLength(l, 'utf8') <= 75), 'every line ≤ 75 octets (folded)');
+    expect(text.includes('DTSTART;VALUE=DATE:20261120') && text.includes('DTEND;VALUE=DATE:20261121'), 'Day 1 all-day (time TBA)');
+    expect(text.includes('DTSTART:20261121T033000Z') && text.includes('DTEND:20261121T121500Z'), 'Day 2 09:00–17:45 IST in UTC');
+    expect((text.match(/BEGIN:VEVENT/g) ?? []).length === 2, 'two VEVENTs');
+
+    await page.reload({ waitUntil: 'networkidle0' });
+    const afterReload = await page.$eval('[data-testid=pass-reg-id]', (e) => e.textContent?.trim());
+    expect(afterReload === 'KR26-ESY-0001', 'pass survives a page refresh (sessionStorage)');
+    return `regId ${r.regId}; filled in ${fill.fillMs} ms; no horizontal scroll: ${fill.overflowFree}; PNG ${w}×${h} (2× ${cardW}px card); .ics ${lines.length - 1} lines, CRLF, folded, all-day Day 1 + timed Day 2; pass persists after refresh`;
+  });
+
+  await scenario(browser, '02-success-team-en', 'en', async (page) => {
+    const fill = await fillToReview(page, {
+      eventId: 's-quiz', name: 'Meera S', id: '1BY23AI050', dept: 'AIML', sem: '3', phone: '9845033333', email: 'meera@example.com',
+      team: { teamName: 'Kannada Kalpa', members: [{ name: 'Ravi K', id: '1by23ai051', phone: '9845044444' }] },
+    });
+    const review = await page.$eval('[data-testid=register-form]', (e) => e.textContent ?? '');
+    expect(review.includes('1BY23AI051'), 'review shows normalised member USN');
+    const r = await submit(page);
+    expect(r.kind === 'success' && r.regId === 'KR26-QIZ-0001', JSON.stringify(r));
+    const passText = await page.$eval('[data-testid=pass-card]', (e) => e.textContent ?? '');
+    expect(passText.includes('Meera S, Ravi K') && passText.includes('Day 1 · 20 November'), 'pass lists team, Latin numerals in EN');
+    return `regId ${r.regId}; team of 2 (quiz min=max=2 → exactly 1 member row); no horizontal scroll: ${fill.overflowFree}`;
+  });
+
+  await scenario(browser, '03-duplicate-real-kn', 'kn', async (page) => {
+    await fillToReview(page, { ...ananya, name: 'Someone Else', phone: '9845099999', email: 'x@example.com' });
+    const r = await submit(page);
+    expect(r.kind === 'error' && r.code === 'DUPLICATE' && r.regId === 'KR26-ESY-0001', JSON.stringify(r));
+    return `same USN as scenario 01 (typed lower-case) → DUPLICATE showing existing ID ${r.regId}; message: "${r.text.slice(0, 80)}…"`;
+  });
+
+  const forced: [string, string, (r: Awaited<ReturnType<typeof submit>>) => boolean, string][] = [
+    ['duplicate', 'en', (r) => r.kind === 'error' && r.code === 'DUPLICATE' && /^KR26-POM-\d{4}$/.test(r.regId), 'DUPLICATE with real regId'],
+    ['full', 'en', (r) => r.kind === 'error' && r.code === 'FULL', 'FULL'],
+    ['closed', 'kn', (r) => r.kind === 'error' && r.code === 'CLOSED' && r.text.includes('ತೆರೆದಿಲ್ಲ'), 'CLOSED (not open), Kannada message'],
+    ['deadline', 'en', (r) => r.kind === 'error' && r.code === 'CLOSED' && r.text.includes('deadline'), 'CLOSED (deadline) message'],
+    ['server', 'en', (r) => r.kind === 'error' && r.code === 'SERVER', 'SERVER with Retry'],
+  ];
+  for (const [i, [mock, lang, check, label]] of forced.entries()) {
+    await scenario(browser, `04-forced-${mock}-${lang}`, lang as 'kn' | 'en', async (page) => {
+      await fillToReview(page, poem(i), mock);
+      const r = await submit(page);
+      expect(check(r), `expected ${label}, got ${JSON.stringify(r)}`);
+      const hasRetry = !!(await page.$('[data-testid=retry]'));
+      return `?mock=${mock} → ${label}${'regId' in r && r.regId ? ` (${r.regId})` : ''}; retry button: ${hasRetry}; text: "${('text' in r ? r.text : '').slice(0, 90)}"`;
+    });
+  }
+
+  await scenario(browser, '05-forced-validation-en', 'en', async (page) => {
+    await fillToReview(page, poem(10), 'validation');
+    const r = await submit(page);
+    expect(r.kind === 'error' && r.code === 'VALIDATION', JSON.stringify(r));
+    await waitStep(page, 'details');
+    const msg = await page.$eval('#f-phone-error', (e) => e.textContent);
+    const invalid = await page.$eval('#f-phone', (e) => e.getAttribute('aria-invalid'));
+    const describedBy = await page.$eval('#f-phone', (e) => e.getAttribute('aria-describedby'));
+    expect(invalid === 'true' && describedBy === 'f-phone-error', 'phone marked invalid + described by its error');
+    return `server rejected phone → form jumped back to step "${await step(page)}", phone field: aria-invalid=${invalid}, "${msg}"`;
+  });
+
+  await scenario(
+    browser,
+    '06-forced-network-kn',
+    'kn',
+    async (page) => {
+      await fillToReview(page, poem(11), 'network');
+      const r = await submit(page, 30000);
+      expect(r.kind === 'error' && r.code === 'NETWORK', JSON.stringify(r));
+      // Turn the mock off and press Retry: the saved form submits successfully.
+      await page.evaluate(() => sessionStorage.removeItem('kr26.mock'));
+      await page.click('[data-testid=retry]');
+      await page.waitForSelector('[data-testid=pass-reg-id]', { timeout: 15000 });
+      const regId = await page.$eval('[data-testid=pass-reg-id]', (e) => e.textContent?.trim());
+      return `connection dropped on submit → NETWORK message (after the one automatic retry), form data kept; Retry with network back → success ${regId}`;
+    },
+    /ERR_EMPTY_RESPONSE|Failed to load resource/,
+  );
+
+  await scenario(
+    browser,
+    '06b-status-endpoint-down-kn',
+    'kn',
+    async (page) => {
+      await page.goto(`${BASE}/register?event=s-essay&mock=statusdown`, { waitUntil: 'networkidle0' });
+      await page.waitForFunction(() => !document.querySelector('[data-testid=seats-left] .skeleton'), { timeout: 15000 });
+      const text = await page.$eval('main', (e) => e.textContent ?? '');
+      const note = text.includes('ಲೈವ್ ಸ್ಥಾನ ಸಂಖ್ಯೆ');
+      const beforeOpen = Date.now() < Date.parse('2026-11-08T00:00:00+05:30');
+      const nextDisabled = await page.$eval('[data-testid=next]', (b) => (b as HTMLButtonElement).disabled);
+      if (beforeOpen) {
+        expect(text.includes('ಶೀಘ್ರದಲ್ಲೇ ತೆರೆಯಲಿದೆ') && nextDisabled, 'before 8 Nov the fallback shows "Opens soon" and blocks Next');
+      } else {
+        expect(!nextDisabled, 'after 8 Nov the fallback allows registration');
+      }
+      expect(note, '"live seat count unavailable" note');
+      return `status GET failed → fallback to events.json + clock: "live seat count unavailable" shown; today is before 8 Nov so state = Opens soon, Next disabled: ${nextDisabled}`;
+    },
+    /ERR_EMPTY_RESPONSE|Failed to load resource/,
+  );
+
+  await scenario(
+    browser,
+    '07-forced-slow-timeout-en',
+    'en',
+    async (page) => {
+      await fillToReview(page, poem(12), 'slow');
+      const t0 = Date.now();
+      const r = await submit(page, 60000);
+      const waited = Math.round((Date.now() - t0) / 1000);
+      expect(r.kind === 'error' && r.code === 'NETWORK', JSON.stringify(r));
+      await sleep(6000); // let the mock finish the requests the browser gave up on
+      await page.evaluate(() => sessionStorage.removeItem('kr26.mock'));
+      await page.click('[data-testid=retry]');
+      const r2 = await page.waitForFunction(
+        () => location.pathname === '/register/success' || document.querySelector('[data-testid=existing-reg-id]'),
+        { timeout: 15000 },
+      ).then(() => page.evaluate(() => document.querySelector('[data-testid=existing-reg-id]')?.textContent ?? 'success'));
+      expect(/^KR26-POM-\d{4}$/.test(r2), `retry after timeout should be DUPLICATE (request had landed), got ${r2}`);
+      return `25 s server delay → client timed out at 20 s, retried once, showed NETWORK after ${waited}s; the first request had actually landed, so manual Retry → DUPLICATE ${r2} (no double registration)`;
+    },
+    /ERR|Failed to load resource|aborted/i,
+  );
+
+  await scenario(browser, '08-client-validation-kn', 'kn', async (page) => {
+    await page.goto(`${BASE}/register?event=s-essay&mock=`, { waitUntil: 'networkidle0' });
+    await page.click('[data-testid=next]');
+    await waitStep(page, 'details');
+    await page.click('[data-testid=next]');
+    await page.waitForSelector('.field-error');
+    const msgs = await page.$$eval('.field-error', (els) => els.map((e) => e.textContent));
+    expect((await step(page)) === 'details', 'stays on details');
+    const focused = await page.evaluate(() => document.activeElement?.id);
+    await typeInto(page, '#f-id', '1RV23CS001');
+    await typeInto(page, '#f-phone', '12345');
+    await page.click('[data-testid=next]');
+    await sleep(300);
+    const usnMsg = await page.$eval('#f-id-error', (e) => e.textContent);
+    return `${msgs.length} inline Kannada errors (${msgs.slice(0, 3).join(' / ')}…); focus moved to #${focused}; wrong college USN → "${usnMsg}"`;
+  });
+
+  await scenario(browser, '09-too-fast-honeypot-en', 'en', async (page) => {
+    const fill = await fillToReview(page, poem(13), '', false);
+    const r = await submit(page);
+    if (fill.fillMs >= 3000) return `SKIPPED min-time check: automation needed ${fill.fillMs} ms (> 3 s) — covered by test:server`;
+    expect(r.kind === 'error' && r.code === 'VALIDATION', `expected VALIDATION/form, got ${JSON.stringify(r)}`);
+    expect(!(await page.$('#f-phone-error')), 'no field blamed');
+    // Honeypot: fill the hidden field, wait past 3 s, submit.
+    await page.$eval('#f-website', (e) => {
+      const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+      set.call(e, 'http://spam.example');
+      e.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await sleep(3200);
+    const r2 = await submit(page);
+    expect(r2.kind === 'error' && r2.code === 'VALIDATION', `honeypot: ${JSON.stringify(r2)}`);
+    return `submitted ${fill.fillMs} ms after opening → generic "${'text' in r ? r.text.slice(0, 50) : ''}…"; honeypot filled → rejected the same way`;
+  });
+
+  await scenario(browser, '10-draft-survives-reload-en', 'en', async (page) => {
+    await page.goto(`${BASE}/register?event=s-rangoli&mock=`, { waitUntil: 'networkidle0' });
+    await page.click('[data-testid=next]');
+    await waitStep(page, 'details');
+    await typeInto(page, '#f-name', 'Kavya N');
+    await typeInto(page, '#f-email', 'kavya@example.com');
+    await page.select('#f-department', 'MBA');
+    const semOptions = await page.$$eval('#f-semester option', (o) => o.map((x) => x.textContent).filter((x) => !x?.startsWith('—')));
+    await page.reload({ waitUntil: 'networkidle0' });
+    await waitStep(page, 'details');
+    const name = await page.$eval('#f-name', (e) => (e as HTMLInputElement).value);
+    const email = await page.$eval('#f-email', (e) => (e as HTMLInputElement).value);
+    expect(name === 'Kavya N' && email === 'kavya@example.com', `after reload: ${name} / ${email}`);
+    expect(semOptions.join(',') === '1,3', `MBA semesters ${semOptions.join(',')}`);
+    await page.select('#f-department', 'CSE');
+    const cse = await page.$$eval('#f-semester option', (o) => o.map((x) => x.textContent).filter((x) => !x?.startsWith('—')));
+    expect(cse.join(',') === '1,3,5,7', `CSE semesters ${cse.join(',')}`);
+    return `step + values restored after reload; semester options MBA = ${semOptions.join(', ')}, CSE = ${cse.join(', ')}`;
+  });
+
+  await scenario(browser, '11-lookup-kn', 'kn', async (page) => {
+    await page.goto(`${BASE}/register/success`, { waitUntil: 'networkidle0' });
+    await page.waitForSelector('[data-testid=lookup-form]');
+    await page.type('#lk-id', '1BY23CS101');
+    await page.type('#lk-phone', '9845000000');
+    await page.click('[data-testid=lookup-form] button[type=submit]');
+    await page.waitForSelector('[data-testid=lookup-error]');
+    const wrong = await page.$eval('[data-testid=lookup-error]', (e) => e.textContent);
+    await typeInto(page, '#lk-phone', '98450 12345');
+    await page.click('[data-testid=lookup-form] button[type=submit]');
+    await page.waitForSelector('[data-testid=pass-reg-id]');
+    const regId = await page.$eval('[data-testid=pass-reg-id]', (e) => e.textContent?.trim());
+    expect(regId === 'KR26-ESY-0001', `lookup regId ${regId}`);
+    return `no pass on device → lookup form; wrong phone → "${wrong}"; ID + full phone → pass ${regId}`;
+  });
+
+  await scenario(browser, '12-pass-png-kannada', 'kn', async (page) => {
+    // Kannada-heavy pass: Kannada names with conjuncts, Kannada event name, team.
+    await fillToReview(page, {
+      eventId: 's-group-singing', name: 'ಶ್ರೀನಿವಾಸ್ ಕೃಷ್ಣಮೂರ್ತಿ', id: '1BY21EC077', dept: 'ECE', sem: '7', phone: '9845055555', email: 'sri@example.com',
+      team: { teamName: 'ಸ್ವರ ಸಂಗಮ', members: [
+        { name: 'ಅಕ್ಷತಾ ಭಟ್', id: '1BY21EC078', phone: '9845055556' },
+        { name: 'ದ್ವಾರಕೀಶ್', id: '1BY21EC079', phone: '9845055557' },
+      ] },
+    });
+    const r = await submit(page);
+    expect(r.kind === 'success', JSON.stringify(r));
+    await page.evaluate(() => document.fonts.ready);
+    const png = await captureDownload(page, '[data-testid=download-png]');
+    writeFileSync(resolve(OUT, `kannada-${png.name}`), png.bytes);
+    await page.screenshot({ path: resolve(OUT, '12-pass-on-screen.png') });
+    return `team pass ${r.regId}; PNG saved as kannada-${png.name} (${png.bytes.readUInt32BE(16)}×${png.bytes.readUInt32BE(20)}) for visual check`;
+  });
+
+  await browser.close();
+  writeFileSync(resolve(OUT, 'results.json'), JSON.stringify(results, null, 2));
+  const failed = results.filter((r) => !r.ok);
+  console.log(`\n${results.length - failed.length}/${results.length} scenarios passed. Output: ${OUT}`);
+  if (failed.length) process.exit(1);
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

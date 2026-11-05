@@ -11,6 +11,8 @@ const Team = lazy(() => import('./pages/Team'));
 const Register = lazy(() => import('./pages/Register'));
 const RegisterSuccess = lazy(() => import('./pages/RegisterSuccess'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+// Dev-only; `import.meta.env.DEV` is false in production builds so this import is dropped entirely.
+const DevMockPanel = import.meta.env.DEV ? lazy(() => import('./components/dev/DevMockPanel')) : null;
 
 function RouteFallback() {
   const { t } = useTranslation();
@@ -24,7 +26,7 @@ function RouteFallback() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route element={<Layout />}>
@@ -39,6 +41,11 @@ export default function App() {
           </Route>
         </Routes>
       </Suspense>
+      {DevMockPanel && (
+        <Suspense fallback={null}>
+          <DevMockPanel />
+        </Suspense>
+      )}
     </BrowserRouter>
   );
 }

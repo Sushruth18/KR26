@@ -98,5 +98,10 @@ export const siteSchema = z.object({
   minFormSeconds: z.number().min(0),
   mapQuery: z.string().min(1),
   departments: z.array(z.string().min(1)).min(1),
+  /** Odd semesters only (Nov = odd term). byDepartment overrides default (e.g. MBA/MCA). */
+  semesters: z.object({
+    default: z.array(z.number().int().min(1).max(10)).min(1),
+    byDepartment: z.record(z.string(), z.array(z.number().int().min(1).max(10)).min(1)),
+  }),
 });
 export type SiteConfig = z.infer<typeof siteSchema>;

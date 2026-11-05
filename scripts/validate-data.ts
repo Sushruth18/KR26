@@ -62,6 +62,30 @@ if (site && events) {
   }
 }
 
+if (site) {
+  for (const dept of Object.keys(site.semesters.byDepartment)) {
+    if (!site.departments.includes(dept)) errors.push(`site.json: semesters.byDepartment.${dept} is not in departments`);
+  }
+}
+
+// tokens.css: every colour's "-rgb" twin (used by Tailwind opacity modifiers) must match its hex value.
+{
+  const css = readFileSync(resolve(process.cwd(), 'src/styles/tokens.css'), 'utf8');
+  for (const [, name, hex] of css.matchAll(/--([a-z0-9-]+):\s*#([0-9a-f]{6})\s*;/gi)) {
+    const rgb = css.match(new RegExp(`--${name}-rgb:\\s*(\\d+) (\\d+) (\\d+);`));
+    const want = [0, 2, 4].map((i) => parseInt(hex!.slice(i, i + 2), 16)).join(' ');
+    if (!rgb) errors.push(`tokens.css: --${name}-rgb missing`);
+    else if (rgb.slice(1).join(' ') !== want) errors.push(`tokens.css: --${name}-rgb is "${rgb.slice(1).join(' ')}", expected "${want}"`);
+  }
+}
+
+// A Netlify build without the Apps Script URL would ship a dead registration form.
+if (process.env.NETLIFY === 'true' && !process.env.VITE_REGISTRATION_ENDPOINT?.trim()) {
+  errors.push('VITE_REGISTRATION_ENDPOINT is not set in Netlify → Site configuration → Environment variables');
+} else if (!process.env.VITE_REGISTRATION_ENDPOINT?.trim()) {
+  console.warn('Note: VITE_REGISTRATION_ENDPOINT is empty — this build will show "registration unavailable".');
+}
+
 if (schedule) {
   for (const s of schedule) {
     if (s.end <= s.start) errors.push(`schedule.json: ${s.title.en} ends before it starts`);

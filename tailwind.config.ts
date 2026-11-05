@@ -1,18 +1,21 @@
 import type { Config } from 'tailwindcss';
 
+// Colours come from src/styles/tokens.css (*-rgb channels) so opacity modifiers like bg-gold-400/10 work.
+const c = (token: string) => `rgb(var(--${token}-rgb) / <alpha-value>)`;
+
 const config: Config = {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        night: { 950: 'var(--night-950)', 900: 'var(--night-900)', 800: 'var(--night-800)' },
-        gold: { 300: 'var(--gold-300)', 400: 'var(--gold-400)', 600: 'var(--gold-600)' },
-        maroon: { 700: 'var(--maroon-700)', 900: 'var(--maroon-900)' },
-        saffron: { 500: 'var(--saffron-500)' },
-        ivory: { 50: 'var(--ivory-50)', 300: 'var(--ivory-300)' },
-        flag: { yellow: 'var(--flag-yellow)', red: 'var(--flag-red)' },
-        success: 'var(--success)',
-        danger: 'var(--danger)',
+        night: { 950: c('night-950'), 900: c('night-900'), 800: c('night-800') },
+        gold: { 300: c('gold-300'), 400: c('gold-400'), 600: c('gold-600') },
+        maroon: { 700: c('maroon-700'), 900: c('maroon-900') },
+        saffron: { 500: c('saffron-500') },
+        ivory: { 50: c('ivory-50'), 300: c('ivory-300') },
+        flag: { yellow: c('flag-yellow'), red: c('flag-red') },
+        success: c('success'),
+        danger: c('danger'),
       },
       fontFamily: {
         display: ['var(--font-display)'],

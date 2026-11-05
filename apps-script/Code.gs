@@ -1,0 +1,521 @@
+/**
+ * Karnataka Rajyotsava 2026 — registration backend (Google Apps Script web app).
+ *
+ * The Apps Script project needs TWO files: this Code.gs and Config.gs (generated from the
+ * website's data — never edit Config.gs by hand). Setup steps: apps-script/README.md.
+ *
+ * Endpoints
+ *   GET  ?action=status                         -> { ok, events: { [id]: { seats, seatsLeft, isOpen, deadline } }, serverTime }
+ *   POST { action: "register", ...fields }      -> { ok:true, regId, event, name } | { ok:false, code, reason?, field?, regId? }
+ *   POST { action: "lookup", id, phone }        -> { ok:true, passes:[{ regId, event, name }] } | { ok:false, code }
+ * The browser sends POST bodies as Content-Type text/plain so no CORS preflight is needed.
+ *
+ * Error codes: VALIDATION, CLOSED (reason NOT_OPEN | DEADLINE), FULL, DUPLICATE, SERVER (reason BUSY when the
+ * lock could not be acquired), NOT_FOUND and RATE_LIMITED (lookup only).
+ */
+
+var SHEET_EVENTS = 'Events';
+var SHEET_REGS = 'Registrations';
+var EVENT_HEADERS = ['id', 'code', 'name_en', 'seats', 'deadline_iso', 'is_open'];
+var REG_HEADERS = [
+  'timestamp', 'reg_id', 'event_id', 'category', 'name', 'usn_or_empid', 'department', 'semester',
+  'phone', 'email', 'team_name', 'members_json', 'member_ids', 'consent_photo'
+];
+var LOCK_WAIT_MS = 20000;
+var STATUS_CACHE_KEY = 'status_v1';
+var STATUS_CACHE_S = 10;
+var LOOKUP_MAX_FAILS = 5;
+var LOOKUP_WINDOW_S = 600;
+
+// ---------------------------------------------------------------------------
+// HTTP entry points
+// ---------------------------------------------------------------------------
+
+function doGet(e) {
+  try {
+    var action = e && e.parameter ? e.parameter.action : '';
+    if (action === 'status') return json_(getStatus_());
+    return json_({ ok: false, code: 'VALIDATION', field: 'action' });
+  } catch (err) {
+    console.error('doGet failed: ' + err);
+    return json_({ ok: false, code: 'SERVER' });
+  }
+}
+
+function doPost(e) {
+  var body;
+  try {
+    body = JSON.parse((e && e.postData && e.postData.contents) || '');
+  } catch (err) {
+    return json_({ ok: false, code: 'VALIDATION', field: 'body' });
+  }
+  try {
+    if (body && body.action === 'register') return json_(register_(body));
+    if (body && body.action === 'lookup') return json_(lookup_(body));
+    return json_({ ok: false, code: 'VALIDATION', field: 'action' });
+  } catch (err) {
+    console.error('doPost failed: ' + err);
+    return json_({ ok: false, code: 'SERVER' });
+  }
+}
+
+function json_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ---------------------------------------------------------------------------
+// Normalisers — must stay identical to src/lib/validation.ts (checked by npm run test:server)
+// ---------------------------------------------------------------------------
+
+function normText_(v) {
+  return String(v == null ? '' : v).normalize('NFC').replace(/\s+/g, ' ').trim();
+}
+function normId_(v) {
+  return normText_(v).replace(/\s+/g, '').toUpperCase();
+}
+function normPhone_(v) {
+  var s = String(v == null ? '' : v).replace(/[^\d+]/g, '');
+  if (s.indexOf('+91') === 0) s = s.slice(3);
+  else if (s.length === 12 && s.indexOf('91') === 0) s = s.slice(2);
+  else if (s.length === 11 && s.charAt(0) === '0') s = s.slice(1);
+  return s;
+}
+function normEmail_(v) {
+  return String(v == null ? '' : v).replace(/\s+/g, '').toLowerCase();
+}
+
+// ---------------------------------------------------------------------------
+// Validation — mirrors src/lib/validation.ts; rules/lists come from Config.gs
+// ---------------------------------------------------------------------------
+
+function matches_(pattern, s) {
+  return new RegExp(pattern).test(s);
+}
+function validName_(s) {
+  var r = CONFIG.rules.name;
+  return s.length >= r.min && s.length <= r.max && matches_(r.pattern, s);
+}
+function validId_(s, category) {
+  if (category === 'students') return matches_(CONFIG.usnRegex, s);
+  return s.length >= 1 && s.length <= CONFIG.rules.empId.max && matches_(CONFIG.rules.empId.pattern, s);
+}
+function validPhone_(s) {
+  return matches_(CONFIG.rules.phone.pattern, s);
+}
+function semestersFor_(department) {
+  var by = CONFIG.semesters.byDepartment;
+  return Object.prototype.hasOwnProperty.call(by, department) ? by[department] : CONFIG.semesters['default'];
+}
+function getEventConfig_(id) {
+  return Object.prototype.hasOwnProperty.call(CONFIG.events, id) ? CONFIG.events[id] : null;
+}
+
+function validate_(b) {
+  function fail(field) {
+    return { ok: false, code: 'VALIDATION', field: field };
+  }
+  // Spam guards: hidden honeypot must be empty; a human needs more than minFormMs to fill the form.
+  if (normText_(b.website) !== '') return fail('form');
+  var elapsed = Number(b.elapsedMs);
+  if (!isFinite(elapsed) || elapsed < CONFIG.minFormMs) return fail('form');
+
+  var eventId = String(b.eventId || '');
+  var ev = getEventConfig_(eventId);
+  if (!ev) return fail('eventId');
+
+  var p = {
+    eventId: eventId,
+    category: ev.category, // derived from the event, never trusted from the client
+    name: normText_(b.name),
+    id: normId_(b.id),
+    department: normText_(b.department),
+    departmentOther: '',
+    semester: '',
+    phone: normPhone_(b.phone),
+    email: normEmail_(b.email),
+    teamName: '',
+    members: [],
+    consentPhoto: b.consentPhoto === true
+  };
+
+  if (!validName_(p.name)) return fail('name');
+  if (!validId_(p.id, ev.category)) return fail('id');
+  if (p.department === 'Other') {
+    p.departmentOther = normText_(b.departmentOther);
+    var o = CONFIG.rules.departmentOther;
+    if (p.departmentOther.length < o.min || p.departmentOther.length > o.max ||
+        !matches_(CONFIG.rules.name.pattern, p.departmentOther)) return fail('departmentOther');
+  } else if (CONFIG.departments.indexOf(p.department) === -1) {
+    return fail('department');
+  }
+  if (ev.category === 'students') {
+    var sem = Number(b.semester);
+    if (semestersFor_(p.department).indexOf(sem) === -1) return fail('semester');
+    p.semester = String(sem);
+  }
+  if (!validPhone_(p.phone)) return fail('phone');
+  if (p.email.length > CONFIG.rules.email.max || !matches_(CONFIG.rules.email.pattern, p.email)) return fail('email');
+  if (b.consentRules !== true) return fail('consentRules');
+
+  var members = Array.isArray(b.members) ? b.members : [];
+  if (ev.teamSize.max > 1) {
+    p.teamName = normText_(b.teamName);
+    var tn = CONFIG.rules.teamName;
+    if (p.teamName.length < tn.min || p.teamName.length > tn.max || !matches_(tn.pattern, p.teamName)) return fail('teamName');
+    var total = members.length + 1; // team size counts the registrant
+    if (total < ev.teamSize.min || total > ev.teamSize.max) return fail('members');
+    var seen = {};
+    seen[p.id] = true;
+    for (var i = 0; i < members.length; i++) {
+      var m = members[i] || {};
+      var mm = { name: normText_(m.name), id: normId_(m.id), phone: normPhone_(m.phone) };
+      if (!validName_(mm.name)) return fail('members.' + i + '.name');
+      if (!validId_(mm.id, ev.category)) return fail('members.' + i + '.id');
+      if (!validPhone_(mm.phone)) return fail('members.' + i + '.phone');
+      if (seen[mm.id]) return fail('members.' + i + '.id');
+      seen[mm.id] = true;
+      p.members.push(mm);
+    }
+  } else if (members.length > 0) {
+    return fail('members');
+  }
+  return { ok: true, data: p, event: ev };
+}
+
+// ---------------------------------------------------------------------------
+// Sheet helpers
+// ---------------------------------------------------------------------------
+
+function ss_() {
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+function sheet_(name) {
+  var sh = ss_().getSheetByName(name);
+  if (!sh) throw new Error('Missing tab "' + name + '" — run setupSheet() once (README step 4).');
+  return sh;
+}
+
+/** Rows as objects keyed by header. Display values, so phone/USN cells are always strings. */
+function readTable_(name) {
+  var values = sheet_(name).getDataRange().getDisplayValues();
+  var headers = (values[0] || []).map(function (h) { return String(h).trim(); });
+  var rows = [];
+  for (var r = 1; r < values.length; r++) {
+    var row = values[r];
+    if (row.join('') === '') continue;
+    var o = { _row: r + 1 };
+    for (var c = 0; c < headers.length; c++) o[headers[c]] = String(row[c] == null ? '' : row[c]);
+    rows.push(o);
+  }
+  return rows;
+}
+
+function readEvents_() {
+  var out = {};
+  readTable_(SHEET_EVENTS).forEach(function (r) {
+    var id = String(r.id).trim();
+    if (!id) return;
+    out[id] = {
+      seats: parseInt(r.seats, 10) || 0,
+      deadline: Date.parse(String(r.deadline_iso).trim()), // NaN if a coordinator broke the format
+      isOpen: String(r.is_open).trim().toUpperCase() === 'TRUE'
+    };
+  });
+  return out;
+}
+
+/**
+ * Formula-injection guard: Sheets treats a value starting with = (and in some clients + - @) as a formula.
+ * A leading apostrophe forces plain text and is not shown in the cell.
+ */
+function safeCell_(v) {
+  var s = v == null ? '' : String(v);
+  return /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+}
+
+/** Appends one row as plain text, placing values by header name (column order in the Sheet can change). */
+function appendByHeader_(sh, record) {
+  var lastCol = sh.getLastColumn();
+  var headers = sh.getRange(1, 1, 1, lastCol).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
+  var row = headers.map(function (h) {
+    return Object.prototype.hasOwnProperty.call(record, h) ? safeCell_(record[h]) : '';
+  });
+  var r = sh.getLastRow() + 1;
+  var range = sh.getRange(r, 1, 1, row.length);
+  range.setNumberFormat('@'); // plain text: keeps phone numbers, USNs and leading zeros intact
+  range.setValues([row]);
+}
+
+function eventRows_(rows, eventId) {
+  return rows.filter(function (r) { return r.event_id === eventId; });
+}
+
+function idsOfRow_(row) {
+  var ids = [normId_(row.usn_or_empid)];
+  String(row.member_ids || '').split(',').forEach(function (x) {
+    var id = normId_(x);
+    if (id) ids.push(id);
+  });
+  return ids;
+}
+
+/** Same USN/employee ID — registrant or any team member, on either side — already in this event. */
+function findDuplicate_(rows, ids) {
+  for (var i = 0; i < rows.length; i++) {
+    var existing = idsOfRow_(rows[i]);
+    for (var j = 0; j < ids.length; j++) {
+      if (existing.indexOf(ids[j]) !== -1) return rows[i].reg_id;
+    }
+  }
+  return null;
+}
+
+/** KR26-<CODE>-NNNN with NNNN = highest existing number for the event + 1 (safe if a row is deleted). */
+function nextRegId_(code, rows) {
+  var max = 0;
+  rows.forEach(function (r) {
+    var n = parseInt(String(r.reg_id).split('-').pop(), 10);
+    if (n > max) max = n;
+  });
+  var num = String(max + 1);
+  while (num.length < 4) num = '0' + num;
+  return 'KR26-' + code + '-' + num;
+}
+
+// ---------------------------------------------------------------------------
+// Status
+// ---------------------------------------------------------------------------
+
+function getStatus_() {
+  var cache = CacheService.getScriptCache();
+  var hit = cache.get(STATUS_CACHE_KEY);
+  if (hit) {
+    var cached = JSON.parse(hit);
+    cached.serverTime = new Date().toISOString();
+    return cached;
+  }
+  var sheetEvents = readEvents_();
+  var counts = {};
+  readTable_(SHEET_REGS).forEach(function (r) { counts[r.event_id] = (counts[r.event_id] || 0) + 1; });
+  var now = Date.now();
+  var events = {};
+  Object.keys(CONFIG.events).forEach(function (id) {
+    var e = sheetEvents[id];
+    if (!e) {
+      events[id] = { seats: 0, seatsLeft: 0, isOpen: false, deadline: null };
+      return;
+    }
+    var validDeadline = !isNaN(e.deadline);
+    events[id] = {
+      seats: e.seats,
+      seatsLeft: Math.max(0, e.seats - (counts[id] || 0)),
+      isOpen: e.isOpen && validDeadline && now < e.deadline,
+      deadline: validDeadline ? new Date(e.deadline).toISOString() : null
+    };
+  });
+  var out = { ok: true, events: events, serverTime: new Date(now).toISOString() };
+  cache.put(STATUS_CACHE_KEY, JSON.stringify(out), STATUS_CACHE_S);
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Register
+// ---------------------------------------------------------------------------
+
+function register_(b) {
+  var v = validate_(b);
+  if (!v.ok) return v;
+  var p = v.data;
+  var ev = v.event;
+
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(LOCK_WAIT_MS);
+  } catch (err) {
+    return { ok: false, code: 'SERVER', reason: 'BUSY' };
+  }
+
+  var result;
+  try {
+    // Everything from reading seats to writing the row happens while holding the lock,
+    // so two people can never both take the last seat.
+    var live = readEvents_()[p.eventId];
+    if (!live || !live.isOpen) return { ok: false, code: 'CLOSED', reason: 'NOT_OPEN' };
+    if (isNaN(live.deadline)) return { ok: false, code: 'CLOSED', reason: 'NOT_OPEN' };
+    if (Date.now() >= live.deadline) return { ok: false, code: 'CLOSED', reason: 'DEADLINE' };
+
+    var rows = eventRows_(readTable_(SHEET_REGS), p.eventId);
+    var ids = [p.id].concat(p.members.map(function (m) { return m.id; }));
+    var dup = findDuplicate_(rows, ids);
+    if (dup) return { ok: false, code: 'DUPLICATE', regId: dup };
+    if (rows.length >= live.seats) return { ok: false, code: 'FULL' };
+
+    var regId = nextRegId_(ev.code, rows);
+    appendByHeader_(sheet_(SHEET_REGS), {
+      timestamp: new Date().toISOString(),
+      reg_id: regId,
+      event_id: p.eventId,
+      category: p.category,
+      name: p.name,
+      usn_or_empid: p.id,
+      department: p.department === 'Other' ? 'Other: ' + p.departmentOther : p.department,
+      semester: p.semester,
+      phone: p.phone,
+      email: p.email,
+      team_name: p.teamName,
+      members_json: p.members.length ? JSON.stringify(p.members) : '',
+      member_ids: p.members.map(function (m) { return m.id; }).join(','),
+      consent_photo: p.consentPhoto ? 'TRUE' : 'FALSE'
+    });
+    SpreadsheetApp.flush();
+    CacheService.getScriptCache().remove(STATUS_CACHE_KEY);
+    result = { ok: true, regId: regId, event: p.eventId, name: p.name };
+  } finally {
+    lock.releaseLock();
+  }
+
+  sendConfirmation_(p, ev, result.regId); // outside the lock; never fails the registration
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Lookup (pass recovery): ID AND full phone must match; returns only regId, event, name
+// ---------------------------------------------------------------------------
+
+function lookup_(b) {
+  var id = normId_(b.id);
+  var phone = normPhone_(b.phone);
+  if (!id || id.length > 20 || !validPhone_(phone)) return { ok: false, code: 'VALIDATION', field: 'lookup' };
+
+  var cache = CacheService.getScriptCache();
+  var key = 'lookup_fail_' + id;
+  var fails = Number(cache.get(key) || 0);
+  if (fails >= LOOKUP_MAX_FAILS) return { ok: false, code: 'RATE_LIMITED' };
+
+  var passes = [];
+  readTable_(SHEET_REGS).forEach(function (r) {
+    if (normId_(r.usn_or_empid) === id && normPhone_(r.phone) === phone) {
+      passes.push({ regId: r.reg_id, event: r.event_id, name: r.name });
+      return;
+    }
+    if (!r.members_json) return;
+    var members;
+    try {
+      members = JSON.parse(r.members_json);
+    } catch (err) {
+      return;
+    }
+    for (var i = 0; i < members.length; i++) {
+      if (normId_(members[i].id) === id && normPhone_(members[i].phone) === phone) {
+        passes.push({ regId: r.reg_id, event: r.event_id, name: members[i].name });
+        return;
+      }
+    }
+  });
+
+  if (!passes.length) {
+    cache.put(key, String(fails + 1), LOOKUP_WINDOW_S);
+    return { ok: false, code: 'NOT_FOUND' };
+  }
+  return { ok: true, passes: passes };
+}
+
+// ---------------------------------------------------------------------------
+// Confirmation email (consumer Gmail accounts: ~100 emails/day quota)
+// ---------------------------------------------------------------------------
+
+function knDigits_(s) {
+  var d = ['೦', '೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯'];
+  return String(s).replace(/\d/g, function (x) { return d[Number(x)]; });
+}
+
+function sendConfirmation_(p, ev, regId) {
+  try {
+    if (MailApp.getRemainingDailyQuota() < 1) {
+      console.warn('Mail quota exhausted; no confirmation for ' + regId);
+      return;
+    }
+    var tba = 'TODO-CONFIRM';
+    var day = Number(CONFIG.day1Date.slice(8, 10));
+    var day2 = Number(CONFIG.day2Date.slice(8, 10));
+    var timeEn = ev.time === tba ? 'Time to be announced' : ev.time + ' IST';
+    var timeKn = ev.time === tba ? 'ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ' : knDigits_(ev.time);
+    var venueEn = ev.venue.en === tba ? 'Venue to be announced' : ev.venue.en;
+    var venueKn = ev.venue.kn === tba ? 'ಸ್ಥಳ ಶೀಘ್ರದಲ್ಲೇ' : ev.venue.kn;
+    var team = p.members.length
+      ? '\nTeam / ತಂಡ: ' + p.teamName + ' — ' + [p.name].concat(p.members.map(function (m) { return m.name; })).join(', ')
+      : '';
+    var body = [
+      'ನಮಸ್ಕಾರ ' + p.name + ',',
+      '',
+      'ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ ' + knDigits_(2026) + ' — "' + ev.name.kn + '" ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮ ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ.',
+      'ನೋಂದಣಿ ಐಡಿ: ' + regId,
+      'ದಿನ ೧ · ' + knDigits_(day) + ' ನವೆಂಬರ್ · ' + timeKn + ' · ' + venueKn,
+      'ಸ್ಥಳದಲ್ಲಿ ಈ ಐಡಿ / ಪಾಸ್ ತೋರಿಸಿ. ' + knDigits_(day2) + ' ನವೆಂಬರ್‌ನ ದಸರಾ ಮೆರವಣಿಗೆಗೂ ಬನ್ನಿ!',
+      '',
+      '---',
+      '',
+      'Hello ' + p.name + ',',
+      '',
+      'Your registration for "' + ev.name.en + '" at Karnataka Rajyotsava 2026 is confirmed.',
+      'Registration ID: ' + regId,
+      'Day 1 · ' + day + ' November 2026 · ' + timeEn + ' · ' + venueEn + team,
+      'Show this ID / your pass at the venue. Join us for the Dasara procession on ' + day2 + ' November too!',
+      '',
+      '— Honnudi Kannada Sangha, BMSIT&M'
+    ].join('\n');
+    MailApp.sendEmail({
+      to: p.email,
+      subject: 'KR 2026 · ' + ev.name.en + ' · ' + regId,
+      body: body,
+      name: 'Honnudi Kannada Sangha'
+    });
+  } catch (err) {
+    console.error('Confirmation email failed for ' + regId + ': ' + err);
+  }
+}
+
+/** Run from the editor to see how many confirmation emails can still be sent today (README §8). */
+function checkEmailQuota() {
+  console.log('Confirmation emails left today: ' + MailApp.getRemainingDailyQuota());
+}
+
+// ---------------------------------------------------------------------------
+// One-time setup — run from the Apps Script editor (README step 4). Safe to run again:
+// it never deletes or overwrites rows, it only adds missing tabs, headers and events.
+// ---------------------------------------------------------------------------
+
+function setupSheet() {
+  var ss = ss_();
+  var evSheet = ss.getSheetByName(SHEET_EVENTS) || ss.insertSheet(SHEET_EVENTS);
+  ensureHeaders_(evSheet, EVENT_HEADERS);
+  var regSheet = ss.getSheetByName(SHEET_REGS) || ss.insertSheet(SHEET_REGS);
+  ensureHeaders_(regSheet, REG_HEADERS);
+
+  var existing = {};
+  readTable_(SHEET_EVENTS).forEach(function (r) { existing[r.id] = true; });
+  Object.keys(CONFIG.events).forEach(function (id) {
+    if (existing[id]) return;
+    var e = CONFIG.events[id];
+    // is_open starts FALSE: registration opens when a coordinator ticks the box.
+    appendByHeader_(evSheet, { id: id, code: e.code, name_en: e.name.en, seats: e.seats, deadline_iso: e.deadline, is_open: 'FALSE' });
+  });
+  evSheet.setFrozenRows(1);
+  regSheet.setFrozenRows(1);
+  console.log('Setup complete: tabs "' + SHEET_EVENTS + '" and "' + SHEET_REGS + '" are ready.');
+}
+
+function ensureHeaders_(sh, headers) {
+  var current = sh.getLastRow() >= 1 ? sh.getRange(1, 1, 1, headers.length).getDisplayValues()[0] : [];
+  if (current.join('') === '') {
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sh.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    return;
+  }
+  for (var i = 0; i < headers.length; i++) {
+    if (String(current[i]).trim() !== headers[i]) {
+      throw new Error('Tab "' + sh.getName() + '" row 1 must be: ' + headers.join(' | '));
+    }
+  }
+}

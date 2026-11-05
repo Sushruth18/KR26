@@ -15,6 +15,23 @@
   --success: #3dbe7a;
   --danger: #ff5a5f;
 
+  /* Same colours as RGB channels, so Tailwind opacity modifiers (bg-gold-400/10) work. Keep in sync. */
+  --night-950-rgb: 7 6 26;
+  --night-900-rgb: 11 10 31;
+  --night-800-rgb: 21 19 46;
+  --gold-400-rgb: 245 184 65;
+  --gold-300-rgb: 255 210 122;
+  --gold-600-rgb: 201 138 27;
+  --maroon-700-rgb: 139 30 45;
+  --maroon-900-rgb: 74 14 24;
+  --saffron-500-rgb: 232 119 46;
+  --ivory-50-rgb: 255 244 220;
+  --ivory-300-rgb: 217 201 168;
+  --flag-yellow-rgb: 255 213 0;
+  --flag-red-rgb: 227 27 35;
+  --success-rgb: 61 190 122;
+  --danger-rgb: 255 90 95;
+
   --nav-h: 64px;
   --gutter: 16px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);

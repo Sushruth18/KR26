@@ -186,6 +186,85 @@
     animation: spin 0.7s linear infinite;
   }
 
+  /* ---------- Form controls ---------- */
+  .field-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 500;
+    color: var(--ivory-50);
+  }
+  .input {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid rgba(201, 138, 27, 0.5);
+    background: var(--night-900);
+    color: var(--ivory-50);
+    font: inherit;
+    font-size: 1rem; /* ≥16px stops iOS zooming on focus */
+    transition: border-color 0.15s;
+  }
+  .input::placeholder {
+    color: rgba(217, 201, 168, 0.6);
+  }
+  .input:hover {
+    border-color: var(--gold-400);
+  }
+  .input:focus-visible {
+    outline: 2px solid var(--gold-300);
+    outline-offset: 1px;
+    border-color: var(--gold-300);
+  }
+  .input[aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+  .input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  select.input {
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image: linear-gradient(45deg, transparent 50%, var(--gold-300) 50%),
+      linear-gradient(135deg, var(--gold-300) 50%, transparent 50%);
+    background-position:
+      calc(100% - 20px) 50%,
+      calc(100% - 14px) 50%;
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+  }
+  select.input option {
+    background: var(--night-900);
+    color: var(--ivory-50);
+  }
+  .field-hint {
+    margin-top: 0.3rem;
+    font-size: 0.875rem;
+    color: var(--ivory-300);
+  }
+  .field-error {
+    margin-top: 0.3rem;
+    font-size: 0.875rem;
+    color: var(--danger);
+  }
+  .check {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    margin-top: 2px;
+    accent-color: var(--gold-400);
+  }
+  /* Honeypot: off-screen, not display:none (some bots skip hidden fields) */
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
   /* ---------- Skeleton shimmer ---------- */
   .skeleton {
     position: relative;
@@ -281,6 +360,12 @@
 }
 
 @layer utilities {
+  /* Letter-spacing breaks Kannada conjunct shaping — only space out Latin text. */
+  html[lang='en'] .tracking-latin {
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
   .pb-safe {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }

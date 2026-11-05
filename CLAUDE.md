@@ -378,7 +378,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 | # | Phase | Contents | Status |
 |---|---|---|---|
 | 1 | Foundation | Hand-scaffolded Vite + React + TS strict, Tailwind v3, ESLint/Prettier, tokens, self-hosted fonts, i18n, format utils, data files + build-time validation, Layout/Navbar/Footer, lazy routes, 404 | ✅ done |
-| 2 | Registration (priority) | `validation.ts`, `api.ts`, `apps-script/Code.gs` (+ `action=lookup`) + README, local mock endpoint, Register form, Pass page (PNG + .ics) | ⏳ |
+| 2 | Registration (priority) | `validation.ts`, `api.ts`, `apps-script/Code.gs` (+ `action=lookup`) + README, local mock endpoint, Register form, Pass page (PNG + .ics) | ✅ done — real-Sheet race test pending deploy |
 | 3 | Competitions | TableauCard grid, status pills, live seat status, rules disclosure | ⏳ |
 | 4 | Art + Intro + Home | PalaceSilhouette, AmbariElephant, BrassPlaque, intro splash, hero, countdown, preview strip, deadline banner | ⏳ |
 | 5 | Event Details | Day tabs, procession-route timeline, Now/Next, guests, attractions, map | ⏳ |
@@ -400,3 +400,12 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - **No scraping** of the 2025 site; empty states until images are supplied.
 - **SEO:** one static OG card, no pre-rendering. **Perf:** render the hero under the splash; on conflict degrade animation on low-end devices before cutting content.
 - **Tooling:** Tailwind pinned to v3; ESLint + Prettier. A local mock endpoint is used for testing registration.
+
+### Registration architecture (Phase 2 — refines §7)
+- **One server implementation.** `apps-script/Code.gs` is the only server code. `apps-script/Config.gs` is **generated** (`npm run gas:config`, also on every build) from `site.json`, `events.json` and `src/lib/rules.ts` — never edit it by hand. Validation rules live in `src/lib/rules.ts`; semesters/departments in `site.json` (`semesters.default` = odd semesters 1,3,5,7; `byDepartment` MBA/MCA = 1,3). Client (`src/lib/validation.ts`) and server read the same lists.
+- **Mock = real Code.gs.** `mock/gas-runtime.ts` runs Code.gs in a Node VM with fake Sheet/Lock/Cache/Mail services; `mock/vite-plugin-mock-gas.ts` serves it at `/mock-api` in `npm run dev` only. Force outcomes with `?mock=duplicate|full|closed|deadline|validation|server|network|slow|statusdown` on any page or the dev-only panel (bottom-left). Mock data is in memory and resets when the dev server restarts.
+- **Tests:** `npm run test:server` (Code.gs logic, 62 cases), `npm run e2e` (browser, needs `npm run dev`; `E2E_BASE` for another port), `npm run race -- <url>` (last-seat concurrency; must be run against the deployed script — the mock is single-threaded).
+- **Sheet column `member_ids`** (not `member_usns`): holds USNs or employee IDs. `user_agent` dropped.
+- **Team size counts the registrant** (Group Dance 6–12 = registrant + 5–11 member rows). Photo/video consent optional; rules consent required.
+- **Extra codes:** `CLOSED` carries `reason: NOT_OPEN | DEADLINE`; `SERVER` may carry `reason: BUSY` (lock timeout); lookup returns `NOT_FOUND` / `RATE_LIMITED` (5 failures per ID per 10 min). Client adds `NETWORK` and `CONFIG` (endpoint not set).
+- The min-time check uses a **client-reported** `elapsedMs`; it stops naive bots, not a determined attacker.
