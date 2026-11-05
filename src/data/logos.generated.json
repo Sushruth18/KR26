@@ -1,0 +1,42 @@
+{
+  "college": {
+    "source": "/brand/college-logo.png",
+    "sha1": "fa85877d01093fa975c7f36b15f8822460d8952f",
+    "width": 596,
+    "height": 647,
+    "variants": [
+      {
+        "w": 64,
+        "src": "/brand/web/college-logo-64w.bba17441.webp"
+      },
+      {
+        "w": 128,
+        "src": "/brand/web/college-logo-128w.b64372c7.webp"
+      },
+      {
+        "w": 192,
+        "src": "/brand/web/college-logo-192w.9717686d.webp"
+      }
+    ]
+  },
+  "club": {
+    "source": "/brand/honnudi-logo.png",
+    "sha1": "db2266bc042d87e2c7f1fb11dc057cfc8681507b",
+    "width": 1016,
+    "height": 407,
+    "variants": [
+      {
+        "w": 120,
+        "src": "/brand/web/honnudi-logo-120w.c7e0d719.webp"
+      },
+      {
+        "w": 240,
+        "src": "/brand/web/honnudi-logo-240w.6b0f1f67.webp"
+      },
+      {
+        "w": 360,
+        "src": "/brand/web/honnudi-logo-360w.9463d783.webp"
+      }
+    ]
+  }
+}

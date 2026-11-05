@@ -2,7 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { Mail } from 'lucide-react';
 import { Torch } from '../ui/Torch';
 import { FolkDivider } from '../ui/FolkDivider';
+import { BrandLogo } from '../ui/BrandLogo';
 import { site } from '../../lib/data';
+import { getLogo } from '../../lib/logos';
 import { formatNumber } from '../../lib/format';
 import { useLang } from '../../hooks/useLang';
 
@@ -24,11 +26,18 @@ export function Footer() {
   const year = formatNumber(2026, lang);
 
   return (
-    <footer className="cv-auto mt-16 border-t border-gold-600/30 bg-night-900/80 [--cv-h:340px] sm:[--cv-h:250px]">
+    <footer className="cv-auto mt-16 border-t border-gold-600/30 bg-night-900/80 [--cv-h:450px] sm:[--cv-h:270px]">
       <FolkDivider className="text-gold-600" />
       <div className="container-page flex items-end justify-between gap-4 py-8">
         <Torch className="hidden sm:block" />
         <div className="flex flex-1 flex-col items-center gap-3 text-center">
+          {(getLogo('college') || getLogo('club')) && (
+            <div className="mb-1 flex items-center justify-center gap-5">
+              <BrandLogo which="college" height={60} lazy />
+              {getLogo('college') && getLogo('club') && <span className="h-10 w-px bg-gold-600/50" aria-hidden="true" />}
+              <BrandLogo which="club" height={40} lazy />
+            </div>
+          )}
           <p className="font-display text-lg text-gold-300">{t('brand.college')}</p>
           <p className="text-sm text-ivory-300">{t('brand.club')}</p>
           <ul className="flex flex-wrap items-center justify-center gap-3">

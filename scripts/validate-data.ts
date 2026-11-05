@@ -1,6 +1,8 @@
-import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { ZodTypeAny } from 'zod';
+import type { LogoAsset, LogoKey } from '../src/lib/logos';
 import {
   eventsSchema,
   gallerySchema,
@@ -60,6 +62,29 @@ if (site && events) {
 if (site) {
   for (const dept of Object.keys(site.semesters.byDepartment)) {
     if (!site.departments.includes(dept)) errors.push(`site.json: semesters.byDepartment.${dept} is not in departments`);
+  }
+
+  // Logos: the WebP copies the site serves must be made from the current masters.
+  const manifest = JSON.parse(readFileSync(resolve(dataDir, 'logos.generated.json'), 'utf8')) as Record<LogoKey, LogoAsset | null>;
+  const pub = (p: string) => resolve(process.cwd(), 'public', p.replace(/^\//, ''));
+  const regen = 'run "npm run brand:images" and commit the result';
+  for (const key of ['college', 'club'] as const) {
+    const source = site.logos[key];
+    const entry = manifest[key];
+    if (!source) {
+      if (entry) errors.push(`logos.generated.json: ${key} is listed but site.json → logos.${key} is empty — ${regen}`);
+      continue;
+    }
+    if (!existsSync(pub(source))) {
+      errors.push(`site.json: logos.${key} "${source}" is not in public/`);
+      continue;
+    }
+    const sha1 = createHash('sha1').update(readFileSync(pub(source))).digest('hex');
+    if (!entry || entry.source !== source || entry.sha1 !== sha1) {
+      errors.push(`logos.${key}: ${source} changed since its WebP copies were made — ${regen}`);
+    } else {
+      for (const v of entry.variants) if (!existsSync(pub(v.src))) errors.push(`logos.${key}: ${v.src} is missing — ${regen}`);
+    }
   }
 }
 

@@ -8,6 +8,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
+import sharp from 'sharp';
 
 const BASE = process.env.E2E_BASE ?? 'http://localhost:5173';
 const OUT = resolve(process.env.E2E_OUT ?? 'e2e-output');
@@ -51,6 +52,16 @@ async function step(page: Page) {
 }
 async function waitStep(page: Page, s: string) {
   await page.waitForFunction((x) => document.querySelector('[data-testid=register-form]')?.getAttribute('data-step') === x, { timeout: 10000 }, s);
+  // A step change focuses its heading, which smooth-scrolls the page (html { scroll-behavior: smooth });
+  // a click computed mid-scroll lands on whatever moved under it. Wait until the page holds still.
+  await page.waitForFunction(
+    () =>
+      new Promise<boolean>((done) => {
+        const y = scrollY;
+        setTimeout(() => done(scrollY === y), 150);
+      }),
+    { timeout: 5000, polling: 50 },
+  );
 }
 async function noHorizontalScroll(page: Page) {
   return page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
@@ -139,6 +150,32 @@ async function captureDownload(page: Page, buttonSel: string) {
     return { name: d.name, b64: btoa(bin) };
   });
   return { name: file.name, bytes: Buffer.from(file.b64, 'base64') };
+}
+
+/**
+ * The brand logos on the pass must reach the exported PNG (html-to-image embeds each <img> src):
+ * each logo's area in the 2× PNG must hold image detail, not flat card background.
+ */
+async function logosInPng(page: Page, png: Buffer) {
+  const boxes = await page.$$eval('[data-testid=pass-logos] img', (imgs) => {
+    const card = document.querySelector('[data-testid=pass-card]')!.getBoundingClientRect();
+    return imgs.map((el) => {
+      const img = el as HTMLImageElement;
+      const b = img.getBoundingClientRect();
+      return { file: img.src.split('/').pop()!, loaded: img.complete && img.naturalWidth > 0, srcset: img.srcset, x: b.left - card.left, y: b.top - card.top, w: b.width, h: b.height };
+    });
+  });
+  expect(boxes.length === 2, `pass shows ${boxes.length} logos, expected 2`);
+  const out: string[] = [];
+  for (const b of boxes) {
+    expect(b.loaded && !b.srcset, `${b.file}: loaded ${b.loaded}, srcset "${b.srcset}" (the export ignores srcset)`);
+    const crop = { left: Math.round(b.x * 2), top: Math.round(b.y * 2), width: Math.round(b.w * 2), height: Math.round(b.h * 2) };
+    const { channels } = await sharp(png).extract(crop).stats();
+    const detail = Math.max(...channels.slice(0, 3).map((c) => c.stdev));
+    expect(detail > 25, `${b.file} looks blank in the PNG (colour stdev ${detail.toFixed(1)})`);
+    out.push(`${b.file.split('.')[0]} in PNG (stdev ${detail.toFixed(0)})`);
+  }
+  return out.join(', ');
 }
 
 async function scenario(browser: Browser, name: string, lang: 'kn' | 'en', fn: (page: Page) => Promise<string>, allowErrors?: RegExp) {
@@ -415,7 +452,8 @@ async function main() {
     const png = await captureDownload(page, '[data-testid=download-png]');
     writeFileSync(resolve(OUT, `kannada-${png.name}`), png.bytes);
     await page.screenshot({ path: resolve(OUT, '12-pass-on-screen.png') });
-    return `team pass ${r.regId}; PNG saved as kannada-${png.name} (${png.bytes.readUInt32BE(16)}×${png.bytes.readUInt32BE(20)}) for visual check`;
+    const logos = await logosInPng(page, png.bytes);
+    return `team pass ${r.regId}; PNG saved as kannada-${png.name} (${png.bytes.readUInt32BE(16)}×${png.bytes.readUInt32BE(20)}) for visual check; ${logos}`;
   });
 
   await scenario(browser, '13-any-usn-1TD24CS001-en', 'en', async (page) => {

@@ -1,24 +1,25 @@
 import { useTranslation } from 'react-i18next';
-import { site } from '../../lib/data';
+import { getLogo } from '../../lib/logos';
+import { BrandLogo } from '../ui/BrandLogo';
 
-/** College + club, with their logos once the files are in public/brand/ (site.json → logos). */
+/**
+ * §5.1 logo row: the college logo beside the college name, the Honnudi wordmark below it
+ * (the club's name in text while its logo is not supplied). Above the fold — loaded eagerly.
+ */
 export function CollegeRow() {
   const { t } = useTranslation();
+  const hasCollege = !!getLogo('college');
   return (
-    <div className="flex flex-col items-center gap-0.5 text-center sm:flex-row sm:gap-3">
-      <span className="inline-flex items-center gap-2.5">
-        {site.logos.college && <Logo src={site.logos.college} alt={t('brand.college')} />}
+    <div className="flex flex-col items-center gap-1 sm:gap-1.5" data-testid="college-row">
+      <p className={`mb-0 inline-flex items-center gap-2.5 sm:gap-3 ${hasCollege ? 'text-start' : ''}`}>
+        <BrandLogo which="college" height={40} heightSm={48} />
         <span className="text-balance text-[0.8125rem] font-medium leading-snug text-ivory-50 sm:text-[0.95rem]">{t('brand.college')}</span>
-      </span>
-      <span className="hidden h-4 w-px bg-gold-600/60 sm:block" aria-hidden="true" />
-      <span className="inline-flex items-center gap-2.5">
-        {site.logos.club && <Logo src={site.logos.club} alt={t('brand.club')} />}
-        <span className="text-[0.8125rem] leading-snug text-gold-400 sm:text-[0.95rem]">{t('brand.club')}</span>
-      </span>
+      </p>
+      {getLogo('club') ? (
+        <BrandLogo which="club" height={28} heightSm={32} />
+      ) : (
+        <p className="mb-0 text-[0.8125rem] leading-snug text-gold-400 sm:text-[0.95rem]">{t('brand.club')}</p>
+      )}
     </div>
   );
-}
-
-function Logo({ src, alt }: { src: string; alt: string }) {
-  return <img src={src} alt={alt} width={40} height={40} className="h-10 w-10 flex-none object-contain" decoding="async" />;
 }

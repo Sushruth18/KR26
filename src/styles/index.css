@@ -99,6 +99,18 @@
       0 0 24px rgba(245, 184, 65, 0.35);
   }
 
+  /* <BrandLogo/>: height per breakpoint from inline vars; width follows the width/height attributes. */
+  .brand-logo {
+    flex: none;
+    width: auto;
+    height: var(--logo-h);
+  }
+  @media (min-width: 640px) {
+    .brand-logo {
+      height: var(--logo-h-sm);
+    }
+  }
+
   .card {
     background: var(--night-800);
     border: 1px solid rgba(201, 138, 27, 0.35);

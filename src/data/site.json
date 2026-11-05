@@ -11,7 +11,7 @@
   "instagramUrl": "",
   "contactEmail": "",
   "madeBy": "",
-  "logos": { "college": "", "club": "" },
+  "logos": { "college": "/brand/college-logo.png", "club": "/brand/honnudi-logo.png" },
   "minFormSeconds": 3,
   "mapQuery": "BMS Institute of Technology and Management, Avalahalli, Yelahanka, Bengaluru",
   "departments": ["CSE", "ISE", "AIML", "ECE", "EEE", "ETE", "Mech", "Civil", "MBA", "MCA"],

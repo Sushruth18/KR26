@@ -7,6 +7,7 @@ const bilingualList = z.object({ kn: z.array(z.string()).min(1), en: z.array(z.s
 const isoDateTime = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
+const logoPath = z.union([z.literal(''), z.string().regex(/^\/[^?#]+\.(png|jpe?g|webp|avif|svg)$/i, 'a path under public/, e.g. /brand/logo.png')]);
 
 export const eventSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
@@ -96,8 +97,11 @@ export const siteSchema = z.object({
   instagramUrl: z.union([z.literal(''), z.string().url()]),
   contactEmail: z.union([z.literal(''), z.string().email()]),
   madeBy: z.string(),
-  /** Paths under public/ (e.g. "/brand/bmsit.webp"); empty = not supplied yet, the logo is hidden. */
-  logos: z.object({ college: z.string(), club: z.string() }),
+  /**
+   * Master logo files under public/ (e.g. "/brand/college-logo.png"); empty = not supplied, logo hidden.
+   * The site serves WebP copies made by `npm run brand:images`, never the master itself.
+   */
+  logos: z.object({ college: logoPath, club: logoPath }),
   minFormSeconds: z.number().min(0),
   mapQuery: z.string().min(1),
   departments: z.array(z.string().min(1)).min(1),

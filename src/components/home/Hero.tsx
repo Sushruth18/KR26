@@ -20,9 +20,9 @@ export function Hero() {
 
   return (
     <section aria-labelledby="home-title" className="relative">
-      <div className="container-page relative z-10 flex flex-col items-center pt-5 text-center sm:pt-8">
+      <div className="container-page relative z-10 flex flex-col items-center pt-4 text-center sm:pt-6">
         <CollegeRow />
-        <p className="mb-0 mt-4 text-sm text-ivory-300 sm:mt-6 sm:text-base">{t('home.presents')}</p>
+        <p className="mb-0 mt-3 text-sm text-ivory-300 sm:mt-4 sm:text-base">{t('home.presents')}</p>
         <h1 id="home-title" className="hero-title mt-1">
           {words.map((w, i) => (
             <span key={w} className="block md:inline">

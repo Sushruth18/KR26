@@ -4,11 +4,12 @@ import { getEvent, site } from '../../lib/data';
 import { formatDate, formatNumber, formatTime, isTodo } from '../../lib/format';
 import type { PassData } from '../../lib/passStore';
 import { useLang } from '../../hooks/useLang';
+import { BrandLogo } from '../ui/BrandLogo';
 import { AmbariMotif } from './AmbariMotif';
 
 /**
- * The procession pass. Uses only solid colours and inline SVG (no backdrop-filter, no external
- * images) so html-to-image renders it identically to the screen.
+ * The procession pass. Uses only solid colours, inline SVG and same-origin logo images (no
+ * backdrop-filter, no srcset — html-to-image embeds each <img> `src`) so the PNG matches the screen.
  */
 export const PassCard = forwardRef<HTMLDivElement, { pass: PassData }>(function PassCard({ pass }, ref) {
   const { t } = useTranslation();
@@ -54,6 +55,10 @@ export const PassCard = forwardRef<HTMLDivElement, { pass: PassData }>(function 
       <p className="mt-3 border-t border-gold-600/50 pt-3 text-sm text-ivory-300">
         {t('pass.day2Invite', { date: formatDate(site.day2Date, lang) })}
       </p>
+      <div className="mt-3 flex items-center justify-center gap-4" data-testid="pass-logos">
+        <BrandLogo which="college" height={40} single />
+        <BrandLogo which="club" height={26} single />
+      </div>
       <p className="mt-2 text-[11px] text-ivory-300/80">{t('brand.club')} · {t('brand.college')}</p>
     </div>
   );

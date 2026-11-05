@@ -26,8 +26,10 @@
   },
   "brand": {
     "wordmark": "Karnataka Rajyotsava",
-    "college": "BMS Institute of Technology & Management",
-    "club": "Honnudi Kannada Sangha"
+    "college": "BMS Institute of Technology & Management",
+    "club": "Honnudi Kannada Sangha",
+    "collegeLogoAlt": "BMS Institute of Technology & Management logo",
+    "clubLogoAlt": "Honnudi Kannada Sangha logo"
   },
   "footer": {
     "copyright": "© {{year}} Honnudi Kannada Sangha | All rights reserved",
