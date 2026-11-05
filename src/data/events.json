@@ -1,0 +1,476 @@
+[
+  {
+    "id": "s-essay",
+    "code": "ESY",
+    "category": "students",
+    "name": {
+      "kn": "ಪ್ರಬಂಧ ಬರಹ",
+      "en": "Essay Writing"
+    },
+    "icon": "file-text",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 1,
+      "max": 1
+    },
+    "seats": 100,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 2000,
+      "second": 1000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "s-poem",
+    "code": "POM",
+    "category": "students",
+    "name": {
+      "kn": "ಕವನ ಸ್ಪರ್ಧೆ",
+      "en": "Poem"
+    },
+    "icon": "feather",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 1,
+      "max": 1
+    },
+    "seats": 100,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 2000,
+      "second": 1000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "s-painting",
+    "code": "PNT",
+    "category": "students",
+    "name": {
+      "kn": "ಚಿತ್ರಕಲೆ",
+      "en": "Painting"
+    },
+    "icon": "palette",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 1,
+      "max": 1
+    },
+    "seats": 100,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 2000,
+      "second": 1000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "s-debate",
+    "code": "DEB",
+    "category": "students",
+    "name": {
+      "kn": "ವಾದ-ವಿವಾದ",
+      "en": "Debate"
+    },
+    "icon": "mic",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 1,
+      "max": 1
+    },
+    "seats": 100,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 2000,
+      "second": 1000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "s-quiz",
+    "code": "QIZ",
+    "category": "students",
+    "name": {
+      "kn": "ಪ್ರಶ್ನೋತ್ತರ ಸ್ಪರ್ಧೆ",
+      "en": "Quiz"
+    },
+    "icon": "brain",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 2,
+      "max": 2
+    },
+    "seats": 30,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 2000,
+      "second": 1000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "s-group-dance",
+    "code": "GDN",
+    "category": "students",
+    "name": {
+      "kn": "ಸಾಮೂಹಿಕ ನೃತ್ಯ",
+      "en": "Group Dance"
+    },
+    "icon": "users",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 6,
+      "max": 12
+    },
+    "seats": 30,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 4000,
+      "second": 2000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "s-treasure-hunt",
+    "code": "TRH",
+    "category": "students",
+    "name": {
+      "kn": "ಖಜಾನೆ ಹುಡುಕಾಟ",
+      "en": "Treasure Hunt"
+    },
+    "icon": "search",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 3,
+      "max": 4
+    },
+    "seats": 30,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 4000,
+      "second": 2000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "s-group-singing",
+    "code": "GSG",
+    "category": "students",
+    "name": {
+      "kn": "ಸಮೂಹ ಗಾಯನ",
+      "en": "Group Singing"
+    },
+    "icon": "music",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 3,
+      "max": 8
+    },
+    "seats": 30,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 4000,
+      "second": 2000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "s-rangoli",
+    "code": "RGL",
+    "category": "students",
+    "name": {
+      "kn": "ರಂಗೋಲಿ",
+      "en": "Rangoli"
+    },
+    "icon": "flower",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 2,
+      "max": 4
+    },
+    "seats": 30,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 4000,
+      "second": 2000
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "f-debate",
+    "code": "FDB",
+    "category": "faculty",
+    "name": {
+      "kn": "ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು)",
+      "en": "Faculty Debate"
+    },
+    "icon": "mic",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 1,
+      "max": 1
+    },
+    "seats": 100,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "memento"
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "f-group-dance",
+    "code": "FGD",
+    "category": "faculty",
+    "name": {
+      "kn": "ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು)",
+      "en": "Faculty Group Dance"
+    },
+    "icon": "users",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 4,
+      "max": 10
+    },
+    "seats": 30,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "memento"
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  },
+  {
+    "id": "f-group-singing",
+    "code": "FGS",
+    "category": "faculty",
+    "name": {
+      "kn": "ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು)",
+      "en": "Faculty Group Singing"
+    },
+    "icon": "music",
+    "date": "2026-11-20",
+    "time": "TODO-CONFIRM",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "teamSize": {
+      "min": 3,
+      "max": 8
+    },
+    "seats": 30,
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "memento"
+    },
+    "rules": {
+      "kn": [
+        "TODO-CONFIRM"
+      ],
+      "en": [
+        "TODO-CONFIRM"
+      ]
+    },
+    "coordinator": {
+      "name": "TODO-CONFIRM",
+      "phone": "TODO-CONFIRM"
+    },
+    "completed": false
+  }
+]

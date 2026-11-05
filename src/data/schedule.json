@@ -1,0 +1,81 @@
+[
+  {
+    "day": 2,
+    "start": "09:00",
+    "end": "10:00",
+    "title": { "kn": "ಬೈಕ್ ರ‍್ಯಾಲಿ (ಮೋಟಾರ್ ಹೆಡ್ಸ್)", "en": "Bike Rally (Motor Heads)" },
+    "venue": { "kn": "ಪ್ರವೇಶ ದ್ವಾರ", "en": "Entrance" }
+  },
+  {
+    "day": 2,
+    "start": "10:00",
+    "end": "12:05",
+    "title": { "kn": "ಉದ್ಘಾಟನೆ ಮತ್ತು ಮೆರವಣಿಗೆ", "en": "Inauguration & Procession" },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" },
+    "description": { "kn": "ವೀರಗಾಸೆ ಮತ್ತು ತಮಟೆ ಜೊತೆಗೆ", "en": "with Veeragase & Tamate troupes" },
+    "highlight": true
+  },
+  {
+    "day": 2,
+    "start": "12:05",
+    "end": "12:30",
+    "title": {
+      "kn": "ನೃತ್ಯ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು)",
+      "en": "Dance Competition (Students & Faculty)"
+    },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
+  },
+  {
+    "day": 2,
+    "start": "12:30",
+    "end": "12:45",
+    "title": {
+      "kn": "ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು)",
+      "en": "Music Competition (Students & Faculty)"
+    },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
+  },
+  {
+    "day": 2,
+    "start": "12:45",
+    "end": "13:15",
+    "title": { "kn": "ಸಂಗೀತ ಕ್ಲಬ್ ಪ್ರದರ್ಶನ", "en": "Music Club Performance" },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
+  },
+  {
+    "day": 2,
+    "start": "13:15",
+    "end": "13:35",
+    "title": { "kn": "ನೃತ್ಯ ಕ್ಲಬ್ ಪ್ರದರ್ಶನ", "en": "Dance Club Performance" },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
+  },
+  {
+    "day": 2,
+    "start": "13:35",
+    "end": "14:00",
+    "title": { "kn": "ಫ್ಯಾಷನ್ ಶೋ", "en": "Fashion Show" },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
+  },
+  {
+    "day": 2,
+    "start": "14:00",
+    "end": "14:15",
+    "title": { "kn": "ಚಲನಚಿತ್ರ ಪ್ರಚಾರ", "en": "Movie Promotion" },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
+  },
+  {
+    "day": 2,
+    "start": "14:15",
+    "end": "14:30",
+    "title": { "kn": "ವಿರಾಮ", "en": "Break" },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" },
+    "kind": "break"
+  },
+  {
+    "day": 2,
+    "start": "14:30",
+    "end": "17:45",
+    "title": { "kn": "ಜಾಮಿಂಗ್ (DAP)", "en": "Jamming (DAP)" },
+    "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
+  }
+]

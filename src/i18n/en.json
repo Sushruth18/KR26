@@ -1,0 +1,78 @@
+{
+  "common": {
+    "skip": "Skip to main content",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu",
+    "mainNav": "Main navigation",
+    "mobileNav": "Mobile menu",
+    "langSwitch": "ಕನ್ನಡಕ್ಕೆ ಬದಲಿಸಿ",
+    "langShort": "ಕನ್ನಡ",
+    "musicOn": "Play music",
+    "musicOff": "Mute music",
+    "tba": "To be announced",
+    "timeTba": "Time to be announced",
+    "loading": "Loading…",
+    "comingSoon": "This page is coming soon",
+    "backHome": "Back to home",
+    "retry": "Try again"
+  },
+  "nav": {
+    "home": "Home",
+    "competitions": "Competitions",
+    "event": "Event Details",
+    "gallery": "Gallery",
+    "team": "Our Team",
+    "register": "Register"
+  },
+  "brand": {
+    "wordmark": "Karnataka Rajyotsava",
+    "college": "BMS Institute of Technology & Management",
+    "club": "Honnudi Kannada Sangha"
+  },
+  "footer": {
+    "copyright": "© {{year}} Honnudi Kannada Sangha | All rights reserved",
+    "instagram": "Follow us on Instagram",
+    "madeBy": "Made by {{name}}",
+    "contact": "Contact us"
+  },
+  "pages": {
+    "home": {
+      "title": "Karnataka Rajyotsava 2026 — The Dasara Procession",
+      "description": "Karnataka Rajyotsava 2026 at BMS Institute of Technology & Management, organised by Honnudi Kannada Sangha — competitions and the Dasara procession."
+    },
+    "competitions": {
+      "title": "Competitions",
+      "subtitle": "Show your talent",
+      "description": "All competitions at Karnataka Rajyotsava 2026 for students and faculty. Register today."
+    },
+    "event": {
+      "title": "Event Details",
+      "subtitle": "Karnataka Rajyotsava 2026",
+      "description": "Schedule, guests and venue for the two-day Karnataka Rajyotsava 2026 festival."
+    },
+    "gallery": {
+      "title": "Gallery",
+      "subtitle": "Memories from our festival",
+      "description": "Photos and reels from past Karnataka Rajyotsava celebrations."
+    },
+    "team": {
+      "title": "Our Team",
+      "subtitle": "The hands behind the procession",
+      "description": "Meet the Honnudi Kannada Sangha team."
+    },
+    "register": {
+      "title": "Register",
+      "subtitle": "Join the procession",
+      "description": "Register for the Karnataka Rajyotsava 2026 competitions."
+    },
+    "pass": {
+      "title": "Your Procession Pass",
+      "description": "Your registration pass."
+    },
+    "notFound": {
+      "title": "The procession took a wrong turn",
+      "text": "We couldn't find the page you were looking for. Let's rejoin the procession.",
+      "description": "Page not found."
+    }
+  }
+}

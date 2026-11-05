@@ -1,0 +1,35 @@
+:root {
+  --night-950: #07061a;
+  --night-900: #0b0a1f;
+  --night-800: #15132e;
+  --gold-400: #f5b841;
+  --gold-300: #ffd27a;
+  --gold-600: #c98a1b;
+  --maroon-700: #8b1e2d;
+  --maroon-900: #4a0e18;
+  --saffron-500: #e8772e;
+  --ivory-50: #fff4dc;
+  --ivory-300: #d9c9a8;
+  --flag-yellow: #ffd500;
+  --flag-red: #e31b23;
+  --success: #3dbe7a;
+  --danger: #ff5a5f;
+
+  --nav-h: 64px;
+  --gutter: 16px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Fonts are swapped by <html lang>. The "Fallback" faces are size-adjusted system fonts
+   so text does not jump when the web font arrives (CLS ≤ 0.05). Values are measured
+   approximations — re-tune in Phase 7 against real devices. */
+:root,
+html[lang='kn'] {
+  --font-display: 'Baloo Tamma 2', 'Baloo Tamma 2 Fallback', 'Cinzel', serif;
+  --font-body: 'Noto Sans Kannada', 'Noto Sans Kannada Fallback', 'Poppins', 'Poppins Fallback', sans-serif;
+}
+
+html[lang='en'] {
+  --font-display: 'Cinzel', 'Cinzel Fallback', 'Baloo Tamma 2', serif;
+  --font-body: 'Poppins', 'Poppins Fallback', 'Noto Sans Kannada', sans-serif;
+}

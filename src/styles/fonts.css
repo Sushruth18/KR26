@@ -1,0 +1,38 @@
+/* Self-hosted (@fontsource) — Kannada subset only for Kannada families, Latin subset for Latin ones.
+   Imported in main.tsx; the weight files themselves come from the packages. */
+
+@font-face {
+  font-family: 'Baloo Tamma 2 Fallback';
+  src: local('Nirmala UI'), local('Noto Sans Kannada'), local('Kohinoor Kannada'), local('Kannada Sangam MN'), local('Tunga');
+  size-adjust: 100%;
+  ascent-override: 115%;
+  descent-override: 55%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Noto Sans Kannada Fallback';
+  src: local('Nirmala UI'), local('Noto Sans Kannada'), local('Kohinoor Kannada'), local('Kannada Sangam MN'), local('Tunga');
+  size-adjust: 100%;
+  ascent-override: 105%;
+  descent-override: 50%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Poppins Fallback';
+  src: local('Arial'), local('Helvetica'), local('Roboto');
+  size-adjust: 112%;
+  ascent-override: 93%;
+  descent-override: 31%;
+  line-gap-override: 8%;
+}
+
+@font-face {
+  font-family: 'Cinzel Fallback';
+  src: local('Georgia'), local('Times New Roman');
+  size-adjust: 104%;
+  ascent-override: 96%;
+  descent-override: 28%;
+  line-gap-override: 0%;
+}
