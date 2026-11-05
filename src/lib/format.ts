@@ -84,6 +84,13 @@ export function formatDate(input: string | Date, lang: Lang, opts: DateFormatOpt
   return out;
 }
 
+/** ISO instant → kn: "೧೮ ನವೆಂಬರ್, ರಾತ್ರಿ ೧೧:೫೯" · en: "18 November, 11:59 PM" (read in IST). */
+export function formatDeadline(iso: string, lang: Lang): string {
+  const p = istParts(iso);
+  const hhmm = `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
+  return `${formatDate(iso, lang)}, ${formatTime(hhmm, lang)}`;
+}
+
 /** Kannada part-of-day word: ಬೆಳಿಗ್ಗೆ (<12), ಮಧ್ಯಾಹ್ನ (12–16), ಸಂಜೆ (16–19), ರಾತ್ರಿ (19+). */
 export function kannadaDayPart(hour24: number): string {
   if (hour24 < 12) return 'ಬೆಳಿಗ್ಗೆ';

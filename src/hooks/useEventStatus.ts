@@ -22,6 +22,9 @@ export function useEventStatus() {
     };
   }, [tick]);
 
-  const refresh = useCallback(() => setTick((n) => n + 1), []);
+  const refresh = useCallback(() => {
+    setS((prev) => ({ ...prev, loading: true }));
+    setTick((n) => n + 1);
+  }, []);
   return { ...s, refresh };
 }

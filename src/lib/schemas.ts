@@ -14,6 +14,8 @@ export const eventSchema = z.object({
   category: z.enum(['students', 'faculty']),
   name: bilingual,
   icon: z.string(),
+  /** Optional card decoration, e.g. a kolam-pattern corner for Rangoli. */
+  ornament: z.enum(['kolam']).optional(),
   date: isoDate,
   /** HH:MM (IST) or TODO-CONFIRM */
   time: z.union([hhmm, z.literal(TODO)]),

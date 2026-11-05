@@ -4,7 +4,7 @@ import { eventDisplay } from '../../lib/eventDisplay';
 import { formatNumber } from '../../lib/format';
 import type { CompetitionEvent } from '../../lib/schemas';
 import type { ResolvedEvent } from '../../lib/eventState';
-import { StatusPill } from './StatusPill';
+import { StatusPill } from '../ui/StatusPill';
 
 interface Props {
   event: CompetitionEvent;

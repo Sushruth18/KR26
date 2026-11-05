@@ -60,7 +60,7 @@ export function MobileMenu({ open, onClose }: Props) {
           role="dialog"
           aria-modal="true"
           aria-label={t('common.mobileNav')}
-          className="fixed inset-0 z-[60] flex flex-col bg-night-950/95 backdrop-blur-md md:hidden"
+          className="fixed inset-0 z-[60] flex flex-col bg-night-950/95 backdrop-blur-md lg:hidden"
           initial={reduced ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={reduced ? undefined : { opacity: 0 }}

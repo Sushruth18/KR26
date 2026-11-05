@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FormProvider } from 'react-hook-form';
 import { ArrowLeft, ArrowRight, Send } from 'lucide-react';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
-import { useEventStatus } from '../hooks/useEventStatus';
+import { useResolvedEvents } from '../hooks/useResolvedEvents';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
 import { StepIndicator } from '../components/register/StepIndicator';
@@ -14,24 +14,18 @@ import { StepTeam } from '../components/register/StepTeam';
 import { StepReview } from '../components/register/StepReview';
 import { SubmitAlert } from '../components/register/SubmitAlert';
 import { useRegistration } from '../components/register/useRegistration';
-import { events, site } from '../lib/data';
 import { ENDPOINT } from '../lib/api';
-import { resolveEventState, type ResolvedEvent } from '../lib/eventState';
 
 export default function Register() {
   const { t } = useTranslation();
   useDocumentMeta('pages.register.title', 'pages.register.description');
   const [params] = useSearchParams();
-  const status = useEventStatus();
+  const status = useResolvedEvents();
   const r = useRegistration(params.get('event'));
   const heading = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
 
-  const resolved = useMemo(() => {
-    const out: Record<string, ResolvedEvent> = {};
-    for (const e of events) out[e.id] = resolveEventState(e, status.data?.events[e.id], site);
-    return out;
-  }, [status.data]);
+  const { resolved } = status;
 
   // Move focus to the step heading when the step changes (not on first load).
   useEffect(() => {

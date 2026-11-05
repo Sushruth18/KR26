@@ -19,18 +19,18 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-gold-600/30 bg-night-950/70 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between gap-3">
-        <Link to="/" className="font-display text-lg leading-tight text-gold-300 text-glow sm:text-xl">
+        <Link to="/" className="font-display text-lg sm:whitespace-nowrap leading-tight text-gold-300 text-glow sm:text-xl">
           {t('brand.wordmark')}
         </Link>
 
-        <nav aria-label={t('common.mainNav')} className="hidden items-center gap-1 md:flex">
+        <nav aria-label={t('common.mainNav')} className="hidden items-center gap-1 lg:flex">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `inline-flex min-h-[44px] items-center border-b-2 px-3 text-sm transition-colors ${
+                `inline-flex min-h-[44px] items-center whitespace-nowrap border-b-2 px-2.5 text-sm transition-colors xl:px-3 ${
                   isActive ? 'border-gold-400 text-gold-300' : 'border-transparent text-ivory-50 hover:text-gold-300'
                 }`
               }
@@ -43,7 +43,7 @@ export function Navbar() {
           <LanguageToggle />
         </nav>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <LanguageToggle />
           <button
             type="button"
