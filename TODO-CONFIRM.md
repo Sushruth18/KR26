@@ -31,7 +31,11 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 ## Content
 - [ ] 2026 team (`team.json` is empty); 2025 team is reference only
 - [ ] Gallery photos / reels (`gallery.json` is empty)
-- [ ] Brand logos in `public/brand/` (BMSIT, Honnudi)
+- [ ] Brand logos in `public/brand/` (BMSIT, Honnudi) — then set `site.json → logos.college` / `logos.club` to their paths (e.g. `/brand/bmsit.webp`); each logo is hidden while its path is empty
+
+## Home page copy (first drafts, written for Phase 4 — confirm wording)
+- [ ] Kannada strings not given in CLAUDE.md: "ಮುಖ್ಯ ಕಾರ್ಯಕ್ರಮಕ್ಕೆ" (Main event in), "ಸ್ಕಿಪ್ ಮಾಡಿ" (splash Skip), "ಸ್ಪರ್ಧೆಗಳ ಮೆರವಣಿಗೆ" / "ಪ್ರತಿ ಸ್ಪರ್ಧೆಯೂ ಒಂದು ಸ್ತಬ್ಧಚಿತ್ರ. ನಿಮ್ಮದನ್ನು ಆರಿಸಿ." (preview strip), plaque captions, deadline-banner and "festival has begun / thank you" lines (`src/i18n/kn.json → home.*`, `intro.*`)
+- [ ] English counterparts of the same (`src/i18n/en.json`)
 - [ ] `public/audio/theme.mp3` — royalty-free / self-recorded nadaswaram or dollu loop (music toggle hidden while absent)
 - [ ] `public/og.png` — 1200×630 social card (referenced in `index.html`; not yet created)
 

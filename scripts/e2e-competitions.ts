@@ -114,6 +114,7 @@ async function main() {
               pressed: document.querySelector('[aria-pressed=true]')?.getAttribute('data-testid'),
             };
           });
+          await page.addStyleTag({ content: '.cv-auto{content-visibility:visible!important}' }); // full-page capture skips off-screen content-visibility sections
           await page.screenshot({ path: resolve(OUT, `${lang}-${width}-${cat}.png`), fullPage: true });
           const expectCards = cat === 'students' ? students.length : faculty.length;
           const cols = width >= 1024 ? 3 : width >= 640 ? 2 : 1;

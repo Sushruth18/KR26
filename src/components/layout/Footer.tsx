@@ -24,7 +24,7 @@ export function Footer() {
   const year = formatNumber(2026, lang);
 
   return (
-    <footer className="mt-16 border-t border-gold-600/30 bg-night-900/80">
+    <footer className="cv-auto mt-16 border-t border-gold-600/30 bg-night-900/80 [--cv-h:340px] sm:[--cv-h:250px]">
       <FolkDivider className="text-gold-600" />
       <div className="container-page flex items-end justify-between gap-4 py-8">
         <Torch className="hidden sm:block" />

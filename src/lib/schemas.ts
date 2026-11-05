@@ -96,6 +96,8 @@ export const siteSchema = z.object({
   instagramUrl: z.union([z.literal(''), z.string().url()]),
   contactEmail: z.union([z.literal(''), z.string().email()]),
   madeBy: z.string(),
+  /** Paths under public/ (e.g. "/brand/bmsit.webp"); empty = not supplied yet, the logo is hidden. */
+  logos: z.object({ college: z.string(), club: z.string() }),
   minFormSeconds: z.number().min(0),
   mapQuery: z.string().min(1),
   departments: z.array(z.string().min(1)).min(1),

@@ -53,6 +53,11 @@ export function istParts(instant: Date | string | number): DateParts {
   };
 }
 
+/** Month name, 1–12. */
+export function monthName(month: number, lang: Lang): string {
+  return MONTHS[lang][month - 1] ?? '';
+}
+
 /** Parts for a plain "YYYY-MM-DD" date (no timezone maths involved). */
 export function dateOnlyParts(date: string): DateParts {
   const [y = 0, m = 1, d = 1] = date.split('-').map(Number);

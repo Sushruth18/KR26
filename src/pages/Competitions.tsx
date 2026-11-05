@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw } from 'lucide-react';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
@@ -10,6 +10,7 @@ import { CategoryToggle } from '../components/competitions/CategoryToggle';
 import { CATEGORIES, parseCategory, type Category } from '../components/competitions/category';
 import { TableauCard } from '../components/competitions/TableauCard';
 import { events } from '../lib/data';
+import { useReducedMotion } from '../hooks/useMotionPrefs';
 
 export default function Competitions() {
   const { t } = useTranslation();
@@ -17,6 +18,14 @@ export default function Competitions() {
   const [params, setParams] = useSearchParams();
   const category = parseCategory(params.get('for'));
   const { resolved, loading, failed, refresh } = useResolvedEvents();
+  const { hash } = useLocation();
+  const reduced = useReducedMotion();
+
+  // /competitions?for=…#<event-id> (from the Home preview strip) lands on that card.
+  useEffect(() => {
+    const el = hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+    el?.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+  }, [hash, reduced]);
 
   const counts = useMemo(
     () => Object.fromEntries(CATEGORIES.map((c) => [c, events.filter((e) => e.category === c).length])) as Record<Category, number>,
@@ -62,7 +71,7 @@ export default function Competitions() {
         <h2 className="sr-only">{t(`competitions.${category}`)}</h2>
         <ul className="m-0 mt-6 grid list-none gap-x-6 gap-y-10 p-0 sm:grid-cols-2 lg:grid-cols-3" data-testid="competition-grid">
           {list.map((e, i) => (
-            <li key={e.id} className="flex">
+            <li key={e.id} id={e.id} className="flex">
               <TableauCard event={e} resolved={resolved[e.id]!} loading={loading} index={i} />
             </li>
           ))}

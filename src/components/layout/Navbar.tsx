@@ -1,11 +1,15 @@
-import { useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu } from 'lucide-react';
 import { NAV_ITEMS } from './navItems';
 import { LanguageToggle } from './LanguageToggle';
 import { MusicToggle } from './MusicToggle';
-import { MobileMenu } from './MobileMenu';
+
+// The menu (and the animation library it uses) is split off the first load: prefetched when the browser
+// is idle, mounted on first open, then kept mounted so its exit animation can run.
+const loadMenu = () => import('./MobileMenu').then((m) => ({ default: m.MobileMenu }));
+const MobileMenu = lazy(loadMenu);
 
 export function Navbar() {
   const { t } = useTranslation();
@@ -14,7 +18,16 @@ export function Navbar() {
   const [openOn, setOpenOn] = useState<string | null>(null);
   const open = openOn === pathname;
   const close = useCallback(() => setOpenOn(null), []);
-  const setOpen = (v: boolean) => setOpenOn(v ? pathname : null);
+  const [menuUsed, setMenuUsed] = useState(false);
+  const setOpen = (v: boolean) => {
+    if (v) setMenuUsed(true);
+    setOpenOn(v ? pathname : null);
+  };
+
+  useEffect(() => {
+    const idle = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 2000));
+    idle(() => void loadMenu());
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-gold-600/30 bg-night-950/70 backdrop-blur-md">
@@ -57,7 +70,11 @@ export function Navbar() {
           </button>
         </div>
       </div>
-      <MobileMenu open={open} onClose={close} />
+      {menuUsed && (
+        <Suspense fallback={null}>
+          <MobileMenu open={open} onClose={close} />
+        </Suspense>
+      )}
     </header>
   );
 }

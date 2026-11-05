@@ -48,7 +48,12 @@
   },
   "register": {
     "stepOf": "Step {{n}} of {{total}}",
-    "steps": { "event": "Event", "details": "Your details", "team": "Team", "review": "Review" },
+    "steps": {
+      "event": "Event",
+      "details": "Your details",
+      "team": "Team",
+      "review": "Review"
+    },
     "chooseEvent": "Choose a competition",
     "eventPlaceholder": "— Choose a competition —",
     "groupStudents": "Students",
@@ -237,6 +242,63 @@
       "title": "The procession took a wrong turn",
       "text": "We couldn't find the page you were looking for. Let's rejoin the procession.",
       "description": "Page not found."
+    }
+  },
+  "intro": {
+    "presents": "BMS Institute of Technology & Management presents",
+    "skip": "Skip",
+    "label": "Intro"
+  },
+  "home": {
+    "presents": "presents",
+    "tagline": "The Dasara Procession",
+    "day1": "Competitions",
+    "day2": "Rajyotsava Procession",
+    "dayAria": "Day {{n}}, {{date}}: {{what}}",
+    "cta": "Join the procession — Register",
+    "regBy": "Register by {{when}}",
+    "regClosed": "Competition registration has closed",
+    "countdown": {
+      "competitions": "Competitions begin in",
+      "competitionsOn": "Competitions are on!",
+      "mainEventIn": "Main event in",
+      "procession": "The procession begins in",
+      "live": "The festival has begun!",
+      "liveText": "On the main stage until {{end}} today.",
+      "liveLink": "See today's schedule",
+      "competitionsLink": "Today's competitions",
+      "over": "Thank you",
+      "overText": "Thank you to everyone who joined the procession. The memories are in the gallery.",
+      "galleryLink": "See the gallery",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "remaining": "{{d}} days, {{h}} hours, {{m}} minutes to go",
+      "starts": "{{date}}, {{time}}"
+    },
+    "plaques": {
+      "heading": "The festival at a glance",
+      "datesCaption": "Competitions on day one, the main event on day two",
+      "eventsUnit": "competitions",
+      "eventsCaption": "{{students}} for students, {{faculty}} for faculty",
+      "prizeUnit": "+ mementos",
+      "prizeCaption": "In cash prizes, with mementos for faculty winners"
+    },
+    "preview": {
+      "title": "The procession of competitions",
+      "text": "Every competition is a float. Pick yours.",
+      "all": "See all competitions",
+      "first": "1st prize {{amount}}",
+      "pause": "Pause the procession",
+      "play": "Resume the procession"
+    },
+    "deadline": {
+      "days_one": "{{n}} day left to register",
+      "days_other": "{{n}} days left to register",
+      "today": "Last day to register",
+      "closes": "Closes {{when}}",
+      "cta": "Register now"
     }
   }
 }

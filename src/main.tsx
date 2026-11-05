@@ -20,14 +20,22 @@ import './styles/index.css';
 import './i18n';
 import { applyDeviceFlags } from './hooks/useMotionPrefs';
 import { captureMockFlagFromUrl } from './lib/mockFlag';
+import { captureClockFromUrl } from './lib/clock';
 import App from './App';
+import { homeReady } from './pages/homePreload';
 
 applyDeviceFlags();
 
-if (import.meta.env.DEV) captureMockFlagFromUrl();
+if (import.meta.env.DEV) {
+  captureMockFlagFromUrl();
+  captureClockFromUrl();
+}
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+// On "/" wait for the (preloaded) Home chunk so the hero renders in the first commit — see pages/homePreload.ts.
+void homeReady.then(() =>
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  ),
 );

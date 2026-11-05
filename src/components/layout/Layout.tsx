@@ -4,18 +4,20 @@ import { useTranslation } from 'react-i18next';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { NightSky } from '../ui/NightSky';
+import { IntroSplash } from '../intro/IntroSplash';
 
 export function Layout() {
   const { t } = useTranslation();
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const main = useRef<HTMLElement>(null);
   const first = useRef(true);
 
-  // Scroll to top on route change; move focus to <main> for keyboard/screen-reader users.
+  // Scroll to top on route change (unless a #hash target is coming); move focus to <main> for keyboard/screen-reader users.
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (!hash) window.scrollTo(0, 0);
     if (first.current) first.current = false;
     else main.current?.focus({ preventScroll: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on navigation to a new page
   }, [pathname]);
 
   // Dev-only guard against the 2025 "footer rendered 2–3 times" bug.
@@ -39,6 +41,7 @@ export function Layout() {
         <Outlet />
       </main>
       <Footer />
+      <IntroSplash />
     </>
   );
 }

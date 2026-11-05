@@ -2,8 +2,11 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './components/layout/Layout';
+import { AmbariElephant } from './components/art/AmbariElephant';
+import { useReducedMotion } from './hooks/useMotionPrefs';
+import { loadHome } from './pages/homePreload';
 
-const Home = lazy(() => import('./pages/Home'));
+const Home = lazy(loadHome); // see pages/homePreload.ts
 const Competitions = lazy(() => import('./pages/Competitions'));
 const EventDetails = lazy(() => import('./pages/EventDetails'));
 const Gallery = lazy(() => import('./pages/Gallery'));
@@ -16,9 +19,11 @@ const DevMockPanel = import.meta.env.DEV ? lazy(() => import('./components/dev/D
 
 function RouteFallback() {
   const { t } = useTranslation();
+  const reduced = useReducedMotion();
+  // The Ambari doubles as the loader (CLAUDE.md §3), walking in place.
   return (
-    <div className="flex min-h-[50vh] items-center justify-center gap-3 text-gold-300" role="status">
-      <span className="spinner" aria-hidden="true" />
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-2 text-gold-300" role="status">
+      <AmbariElephant walking={!reduced} className="h-20 w-auto" />
       <span>{t('common.loading')}</span>
     </div>
   );
