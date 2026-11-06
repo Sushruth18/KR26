@@ -111,6 +111,31 @@
     }
   }
 
+  /*
+   * <BrandLogo plate/>: ivory arch plate for the college logo on dark backgrounds. Half-circle top
+   * (radius = half the plate width, set inline) over a gently rounded base, so the gear sits under
+   * the arch and the motto ribbon fills the base. The glow is static — never animated.
+   * Border width must match PLATE_BORDER in BrandLogo.tsx.
+   */
+  .logo-plate {
+    flex: none;
+    display: inline-flex;
+    padding: var(--plate-pad);
+    border: 1px solid var(--gold-400);
+    border-radius: var(--plate-rt) var(--plate-rt) var(--plate-rb) var(--plate-rb);
+    background: var(--ivory-50);
+    box-shadow:
+      0 0 0 1px rgba(201, 138, 27, 0.35),
+      0 0 10px rgba(245, 184, 65, 0.35),
+      0 0 22px rgba(245, 184, 65, 0.16);
+  }
+  @media (min-width: 640px) {
+    .logo-plate {
+      padding: var(--plate-pad-sm);
+      border-radius: var(--plate-rt-sm) var(--plate-rt-sm) var(--plate-rb-sm) var(--plate-rb-sm);
+    }
+  }
+
   .card {
     background: var(--night-800);
     border: 1px solid rgba(201, 138, 27, 0.35);

@@ -153,6 +153,14 @@ async function captureDownload(page: Page, buttonSel: string) {
 }
 
 /**
+ * Stats of one region of a PNG. `sharp(png).extract(r).stats()` ignores the extract and reports the
+ * whole image, so materialise the crop first.
+ */
+async function cropStats(png: Buffer, region: { left: number; top: number; width: number; height: number }) {
+  return sharp(await sharp(png).extract(region).png().toBuffer()).stats();
+}
+
+/**
  * The brand logos on the pass must reach the exported PNG (html-to-image embeds each <img> src):
  * each logo's area in the 2× PNG must hold image detail, not flat card background.
  */
@@ -162,7 +170,18 @@ async function logosInPng(page: Page, png: Buffer) {
     return imgs.map((el) => {
       const img = el as HTMLImageElement;
       const b = img.getBoundingClientRect();
-      return { file: img.src.split('/').pop()!, loaded: img.complete && img.naturalWidth > 0, srcset: img.srcset, x: b.left - card.left, y: b.top - card.top, w: b.width, h: b.height };
+      const plate = img.parentElement!.classList.contains('logo-plate') ? img.parentElement!.getBoundingClientRect() : null;
+      return {
+        file: img.src.split('/').pop()!,
+        loaded: img.complete && img.naturalWidth > 0,
+        srcset: img.srcset,
+        x: b.left - card.left,
+        y: b.top - card.top,
+        w: b.width,
+        h: b.height,
+        // A point in the plate's top padding, between its gold border and the logo.
+        plateProbe: plate ? { x: b.left - card.left + b.width / 2, y: (plate.top + b.top) / 2 - card.top + 0.5 } : null,
+      };
     });
   });
   expect(boxes.length === 2, `pass shows ${boxes.length} logos, expected 2`);
@@ -170,10 +189,19 @@ async function logosInPng(page: Page, png: Buffer) {
   for (const b of boxes) {
     expect(b.loaded && !b.srcset, `${b.file}: loaded ${b.loaded}, srcset "${b.srcset}" (the export ignores srcset)`);
     const crop = { left: Math.round(b.x * 2), top: Math.round(b.y * 2), width: Math.round(b.w * 2), height: Math.round(b.h * 2) };
-    const { channels } = await sharp(png).extract(crop).stats();
+    const { channels } = await cropStats(png, crop);
     const detail = Math.max(...channels.slice(0, 3).map((c) => c.stdev));
     expect(detail > 25, `${b.file} looks blank in the PNG (colour stdev ${detail.toFixed(1)})`);
-    out.push(`${b.file.split('.')[0]} in PNG (stdev ${detail.toFixed(0)})`);
+    let plateNote = '';
+    if (b.file.startsWith('college-logo')) {
+      // The college logo sits on an ivory plate (the pass card is dark) — it must reach the PNG too.
+      expect(b.plateProbe, 'college logo is not on its plate on the pass');
+      const px = { left: Math.round(b.plateProbe!.x * 2), top: Math.round(b.plateProbe!.y * 2), width: 2, height: 2 };
+      const [r, g, bl] = (await cropStats(png, px)).channels.map((c) => Math.round(c.mean));
+      expect(r! > 235 && g! > 225 && bl! > 195, `college logo plate not ivory in the PNG (rgb ${r},${g},${bl})`);
+      plateNote = `, ivory plate rgb(${r},${g},${bl})`;
+    }
+    out.push(`${b.file.split('.')[0]} in PNG (stdev ${detail.toFixed(0)}${plateNote})`);
   }
   return out.join(', ');
 }

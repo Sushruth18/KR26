@@ -56,7 +56,7 @@ export const PassCard = forwardRef<HTMLDivElement, { pass: PassData }>(function 
         {t('pass.day2Invite', { date: formatDate(site.day2Date, lang) })}
       </p>
       <div className="mt-3 flex items-center justify-center gap-4" data-testid="pass-logos">
-        <BrandLogo which="college" height={40} single />
+        <BrandLogo which="college" height={48} plate single />
         <BrandLogo which="club" height={26} single />
       </div>
       <p className="mt-2 text-[11px] text-ivory-300/80">{t('brand.club')} · {t('brand.college')}</p>

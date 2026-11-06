@@ -119,6 +119,14 @@ async function main() {
             clipped,
             sceneTop: Math.round(scene.top),
             sceneBottom: Math.round(scene.bottom),
+            elephantBottom: Math.round(document.querySelector('.hero-scene .ambari')!.getBoundingClientRect().bottom),
+            viewH: window.innerHeight,
+            // The college logo sits on its ivory plate wherever it appears on the night background.
+            plates: ['[data-testid=college-row]', 'footer'].map((s) => {
+              const img = document.querySelector(`${s} img[src*="college-logo"]`);
+              const plate = img?.parentElement;
+              return !!plate?.classList.contains('logo-plate') && getComputedStyle(plate).backgroundColor === 'rgb(255, 244, 220)';
+            }),
             h1Bottom: Math.round(h1.bottom),
             phase: document.querySelector('[data-testid=countdown]')?.getAttribute('data-phase'),
             floats: document.querySelectorAll('.marquee-list:not([aria-hidden]) a').length,
@@ -133,9 +141,13 @@ async function main() {
         expect(m.floats === events.length, `preview floats ${m.floats} ≠ ${events.length}`);
         expect(m.phase, 'countdown phase missing');
         // The lit palace + elephant must be in the first screen on phones (90% of visitors).
-        if (width <= 360) expect(m.sceneTop < 760 - 150, `scene starts at ${m.sceneTop}px — palace not in the first screen`);
+        if (width <= 360) {
+          expect(m.sceneTop < 760 - 150, `scene starts at ${m.sceneTop}px — palace not in the first screen`);
+          expect(m.elephantBottom <= m.viewH, `elephant ends at ${m.elephantBottom}px — below the ${m.viewH}px first screen`);
+        }
+        expect(m.plates.every(Boolean), `college logo plate (home row, footer): ${m.plates.join(', ')}`);
         await page.browserContext().close();
-        return `no h-scroll, h1×1, footer×1, no clipping, scene ${m.sceneTop}–${m.sceneBottom}px, ${m.floats} floats, phase ${m.phase}`;
+        return `no h-scroll, h1×1, footer×1, no clipping, scene ${m.sceneTop}–${m.sceneBottom}px, elephant ↓${m.elephantBottom}/${m.viewH}, logo plates ✓, ${m.floats} floats, phase ${m.phase}`;
       });
     }
   }

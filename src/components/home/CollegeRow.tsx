@@ -12,7 +12,7 @@ export function CollegeRow() {
   return (
     <div className="flex flex-col items-center gap-1 sm:gap-1.5" data-testid="college-row">
       <p className={`mb-0 inline-flex items-center gap-2.5 sm:gap-3 ${hasCollege ? 'text-start' : ''}`}>
-        <BrandLogo which="college" height={40} heightSm={48} />
+        <BrandLogo which="college" height={46} heightSm={50} plate />
         <span className="text-balance text-[0.8125rem] font-medium leading-snug text-ivory-50 sm:text-[0.95rem]">{t('brand.college')}</span>
       </p>
       {getLogo('club') ? (
