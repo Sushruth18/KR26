@@ -17,7 +17,19 @@
  *
  * Registration is open unless the event's is_open cell is not TRUE or its deadline has passed. There is no
  * seat limit. Error codes: VALIDATION, CLOSED (reason NOT_OPEN = closed by a coordinator | DEADLINE), DUPLICATE,
- * SERVER (reason BUSY when the lock could not be acquired), NOT_FOUND and RATE_LIMITED (lookup only).
+ * SERVER, NOT_FOUND and RATE_LIMITED (lookup only).
+ *
+ * Every SERVER answer carries a short machine-readable "reason" (never a secret, stack trace or sheet content):
+ *   EVENTS_TAB_MISSING                  the Events tab does not exist
+ *   EVENTS_COLUMN_MISSING:<column>      the Events tab lacks id / sheet_name / deadline_iso / is_open
+ *   EVENT_SHEET_NAME_MISSING:<eventId>  the event's sheet_name cell is empty
+ *   EVENT_TAB_RESERVED:<eventId>        sheet_name points at the Events tab itself
+ *   EVENT_TAB_SHARED:<eventId>          two events use the same tab
+ *   EVENT_TAB_MISSING:<eventId>         no tab with that sheet_name exists
+ *   EVENT_TAB_COLUMN_MISSING:<eventId>:<column>   the event tab's header row is not the layout
+ *   LOCK_TIMEOUT                        could not get the script lock within 20 s (website: "try again")
+ *   UNEXPECTED                          anything else — the real message is only in the Apps Script log
+ * Each one is also written to the log with console.error (Apps Script editor > Executions).
  */
 
 var SHEET_EVENTS = 'Events';
@@ -44,8 +56,7 @@ function doGet(e) {
     if (action === 'status') return json_(getStatus_());
     return json_({ ok: false, code: 'VALIDATION', field: 'action' });
   } catch (err) {
-    console.error('doGet failed: ' + err);
-    return json_({ ok: false, code: 'SERVER' });
+    return json_(serverError_(err, 'status'));
   }
 }
 
@@ -56,18 +67,42 @@ function doPost(e) {
   } catch (err) {
     return json_({ ok: false, code: 'VALIDATION', field: 'body' });
   }
+  var action = body && typeof body.action === 'string' ? body.action : '';
   try {
-    if (body && body.action === 'register') return json_(register_(body));
-    if (body && body.action === 'lookup') return json_(lookup_(body));
+    if (action === 'register') return json_(register_(body));
+    if (action === 'lookup') return json_(lookup_(body));
     return json_({ ok: false, code: 'VALIDATION', field: 'action' });
   } catch (err) {
-    console.error('doPost failed: ' + err);
-    return json_({ ok: false, code: 'SERVER' });
+    return json_(serverError_(err, action));
   }
 }
 
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ---------------------------------------------------------------------------
+// SERVER errors: every exception becomes { ok:false, code:'SERVER', reason } — see the list at the top.
+// ---------------------------------------------------------------------------
+
+var REASON_PATTERN = /^[A-Z_]+(:[A-Za-z0-9_.\-]+)*$/;
+
+/** An Error that carries a known, safe reason code. detail is for the log only and is never sent to the browser. */
+function fail_(reason, detail) {
+  var err = new Error(detail || reason);
+  err.reason = reason;
+  return err;
+}
+
+/**
+ * Maps any exception to the SERVER answer. Only a reason raised by fail_ (and well-formed) goes out; everything
+ * else is "UNEXPECTED". The real message goes to the Apps Script log only — never into the response.
+ */
+function serverError_(err, where) {
+  var reason = err && typeof err.reason === 'string' && REASON_PATTERN.test(err.reason) ? err.reason : 'UNEXPECTED';
+  var message = err && err.message ? String(err.message) : String(err);
+  console.error('SERVER reason=' + reason + ' where=' + (where || '?') + ' — ' + message);
+  return { ok: false, code: 'SERVER', reason: reason };
 }
 
 // ---------------------------------------------------------------------------
@@ -215,7 +250,14 @@ function readTable_(sh) {
 /** The Events tab as { [eventId]: { sheetName, deadline, isOpen } }. Read by header name, so extra columns are harmless. */
 function readEvents_() {
   var evSheet = ss_().getSheetByName(SHEET_EVENTS);
-  if (!evSheet) throw new Error('Missing tab "' + SHEET_EVENTS + '" — run setupSheet() once (README step 4).');
+  if (!evSheet) throw fail_('EVENTS_TAB_MISSING', 'Missing tab "' + SHEET_EVENTS + '" — run setupSheet() once (README step 4).');
+  var evHeaders = evSheet.getRange(1, 1, 1, Math.max(1, evSheet.getLastColumn())).getDisplayValues()[0]
+    .map(function (h) { return String(h).trim(); });
+  ['id', 'sheet_name', 'deadline_iso', 'is_open'].forEach(function (h) {
+    if (evHeaders.indexOf(h) === -1) {
+      throw fail_('EVENTS_COLUMN_MISSING:' + h, 'The ' + SHEET_EVENTS + ' tab has no "' + h + '" column in row 1 — run setupSheet().');
+    }
+  });
   var out = {};
   readTable_(evSheet).forEach(function (r) {
     var id = String(r.id).trim();
@@ -238,21 +280,25 @@ function readEvents_() {
 function eventTab_(eventId, events) {
   var ev = events[eventId];
   var name = ev ? ev.sheetName : '';
-  if (!name) throw new Error('Event "' + eventId + '" has no sheet_name in the ' + SHEET_EVENTS + ' tab — run setupSheet().');
-  if (name === SHEET_EVENTS) throw new Error('Event "' + eventId + '": sheet_name must not be "' + SHEET_EVENTS + '".');
+  if (!name) throw fail_('EVENT_SHEET_NAME_MISSING:' + eventId, 'Event "' + eventId + '" has no sheet_name in the ' + SHEET_EVENTS + ' tab — run setupSheet().');
+  if (name === SHEET_EVENTS) throw fail_('EVENT_TAB_RESERVED:' + eventId, 'Event "' + eventId + '": sheet_name must not be "' + SHEET_EVENTS + '".');
   Object.keys(events).forEach(function (other) {
     if (other !== eventId && events[other].sheetName === name) {
-      throw new Error('Events "' + eventId + '" and "' + other + '" both use the tab "' + name + '" — every event needs its own tab.');
+      throw fail_('EVENT_TAB_SHARED:' + eventId,
+        'Events "' + eventId + '" and "' + other + '" both use the tab "' + name + '" — every event needs its own tab.');
     }
   });
   var sh = ss_().getSheetByName(name);
   if (!sh) {
-    throw new Error('Event "' + eventId + '": tab "' + name + '" not found. Fix its sheet_name cell in the ' + SHEET_EVENTS +
-      ' tab, or run setupSheet() to recreate the tab.');
+    throw fail_('EVENT_TAB_MISSING:' + eventId, 'Event "' + eventId + '": tab "' + name + '" not found. Fix its sheet_name cell in the ' +
+      SHEET_EVENTS + ' tab, or run setupSheet() to recreate the tab.');
   }
   var headers = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
   REG_HEADERS.forEach(function (h) {
-    if (headers.indexOf(h) === -1) throw new Error('Tab "' + name + '" has no "' + h + '" column in row 1 — refusing to write to it.');
+    if (headers.indexOf(h) === -1) {
+      throw fail_('EVENT_TAB_COLUMN_MISSING:' + eventId + ':' + h,
+        'Tab "' + name + '" has no "' + h + '" column in row 1 — refusing to write to it.');
+    }
   });
   return sh;
 }
@@ -262,7 +308,7 @@ function eventTabOrNull_(eventId, events) {
   try {
     return eventTab_(eventId, events);
   } catch (err) {
-    console.error(String(err));
+    serverError_(err, 'tab:' + eventId); // logs reason + message; the caller just treats the event as closed / skips it
     return null;
   }
 }
@@ -370,7 +416,7 @@ function register_(b) {
   try {
     lock.waitLock(LOCK_WAIT_MS);
   } catch (err) {
-    return { ok: false, code: 'SERVER', reason: 'BUSY' };
+    return serverError_(fail_('LOCK_TIMEOUT', 'Could not get the script lock within ' + LOCK_WAIT_MS + ' ms: ' + err), 'register');
   }
 
   var result;

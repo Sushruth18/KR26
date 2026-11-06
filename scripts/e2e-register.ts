@@ -303,13 +303,27 @@ async function main() {
     ['server', 'en', (r) => r.kind === 'error' && r.code === 'SERVER', 'SERVER with Retry'],
   ];
   for (const [i, [mock, lang, check, label]] of forced.entries()) {
-    await scenario(browser, `04-forced-${mock}-${lang}`, lang as 'kn' | 'en', async (page) => {
-      await fillToReview(page, poem(i), mock);
-      const r = await submit(page);
-      expect(check(r), `expected ${label}, got ${JSON.stringify(r)}`);
-      const hasRetry = !!(await page.$('[data-testid=retry]'));
-      return `?mock=${mock} → ${label}${'regId' in r && r.regId ? ` (${r.regId})` : ''}; retry button: ${hasRetry}; text: "${('text' in r ? r.text : '').slice(0, 90)}"`;
-    });
+    // A SERVER answer logs its machine-readable reason to the console (and shows visitors nothing extra).
+    const serverLog = /\[registration\] register: server error, reason=UNEXPECTED/;
+    await scenario(
+      browser,
+      `04-forced-${mock}-${lang}`,
+      lang as 'kn' | 'en',
+      async (page) => {
+        const logged: string[] = [];
+        page.on('console', (m) => m.type() === 'error' && serverLog.test(m.text()) && logged.push(m.text()));
+        await fillToReview(page, poem(i), mock);
+        const r = await submit(page);
+        expect(check(r), `expected ${label}, got ${JSON.stringify(r)}`);
+        if (mock === 'server') {
+          expect(logged.length === 1, `expected one console line with the SERVER reason, got ${logged.length}`);
+          expect(!/UNEXPECTED|reason/i.test('text' in r ? r.text : ''), 'the reason must not be shown to the visitor');
+        }
+        const hasRetry = !!(await page.$('[data-testid=retry]'));
+        return `?mock=${mock} → ${label}${'regId' in r && r.regId ? ` (${r.regId})` : ''}; retry button: ${hasRetry}; text: "${('text' in r ? r.text : '').slice(0, 90)}"${logged[0] ? `; console: ${logged[0]}` : ''}`;
+      },
+      mock === 'server' ? serverLog : undefined,
+    );
   }
 
   await scenario(browser, '05-forced-validation-en', 'en', async (page) => {

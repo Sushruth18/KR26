@@ -140,7 +140,7 @@ export function mockGas(): Plugin {
           res.end();
         } catch (e) {
           server.config.logger.error(`[mock-api] ${(e as Error).stack ?? e}`);
-          send(res, { ok: false, code: 'SERVER' });
+          send(res, { ok: false, code: 'SERVER', reason: 'UNEXPECTED' });
         }
       });
     },

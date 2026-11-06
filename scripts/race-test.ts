@@ -13,7 +13,7 @@
  * Against the local mock: npm run race -- http://localhost:5173/mock-api
  *
  * Note: each request holds the script lock for roughly 1–2 s on the real script and waits up to 20 s for
- * it, so a very large burst can legitimately come back "SERVER / BUSY" (the website tells the visitor to
+ * it, so a very large burst can legitimately come back "SERVER / LOCK_TIMEOUT" (the website tells the visitor to
  * try again). That is reported as a failure here too — lower the count if you only want to test ordering.
  */
 const [endpoint, eventId = 's-essay', countArg = '10'] = process.argv.slice(2);
@@ -83,8 +83,8 @@ async function main() {
   const okResults = results.filter((r) => r.ok);
   const bad = results.filter((r) => !r.ok);
   if (bad.length) {
-    const busy = bad.filter((r) => r.code === 'SERVER' && r.reason === 'BUSY').length;
-    failures.push(`${bad.length} of ${count} did not succeed (${busy} lock timeouts "BUSY") — expected every request to succeed`);
+    const busy = bad.filter((r) => r.code === 'SERVER' && r.reason === 'LOCK_TIMEOUT').length;
+    failures.push(`${bad.length} of ${count} did not succeed (${busy} lock timeouts "LOCK_TIMEOUT") — expected every request to succeed`);
   }
 
   const regIds = okResults.map((r) => r.regId!);

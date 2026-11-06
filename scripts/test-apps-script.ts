@@ -489,16 +489,16 @@ t('validation failures are rejected before taking the lock', () => {
   reg(rt, { phone: '1' });
   assert.equal(rt.lock.acquired, 0);
 });
-t('lock not obtainable within 20 s → SERVER/BUSY, nothing written', () => {
+t('lock not obtainable within 20 s → SERVER/LOCK_TIMEOUT, nothing written', () => {
   const rt = createOpenRuntime();
   rt.lock.busy = true;
-  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'BUSY' });
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'LOCK_TIMEOUT' });
   assert.equal(rt.countRegs('s-essay'), 0);
 });
-t('Sheet failure inside the lock → SERVER, and the lock is still released', () => {
+t('Sheet failure inside the lock → SERVER/UNEXPECTED, and the lock is still released', () => {
   const rt = createOpenRuntime();
   rt.tab('s-essay').throwOnAccess = true;
-  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER' });
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'UNEXPECTED' });
   assert.equal(rt.lock.held, false);
   assert.equal(rt.lock.released, 1);
 });
@@ -658,7 +658,7 @@ t('renaming the tab WITHOUT updating sheet_name → SERVER and nothing is writte
   const rt = createOpenRuntime();
   rt.tab('s-essay').setName('Essay – renamed but cell not updated');
   const before = rt.ss.snapshot();
-  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER' });
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'EVENT_TAB_MISSING:s-essay' });
   assert.equal(rt.ss.snapshot(), before);
   assert.equal(rt.lock.held, false);
 });
@@ -670,7 +670,7 @@ t('missing event tab → SERVER, a clear log message, and no row anywhere', () =
   (rt.ctx.console as { error: (m: string) => void }).error = (m: string) => logs.push(String(m));
   rt.ss.sheets.splice(rt.ss.sheets.indexOf(rt.tab('s-essay')), 1);
   const before = rt.ss.snapshot();
-  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER' });
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'EVENT_TAB_MISSING:s-essay' });
   assert.equal(rt.ss.snapshot(), before, 'no cell anywhere changed');
   assert.ok(logs.some((l) => /tab "ESY – Essay Writing" not found/.test(l) && /s-essay/.test(l)), `log: ${logs.join(' | ')}`);
   assert.equal(rt.lock.held, false);
@@ -688,19 +688,20 @@ t('empty sheet_name → SERVER, nothing written', () => {
   const rt = createOpenRuntime();
   rt.setEventField('s-essay', 'sheet_name', '');
   const before = rt.ss.snapshot();
-  assert.equal(reg(rt).code, 'SERVER');
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'EVENT_SHEET_NAME_MISSING:s-essay' });
   assert.equal(rt.ss.snapshot(), before);
 });
 t('sheet_name pointing at another event\'s tab (or at "Events") → SERVER, nothing written', () => {
   const rt = createOpenRuntime();
   rt.setEventField('s-essay', 'sheet_name', 'POM – Poem');
   const before = rt.ss.snapshot();
-  assert.equal(reg(rt).code, 'SERVER');
-  assert.equal(reg(rt, { eventId: 's-poem', id: '1BY23CS002' }).code, 'SERVER'); // both are ambiguous now
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'EVENT_TAB_SHARED:s-essay' });
+  // both are ambiguous now
+  assert.deepEqual(reg(rt, { eventId: 's-poem', id: '1BY23CS002' }), { ok: false, code: 'SERVER', reason: 'EVENT_TAB_SHARED:s-poem' });
   assert.equal(rt.ss.snapshot(), before);
   rt.setEventField('s-essay', 'sheet_name', 'Events');
   const beforeEvents = rt.ss.snapshot(); // after the cell edit itself
-  assert.equal(reg(rt).code, 'SERVER');
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'EVENT_TAB_RESERVED:s-essay' });
   assert.equal(rt.ss.snapshot(), beforeEvents);
   assert.equal(rt.events().getLastRow(), 13);
 });
@@ -708,8 +709,145 @@ t('a tab whose header row is not the registration layout is never written to', (
   const rt = createOpenRuntime();
   rt.tab('s-essay').getRange(1, 2).setValues([['something_else']]);
   const before = rt.ss.snapshot();
-  assert.equal(reg(rt).code, 'SERVER');
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'EVENT_TAB_COLUMN_MISSING:s-essay:reg_id' });
   assert.equal(rt.ss.snapshot(), before);
+});
+
+console.log('\nSERVER reasons (machine-readable, safe, logged)');
+type Resp = { ok: boolean; code?: string; reason?: string };
+/** Captures console.error output of Code.gs. */
+const captureErrors = (rt: GasRuntime) => {
+  const logs: string[] = [];
+  (rt.ctx.console as { error: (m: string) => void }).error = (m: string) => logs.push(String(m));
+  return logs;
+};
+const lookupBody = { action: 'lookup', id: '1BY23CS001', phone: '9845012345' };
+const SAFE_REASON = /^[A-Z_]+(:[A-Za-z0-9_.-]+)*$/;
+t('no Events tab → EVENTS_TAB_MISSING on status, register and lookup; nothing is created or written', () => {
+  const rt = createGasRuntime(); // setupSheet() never ran
+  const logs = captureErrors(rt);
+  const want = { ok: false, code: 'SERVER', reason: 'EVENTS_TAB_MISSING' };
+  assert.deepEqual(rt.get({ action: 'status' }), want);
+  assert.deepEqual(reg(rt), want);
+  assert.deepEqual(rt.post(lookupBody), want);
+  assert.equal(rt.ss.getSheets().length, 0);
+  assert.equal(rt.lock.held, false);
+  assert.equal(logs.filter((l) => /reason=EVENTS_TAB_MISSING/.test(l)).length, 3, logs.join(' | '));
+});
+for (const col of ['id', 'sheet_name', 'deadline_iso', 'is_open']) {
+  t(`Events tab without the "${col}" column → EVENTS_COLUMN_MISSING:${col} on status, register and lookup`, () => {
+    const rt = createOpenRuntime();
+    const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
+    rt.events().getRange(1, headers.indexOf(col) + 1).setValues([['renamed_by_mistake']]);
+    rt.cache.clear();
+    const before = rt.ss.snapshot();
+    const want = { ok: false, code: 'SERVER', reason: `EVENTS_COLUMN_MISSING:${col}` };
+    assert.deepEqual(rt.get({ action: 'status' }), want);
+    assert.deepEqual(reg(rt), want);
+    assert.deepEqual(rt.post(lookupBody), want);
+    assert.equal(rt.ss.snapshot(), before, 'nothing written anywhere');
+  });
+}
+t('status: one broken event tab is not a SERVER error — that event is closed, the rest stay open (reason only in the log)', () => {
+  const rt = createOpenRuntime();
+  const logs = captureErrors(rt);
+  rt.ss.sheets.splice(rt.ss.sheets.indexOf(rt.tab('s-essay')), 1);
+  const s = st(rt);
+  assert.equal(s.ok, true);
+  assert.equal(s.events['s-essay']?.isOpen, false);
+  assert.equal(s.events['s-poem']?.isOpen, true);
+  assert.ok(logs.some((l) => /reason=EVENT_TAB_MISSING:s-essay/.test(l)), logs.join(' | '));
+});
+t('status: an unexpected exception → SERVER/UNEXPECTED; the real message is logged but never sent', () => {
+  const rt = createOpenRuntime();
+  const logs = captureErrors(rt);
+  rt.events().throwOnAccess = true;
+  rt.cache.clear();
+  const r = rt.get({ action: 'status' });
+  assert.deepEqual(r, { ok: false, code: 'SERVER', reason: 'UNEXPECTED' });
+  assert.ok(logs.some((l) => /reason=UNEXPECTED/.test(l) && /Service Spreadsheets failed/.test(l) && /where=status/.test(l)), logs.join(' | '));
+  assert.doesNotMatch(JSON.stringify(r), /Spreadsheets|simulated|Error|at /);
+});
+t('register: an unexpected exception → UNEXPECTED, real message only in the log, no stack or sheet content in the answer', () => {
+  const rt = createOpenRuntime();
+  reg(rt, { id: '1BY23CS099', name: 'Secret Person' });
+  const logs = captureErrors(rt);
+  rt.tab('s-essay').throwOnAccess = true;
+  const r = reg(rt);
+  assert.deepEqual(r, { ok: false, code: 'SERVER', reason: 'UNEXPECTED' });
+  assert.deepEqual(Object.keys(r).sort(), ['code', 'ok', 'reason']);
+  assert.ok(logs.some((l) => /reason=UNEXPECTED/.test(l) && /where=register/.test(l) && /simulated/.test(l)), logs.join(' | '));
+  assert.doesNotMatch(JSON.stringify(r), /Secret|1BY23|simulated|Spreadsheets/);
+});
+t('lookup: an unexpected exception → SERVER/UNEXPECTED', () => {
+  const rt = createOpenRuntime();
+  captureErrors(rt);
+  rt.events().throwOnAccess = true;
+  assert.deepEqual(rt.post(lookupBody), { ok: false, code: 'SERVER', reason: 'UNEXPECTED' });
+});
+t('lookup: a broken event tab is skipped (logged), not a SERVER error', () => {
+  const rt = createOpenRuntime();
+  const logs = captureErrors(rt);
+  reg(rt, { eventId: 's-poem' });
+  rt.ss.sheets.splice(rt.ss.sheets.indexOf(rt.tab('s-essay')), 1);
+  const r = rt.post(lookupBody) as unknown as { ok: boolean; passes: unknown[] };
+  assert.equal(r.ok, true);
+  assert.equal(r.passes.length, 1);
+  assert.ok(logs.some((l) => /reason=EVENT_TAB_MISSING:s-essay/.test(l)));
+});
+t('LOCK_TIMEOUT is logged with console.error and the lock was never held', () => {
+  const rt = createOpenRuntime();
+  const logs = captureErrors(rt);
+  rt.lock.busy = true;
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'LOCK_TIMEOUT' });
+  assert.ok(logs.some((l) => /reason=LOCK_TIMEOUT/.test(l) && /where=register/.test(l)), logs.join(' | '));
+  assert.equal(rt.lock.held, false);
+});
+t('serverError_ only lets well-formed reason codes out; anything else becomes UNEXPECTED (and is logged)', () => {
+  const rt = createOpenRuntime();
+  const logs = captureErrors(rt);
+  const se = rt.ctx.serverError_ as (e: unknown, where: string) => Resp;
+  const fail = rt.ctx.fail_ as (reason: string, detail?: string) => Error;
+  // (objects built inside the VM have another realm's prototype — compare as JSON)
+  assert.equal(JSON.stringify(se(fail('EVENT_TAB_MISSING:s-essay'), 'x')), '{"ok":false,"code":"SERVER","reason":"EVENT_TAB_MISSING:s-essay"}');
+  for (const bad of ['has spaces', 'lower_case', 'TOKEN=abc123 secret!', 'X'.repeat(5) + '\n' + 'stack', '', 'A:b c']) {
+    assert.equal(se(fail(bad, 'detail'), 'x').reason, 'UNEXPECTED', JSON.stringify(bad));
+  }
+  assert.equal(se(new Error('plain'), 'x').reason, 'UNEXPECTED');
+  assert.equal(se('a string thrown', 'x').reason, 'UNEXPECTED');
+  assert.equal(se(null, 'x').reason, 'UNEXPECTED');
+  assert.equal(se({ reason: 42 }, 'x').reason, 'UNEXPECTED');
+  assert.ok(logs.length >= 10 && logs.every((l) => /^SERVER reason=/.test(l)), logs.join(' | '));
+});
+t('every reason a real failure can produce is machine-readable and secret-free', () => {
+  const seen = new Set<string>();
+  const run = (rt: GasRuntime, fn: () => Resp) => {
+    captureErrors(rt);
+    const r = fn();
+    assert.equal(r.code, 'SERVER');
+    assert.match(r.reason ?? '', SAFE_REASON);
+    seen.add((r.reason ?? '').split(':')[0] ?? '');
+  };
+  let rt = createGasRuntime(); // no Events tab
+  run(rt, () => rt.get({ action: 'status' }));
+  rt = createOpenRuntime();
+  rt.setEventField('s-essay', 'sheet_name', '');
+  run(rt, () => reg(rt));
+  rt = createOpenRuntime();
+  rt.lock.busy = true;
+  run(rt, () => reg(rt));
+  rt = createOpenRuntime();
+  rt.tab('s-essay').throwOnAccess = true;
+  run(rt, () => reg(rt));
+  assert.deepEqual([...seen].sort(), ['EVENTS_TAB_MISSING', 'EVENT_SHEET_NAME_MISSING', 'LOCK_TIMEOUT', 'UNEXPECTED']);
+});
+t('mapping never changes non-SERVER answers: VALIDATION, CLOSED and DUPLICATE carry no SERVER reason', () => {
+  const rt = createOpenRuntime();
+  assert.deepEqual(reg(rt, { phone: '1' }), { ok: false, code: 'VALIDATION', field: 'phone' });
+  const first = reg(rt);
+  assert.deepEqual(reg(rt), { ok: false, code: 'DUPLICATE', regId: first.regId });
+  rt.setEventField('s-poem', 'is_open', 'FALSE');
+  assert.deepEqual(reg(rt, { eventId: 's-poem' }), { ok: false, code: 'CLOSED', reason: 'NOT_OPEN' });
 });
 
 console.log('\nClient/server parity');

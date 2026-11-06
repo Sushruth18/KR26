@@ -28,7 +28,8 @@ export type ErrorCode =
 export interface ApiError {
   ok: false;
   code: ErrorCode;
-  reason?: 'NOT_OPEN' | 'DEADLINE' | 'BUSY' | string;
+  /** CLOSED: NOT_OPEN | DEADLINE. SERVER: LOCK_TIMEOUT, EVENTS_TAB_MISSING, EVENT_TAB_MISSING:<id>, UNEXPECTED … (console only). */
+  reason?: string;
   field?: string;
   regId?: string;
 }
@@ -54,6 +55,16 @@ export type LookupResponse = { ok: true; passes: LookupPass[] } | ApiError;
 
 class NetworkError extends Error {}
 
+/**
+ * A SERVER answer carries a short machine-readable reason (EVENT_TAB_MISSING:s-essay, LOCK_TIMEOUT, UNEXPECTED …).
+ * Visitors see nothing extra — the reason is only written to the browser console for whoever is debugging.
+ */
+function logServerReason(where: 'status' | 'register' | 'lookup', res: unknown) {
+  if (!res || typeof res !== 'object') return;
+  const r = res as Partial<ApiError>;
+  if (r.ok === false && r.code === 'SERVER') console.error(`[registration] ${where}: server error, reason=${r.reason ?? '(none)'}`);
+}
+
 function url(params: Record<string, string> = {}) {
   const u = new URL(ENDPOINT, window.location.origin);
   for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
@@ -78,7 +89,7 @@ async function fetchJson(target: string, init: RequestInit, timeoutMs: number): 
   try {
     return await res.json();
   } catch {
-    return { ok: false, code: 'SERVER' } satisfies ApiError; // the server answered, but not with JSON
+    return { ok: false, code: 'SERVER', reason: 'BAD_RESPONSE' } satisfies ApiError; // the server answered, but not with JSON
   }
 }
 
@@ -106,7 +117,10 @@ export async function getStatus(): Promise<StatusResponse> {
   inflight ??= (async () => {
     try {
       const data = (await fetchJson(url({ action: 'status' }), { method: 'GET' }, STATUS_TIMEOUT_MS)) as StatusResponse;
-      if (!data || data.ok !== true || typeof data.events !== 'object') throw new Error('bad status');
+      if (!data || data.ok !== true || typeof data.events !== 'object') {
+        logServerReason('status', data);
+        throw new Error('bad status');
+      }
       statusCache = { at: Date.now(), data };
       return data;
     } finally {
@@ -123,9 +137,10 @@ export async function register(payload: RegisterPayload): Promise<RegisterRespon
     try {
       const res = (await post(payload, REGISTER_TIMEOUT_MS)) as RegisterResponse;
       invalidateStatus();
-      return res && typeof res.ok === 'boolean' ? res : { ok: false, code: 'SERVER' };
+      logServerReason('register', res);
+      return res && typeof res.ok === 'boolean' ? res : { ok: false, code: 'SERVER', reason: 'BAD_RESPONSE' };
     } catch (e) {
-      if (!(e instanceof NetworkError)) return { ok: false, code: 'SERVER' };
+      if (!(e instanceof NetworkError)) return { ok: false, code: 'SERVER', reason: 'UNEXPECTED' };
       // fall through to the single retry
     }
   }
@@ -137,7 +152,8 @@ export async function lookup(id: string, phone: string): Promise<LookupResponse>
   if (!ENDPOINT) return configError;
   try {
     const res = (await post({ action: 'lookup', id, phone }, REGISTER_TIMEOUT_MS)) as LookupResponse;
-    return res && typeof res.ok === 'boolean' ? res : { ok: false, code: 'SERVER' };
+    logServerReason('lookup', res);
+    return res && typeof res.ok === 'boolean' ? res : { ok: false, code: 'SERVER', reason: 'BAD_RESPONSE' };
   } catch {
     return { ok: false, code: 'NETWORK' };
   }
