@@ -99,7 +99,7 @@ export const siteSchema = z.object({
    * Master logo files under public/ (e.g. "/brand/college-logo.png"); empty = not supplied, logo hidden.
    * The site serves WebP copies made by `npm run brand:images`, never the master itself.
    */
-  logos: z.object({ college: logoPath, club: logoPath }),
+  logos: z.object({ college: logoPath, club: logoPath, jubilee: logoPath, cultural: logoPath }),
   minFormSeconds: z.number().min(0),
   mapQuery: z.string().min(1),
   departments: z.array(z.string().min(1)).min(1),

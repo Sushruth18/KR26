@@ -29,7 +29,9 @@
     "college": "BMS Institute of Technology & Management",
     "club": "Honnudi Kannada Sangha",
     "collegeLogoAlt": "BMS Institute of Technology & Management logo",
-    "clubLogoAlt": "Honnudi Kannada Sangha logo"
+    "clubLogoAlt": "Honnudi Kannada Sangha logo",
+    "jubileeLogoAlt": "BMSIT&M 25 Years of Excellence, 2002–2027",
+    "culturalLogoAlt": "Cultural emblem"
   },
   "footer": {
     "copyright": "© {{year}} Honnudi Kannada Sangha | All rights reserved",

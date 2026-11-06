@@ -31,11 +31,17 @@ export function Footer() {
       <div className="container-page flex items-end justify-between gap-4 py-8">
         <Torch className="hidden sm:block" />
         <div className="flex flex-1 flex-col items-center gap-3 text-center">
-          {(getLogo('college') || getLogo('club')) && (
-            <div className="mb-1 flex items-center justify-center gap-5">
+          {(getLogo('college') || getLogo('club') || getLogo('cultural')) && (
+            <div className="mb-1 flex items-center justify-center gap-3 min-[400px]:gap-5" data-testid="footer-logos">
               <BrandLogo which="college" height={72} plate lazy />
-              {getLogo('college') && getLogo('club') && <span className="h-10 w-px bg-gold-600/50" aria-hidden="true" />}
-              <BrandLogo which="club" height={40} lazy />
+              {getLogo('college') && (getLogo('club') || getLogo('cultural')) && (
+                <span className="h-10 w-px bg-gold-600/50" aria-hidden="true" />
+              )}
+              {/* The club pair: Honnudi wordmark + cultural emblem, centred on one line, same visual height. */}
+              <span className="flex items-center justify-center gap-2.5 min-[400px]:gap-3" data-testid="footer-club-pair">
+                <BrandLogo which="club" height={40} lazy />
+                <BrandLogo which="cultural" height={48} lazy />
+              </span>
             </div>
           )}
           <p className="font-display text-lg text-gold-300">{t('brand.college')}</p>

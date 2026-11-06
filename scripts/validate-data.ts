@@ -77,7 +77,7 @@ if (site) {
   const manifest = JSON.parse(readFileSync(resolve(dataDir, 'logos.generated.json'), 'utf8')) as Record<LogoKey, LogoAsset | null>;
   const pub = (p: string) => resolve(process.cwd(), 'public', p.replace(/^\//, ''));
   const regen = 'run "npm run brand:images" and commit the result';
-  for (const key of ['college', 'club'] as const) {
+  for (const key of Object.keys(site.logos) as LogoKey[]) {
     const source = site.logos[key];
     const entry = manifest[key];
     if (!source) {

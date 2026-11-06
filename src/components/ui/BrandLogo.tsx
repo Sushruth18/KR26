@@ -2,7 +2,12 @@ import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getLogo, type LogoKey } from '../../lib/logos';
 
-const ALT: Record<LogoKey, string> = { college: 'brand.collegeLogoAlt', club: 'brand.clubLogoAlt' };
+const ALT: Record<LogoKey, string> = {
+  college: 'brand.collegeLogoAlt',
+  club: 'brand.clubLogoAlt',
+  jubilee: 'brand.jubileeLogoAlt',
+  cultural: 'brand.culturalLogoAlt',
+};
 
 /** Plate border width — keep in sync with `.logo-plate` in index.css. */
 const PLATE_BORDER = 1;

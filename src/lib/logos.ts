@@ -1,6 +1,6 @@
 import manifest from '../data/logos.generated.json';
 
-export type LogoKey = 'college' | 'club';
+export type LogoKey = 'college' | 'club' | 'jubilee' | 'cultural';
 
 /** One entry of src/data/logos.generated.json (written by `npm run brand:images`). */
 export interface LogoAsset {

@@ -19,6 +19,7 @@
     "race": "tsx scripts/race-test.ts",
     "shot": "tsx scripts/shot.ts",
     "e2e:home": "tsx scripts/e2e-home.ts",
+    "e2e:brand": "tsx scripts/e2e-brand.ts",
     "perf:home": "tsx scripts/perf-home.ts"
   },
   "dependencies": {

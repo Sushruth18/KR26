@@ -19,7 +19,12 @@ import type { LogoAsset, LogoKey } from '../src/lib/logos';
  * Output widths in px. They cover every displayed size at 1×–3× screens: college ≤ 64 CSS px wide
  * (Home, footer, pass), club ≤ 120 CSS px wide. The pass picks one fixed file (html-to-image ignores srcset).
  */
-const WIDTHS: Record<LogoKey, number[]> = { college: [64, 128, 192], club: [120, 240, 360] };
+const WIDTHS: Record<LogoKey, number[]> = {
+  college: [64, 128, 192],
+  club: [120, 240, 360],
+  jubilee: [64, 128, 192], // ≤ 50 CSS px wide on Home
+  cultural: [64, 128, 192], // ≤ 48 CSS px wide in the footer
+};
 
 const root = process.cwd();
 const outDir = resolve(root, 'public/brand/web');
@@ -29,7 +34,7 @@ const sha1 = (buf: Buffer) => createHash('sha1').update(buf).digest('hex');
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 
-const manifest: Record<LogoKey, LogoAsset | null> = { college: null, club: null };
+const manifest: Record<LogoKey, LogoAsset | null> = { college: null, club: null, jubilee: null, cultural: null };
 for (const key of Object.keys(WIDTHS) as LogoKey[]) {
   const source = site.logos[key];
   if (!source) continue;

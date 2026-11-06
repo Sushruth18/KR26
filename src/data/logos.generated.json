@@ -38,5 +38,45 @@
         "src": "/brand/web/honnudi-logo-360w.9463d783.webp"
       }
     ]
+  },
+  "jubilee": {
+    "source": "/brand/25-logo.png",
+    "sha1": "1cb6fa6f68b07e9e3ac4782cc8a2da4c0d2fb521",
+    "width": 896,
+    "height": 900,
+    "variants": [
+      {
+        "w": 64,
+        "src": "/brand/web/25-logo-64w.2f4c0d46.webp"
+      },
+      {
+        "w": 128,
+        "src": "/brand/web/25-logo-128w.fdecebfa.webp"
+      },
+      {
+        "w": 192,
+        "src": "/brand/web/25-logo-192w.16ba3c9c.webp"
+      }
+    ]
+  },
+  "cultural": {
+    "source": "/brand/cultural.png",
+    "sha1": "edc907f832052a099daa76942c9c3764464d4d14",
+    "width": 714,
+    "height": 713,
+    "variants": [
+      {
+        "w": 64,
+        "src": "/brand/web/cultural-64w.5f3f893a.webp"
+      },
+      {
+        "w": 128,
+        "src": "/brand/web/cultural-128w.f661f79d.webp"
+      },
+      {
+        "w": 192,
+        "src": "/brand/web/cultural-192w.79887ab5.webp"
+      }
+    ]
   }
 }

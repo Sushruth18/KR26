@@ -35,7 +35,9 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 ## Home page copy (first drafts, written for Phase 4 — confirm wording)
 - [ ] Kannada strings not given in CLAUDE.md: "ಮುಖ್ಯ ಕಾರ್ಯಕ್ರಮಕ್ಕೆ" (Main event in), "ಸ್ಕಿಪ್ ಮಾಡಿ" (splash Skip), "ಸ್ಪರ್ಧೆಗಳ ಮೆರವಣಿಗೆ" / "ಪ್ರತಿ ಸ್ಪರ್ಧೆಯೂ ಒಂದು ಸ್ತಬ್ಧಚಿತ್ರ. ನಿಮ್ಮದನ್ನು ಆರಿಸಿ." (preview strip), plaque captions, deadline-banner and "festival has begun / thank you" lines (`src/i18n/kn.json → home.*`, `intro.*`)
 - [ ] Logo alt text: "ಬಿ.ಎಂ.ಎಸ್. ತಾಂತ್ರಿಕ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನಾ ಮಹಾವಿದ್ಯಾಲಯದ ಲಾಂಛನ", "ಹೊನ್ನುಡಿ ಕನ್ನಡ ಸಂಘದ ಲಾಂಛನ" (`kn.json → brand.*LogoAlt`)
-- [ ] English counterparts of the same (`src/i18n/en.json`)
+- [ ] Alt text for the two new logos — Kannada drafts: 25-years logo "ಬಿ.ಎಂ.ಎಸ್.ಐ.ಟಿ.ಎಂ ೨೫ ವರ್ಷಗಳ ಶ್ರೇಷ್ಠತೆ" (wording supplied by the team; confirm), cultural emblem "ಸಾಂಸ್ಕೃತಿಕ ಲಾಂಛನ" (**draft** — confirm, and what the emblem is officially called) (`kn.json → brand.jubileeLogoAlt`, `brand.culturalLogoAlt`)
+- [ ] English counterparts of the same (`src/i18n/en.json`); the cultural emblem's English alt "Cultural emblem" is a draft too
+- [ ] 25-years logo reads "BMSITM" in its lettering while the English alt text says "BMSIT&M" — confirm the logo's spelling is intended
 - [ ] `public/audio/theme.mp3` — royalty-free / self-recorded nadaswaram or dollu loop (music toggle hidden while absent)
 - [ ] `public/og.png` — 1200×630 social card (referenced in `index.html`; not yet created)
 
