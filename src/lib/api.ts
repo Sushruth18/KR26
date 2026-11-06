@@ -44,6 +44,8 @@ export interface StatusResponse {
   ok: true;
   events: Record<string, LiveEventStatus>;
   serverTime: string;
+  /** Hash of the Config.gs the deployed script runs (compare with `npm run gas:config`); console/debugging only. */
+  configVersion?: string;
 }
 export type RegisterResponse = { ok: true; regId: string; event: string; name: string } | ApiError;
 export interface LookupPass {

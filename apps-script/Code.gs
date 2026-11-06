@@ -10,7 +10,7 @@
  *                     event's registrations. There is no shared "Registrations" tab.
  *
  * Endpoints
- *   GET  ?action=status                         -> { ok, events: { [id]: { isOpen, deadline, registeredCount } }, serverTime }
+ *   GET  ?action=status                         -> { ok, events: { [id]: { isOpen, deadline, registeredCount } }, serverTime, configVersion }
  *   POST { action: "register", ...fields }      -> { ok:true, regId, event, name } | { ok:false, code, reason?, field?, regId? }
  *   POST { action: "lookup", id, phone }        -> { ok:true, passes:[{ regId, event, name }] } | { ok:false, code }
  * The browser sends POST bodies as Content-Type text/plain so no CORS preflight is needed.
@@ -27,6 +27,9 @@
  *   EVENT_TAB_SHARED:<eventId>          two events use the same tab
  *   EVENT_TAB_MISSING:<eventId>         no tab with that sheet_name exists
  *   EVENT_TAB_COLUMN_MISSING:<eventId>:<column>   the event tab's header row is not the layout
+ *   CONFIG_MISMATCH                     Config.gs is missing, from another version of the site, or not the one this
+ *                                       Code.gs expects (CONFIG_SCHEMA / CONFIG_VERSION) — paste the latest Config.gs
+ *   CONFIG_EMPTY                        Config.gs defines no events — paste the latest Config.gs
  *   LOCK_TIMEOUT                        could not get the script lock within 20 s (website: "try again")
  *   UNEXPECTED                          anything else — the real message is only in the Apps Script log
  * Each one is also written to the log with console.error (Apps Script editor > Executions).
@@ -41,7 +44,10 @@ var REG_HEADERS = [
   'phone', 'email', 'team_name', 'members_json', 'member_ids', 'consent_photo'
 ];
 var LOCK_WAIT_MS = 20000;
-var STATUS_CACHE_KEY = 'status_v2';
+// Config.gs (generated) must declare CONFIG_SCHEMA with this exact number, or every request answers CONFIG_MISMATCH.
+// Keep equal to GAS_CONFIG_SCHEMA in scripts/gas-config.ts (npm run gas:config fails if they differ).
+var EXPECTED_CONFIG_SCHEMA = 2;
+var STATUS_CACHE_KEY = 'status_v3';
 var STATUS_CACHE_S = 10;
 var LOOKUP_MAX_FAILS = 5;
 var LOOKUP_WINDOW_S = 600;
@@ -92,6 +98,23 @@ function fail_(reason, detail) {
   var err = new Error(detail || reason);
   err.reason = reason;
   return err;
+}
+
+/**
+ * Config.gs sanity check, run first by status, register, lookup and setupSheet. A stale, missing or empty Config.gs
+ * is the usual reason for "0 tabs created" and for unknown-event errors, so it is reported by name, not guessed at.
+ */
+function assertConfig_() {
+  if (typeof CONFIG === 'undefined' || typeof CONFIG_SCHEMA === 'undefined' || typeof CONFIG_VERSION === 'undefined') {
+    throw fail_('CONFIG_MISMATCH', 'Config.gs is missing or out of date (no CONFIG_SCHEMA / CONFIG_VERSION) — paste the latest Config.gs.');
+  }
+  if (CONFIG_SCHEMA !== EXPECTED_CONFIG_SCHEMA) {
+    throw fail_('CONFIG_MISMATCH', 'Config.gs is schema ' + CONFIG_SCHEMA + ' but Code.gs expects schema ' + EXPECTED_CONFIG_SCHEMA +
+      ' — paste the latest Code.gs AND Config.gs together.');
+  }
+  if (!CONFIG || !CONFIG.events || typeof CONFIG.events !== 'object' || Object.keys(CONFIG.events).length === 0) {
+    throw fail_('CONFIG_EMPTY', 'Config.gs has no events — paste the latest Config.gs.');
+  }
 }
 
 /**
@@ -372,6 +395,7 @@ function nextRegId_(code, rows) {
 // ---------------------------------------------------------------------------
 
 function getStatus_() {
+  assertConfig_();
   var cache = CacheService.getScriptCache();
   var hit = cache.get(STATUS_CACHE_KEY);
   if (hit) {
@@ -397,7 +421,7 @@ function getStatus_() {
       registeredCount: tab ? readTable_(tab).filter(function (r) { return r.reg_id !== ''; }).length : 0
     };
   });
-  var out = { ok: true, events: events, serverTime: new Date(now).toISOString() };
+  var out = { ok: true, events: events, serverTime: new Date(now).toISOString(), configVersion: CONFIG_VERSION };
   cache.put(STATUS_CACHE_KEY, JSON.stringify(out), STATUS_CACHE_S);
   return out;
 }
@@ -407,6 +431,7 @@ function getStatus_() {
 // ---------------------------------------------------------------------------
 
 function register_(b) {
+  assertConfig_();
   var v = validate_(b);
   if (!v.ok) return v;
   var p = v.data;
@@ -467,6 +492,7 @@ function register_(b) {
 // ---------------------------------------------------------------------------
 
 function lookup_(b) {
+  assertConfig_();
   var id = normId_(b.id);
   var phone = normPhone_(b.phone);
   if (!id || id.length > 20 || !validPhone_(phone)) return { ok: false, code: 'VALIDATION', field: 'lookup' };
@@ -577,6 +603,12 @@ function checkEmailQuota() {
 // ---------------------------------------------------------------------------
 
 function setupSheet() {
+  // The event list comes from CONFIG.events in Config.gs — NOT from the Events tab. If Config.gs is stale or empty
+  // there is nothing to seed, so stop loudly before touching the spreadsheet.
+  assertConfig_();
+  var ids = Object.keys(CONFIG.events);
+  console.log('Config ' + CONFIG_VERSION + ' (schema ' + CONFIG_SCHEMA + ') lists ' + ids.length + ' events: ' + ids.join(', '));
+
   var ss = ss_();
   var evSheet = ss.getSheetByName(SHEET_EVENTS) || ss.insertSheet(SHEET_EVENTS);
   ensureEventsHeaders_(evSheet);
@@ -584,15 +616,19 @@ function setupSheet() {
   // 1. One row per competition. New rows start OPEN (is_open TRUE); existing rows keep whatever the coordinators set.
   var existing = {};
   readTable_(evSheet).forEach(function (r) { existing[String(r.id).trim()] = r; });
-  Object.keys(CONFIG.events).forEach(function (id) {
+  var report = {};
+  ids.forEach(function (id) {
     var e = CONFIG.events[id];
     var row = existing[id];
+    report[id] = { row: 'already there', tab: '' };
     if (!row) {
       appendByHeader_(evSheet, {
         id: id, code: e.code, name_en: e.name.en, sheet_name: e.sheetName, deadline_iso: e.deadline, is_open: 'TRUE'
       });
+      report[id].row = 'ADDED';
     } else if (!String(row.sheet_name || '').trim()) {
       setCellByHeader_(evSheet, row._row, 'sheet_name', e.sheetName); // e.g. a pre-tab-per-event Events tab
+      report[id].row = 'sheet_name filled in';
     }
   });
   evSheet.setFrozenRows(1);
@@ -601,9 +637,10 @@ function setupSheet() {
   var events = readEvents_();
   var used = {};
   var created = [];
-  Object.keys(CONFIG.events).forEach(function (id) {
+  var existed = [];
+  ids.forEach(function (id) {
     var name = events[id] ? events[id].sheetName : '';
-    if (!name) throw new Error('Event "' + id + '" has no sheet_name in the ' + SHEET_EVENTS + ' tab.');
+    if (!name) throw new Error('Event "' + id + '" has no sheet_name in the ' + SHEET_EVENTS + ' tab — the row could not be written.');
     if (name === SHEET_EVENTS) throw new Error('Event "' + id + '": sheet_name must not be "' + SHEET_EVENTS + '".');
     if (used[name]) throw new Error('Events "' + used[name] + '" and "' + id + '" use the same sheet_name "' + name + '".');
     used[name] = id;
@@ -611,19 +648,43 @@ function setupSheet() {
     if (!sh) {
       sh = ss.insertSheet(name);
       created.push(name);
+      report[id].tab = 'tab "' + name + '" CREATED';
+    } else {
+      existed.push(name);
+      report[id].tab = 'tab "' + name + '" already existed';
     }
     ensureHeaders_(sh, REG_HEADERS);
     // Plain text for every data column (phone numbers, USNs, leading zeros) — also for rows typed in by hand.
     if (sh.getMaxRows() > 1) sh.getRange(2, 1, sh.getMaxRows() - 1, REG_HEADERS.length).setNumberFormat('@');
     sh.setFrozenRows(1);
+    console.log(id + ': Events row ' + report[id].row + '; ' + report[id].tab);
   });
+
+  // 3. Verify what is really in the spreadsheet now, instead of trusting the loops above.
+  var after = readEvents_();
+  var missing = ids.filter(function (id) { return !after[id]; });
+  if (missing.length) {
+    throw new Error('Setup failed: the Events tab has no row for ' + missing.join(', ') + ' (Config lists ' + ids.length + ' events).');
+  }
+  if (readTable_(ss.getSheetByName(SHEET_EVENTS)).length < 1) {
+    throw new Error('Setup failed: the Events tab has no event rows after setup.');
+  }
 
   if (ss.getSheetByName(SHEET_OLD_REGS)) {
     console.warn('An old "' + SHEET_OLD_REGS + '" tab exists. It is no longer used (registrations now go to the per-event tabs) ' +
       'and was left untouched — delete it by hand once you have copied anything you need.');
   }
-  console.log('Setup complete. Events tab ready; ' + created.length + ' event tab(s) created' +
-    (created.length ? ': ' + created.join(', ') : '') + '. Nothing was deleted or overwritten.');
+  console.log('Setup complete. Config ' + CONFIG_VERSION + ': ' + ids.length + ' events; ' +
+    ids.filter(function (id) { return report[id].row === 'ADDED'; }).length + ' Events row(s) added; ' +
+    created.length + ' event tab(s) created' + (created.length ? ' (' + created.join(', ') + ')' : '') + ', ' +
+    existed.length + ' already existed. Nothing was deleted or overwritten.');
+}
+
+/** Run from the editor to see which Config.gs this project is using (version, schema, events) without changing anything. */
+function checkConfig() {
+  assertConfig_();
+  console.log('Config.gs OK — version ' + CONFIG_VERSION + ', schema ' + CONFIG_SCHEMA + ', ' + Object.keys(CONFIG.events).length +
+    ' events: ' + Object.keys(CONFIG.events).join(', '));
 }
 
 /** Events tab: create the header row, or append any required column that is missing. Extra columns are left alone. */

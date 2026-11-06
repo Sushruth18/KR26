@@ -4,6 +4,8 @@
  */
 import assert from 'node:assert/strict';
 import { createGasRuntime, createOpenRuntime, type GasRuntime } from '../mock/gas-runtime';
+import { readFileSync } from 'node:fs';
+import { buildGasConfigSource, computeConfigVersion, GAS_CONFIG_SCHEMA } from './gas-config';
 import { isValidId, normEmail, normId, normPhone, normText } from '../src/lib/validation';
 
 let passed = 0;
@@ -848,6 +850,170 @@ t('mapping never changes non-SERVER answers: VALIDATION, CLOSED and DUPLICATE ca
   assert.deepEqual(reg(rt), { ok: false, code: 'DUPLICATE', regId: first.regId });
   rt.setEventField('s-poem', 'is_open', 'FALSE');
   assert.deepEqual(reg(rt, { eventId: 's-poem' }), { ok: false, code: 'CLOSED', reason: 'NOT_OPEN' });
+});
+
+console.log('\nConfig.gs version & setupSheet reporting');
+const captureLogs = (rt: GasRuntime) => {
+  const logs: string[] = [];
+  const c = rt.ctx.console as { log: (m: string) => void; warn: (m: string) => void; error: (m: string) => void };
+  c.log = (m: string) => logs.push(String(m));
+  c.warn = (m: string) => logs.push(`WARN ${m}`);
+  c.error = (m: string) => logs.push(`ERR ${m}`);
+  return logs;
+};
+const cfgOf = (rt: GasRuntime) => rt.ctx.CONFIG as { events: Record<string, unknown> };
+const sheetCount = (rt: GasRuntime) => rt.ss.getSheets().length;
+t('generated Config.gs: CONFIG_SCHEMA matches Code.gs, CONFIG_VERSION is an 8-hex hash of the config, and the file on disk is up to date', () => {
+  const onDisk = readFileSync('apps-script/Config.gs', 'utf8');
+  assert.equal(onDisk, buildGasConfigSource(), 'run npm run gas:config');
+  const code = readFileSync('apps-script/Code.gs', 'utf8');
+  assert.equal(Number(/var EXPECTED_CONFIG_SCHEMA = (\d+);/.exec(code)?.[1]), GAS_CONFIG_SCHEMA);
+  const rt = createGasRuntime();
+  assert.match(String(rt.ctx.CONFIG_VERSION), /^[0-9a-f]{8}$/);
+  assert.equal(rt.ctx.CONFIG_SCHEMA, GAS_CONFIG_SCHEMA);
+  assert.equal(rt.ctx.CONFIG_VERSION, computeConfigVersion(JSON.parse(JSON.stringify(rt.ctx.CONFIG))));
+  assert.equal(Object.keys(cfgOf(rt).events).length, 12);
+});
+t('CONFIG_VERSION changes when an event, a deadline or a rule changes, and is stable otherwise', () => {
+  const rt = createGasRuntime();
+  const base = JSON.parse(JSON.stringify(rt.ctx.CONFIG));
+  const v = computeConfigVersion(base);
+  assert.equal(computeConfigVersion(JSON.parse(JSON.stringify(base))), v);
+  const withoutEvent = JSON.parse(JSON.stringify(base));
+  delete withoutEvent.events['s-rangoli'];
+  const otherDeadline = JSON.parse(JSON.stringify(base));
+  otherDeadline.events['s-essay'].deadline = '2026-11-17T23:59:00+05:30';
+  const otherRule = JSON.parse(JSON.stringify(base));
+  otherRule.rules.phone.pattern = '^[0-9]{10}$';
+  for (const changed of [withoutEvent, otherDeadline, otherRule]) assert.notEqual(computeConfigVersion(changed), v);
+});
+t('status includes configVersion (= CONFIG_VERSION), also when served from the cache', () => {
+  const rt = createOpenRuntime();
+  const first = st(rt);
+  assert.equal((first as unknown as { configVersion: string }).configVersion, rt.ctx.CONFIG_VERSION);
+  const cached = rt.get({ action: 'status' }) as unknown as { configVersion: string };
+  assert.equal(cached.configVersion, rt.ctx.CONFIG_VERSION);
+});
+t('setupSheet logs "Config <version> … lists 12 events", then one line per event: Events row ADDED + tab CREATED', () => {
+  const rt = createGasRuntime();
+  const logs = captureLogs(rt);
+  setup(rt);
+  assert.match(logs[0] ?? '', new RegExp(`^Config ${rt.ctx.CONFIG_VERSION} \\(schema ${GAS_CONFIG_SCHEMA}\\) lists 12 events: s-essay, s-poem`));
+  for (const id of ids(rt)) {
+    const line = logs.find((l) => l.startsWith(`${id}: `));
+    assert.ok(line && /Events row ADDED/.test(line) && /tab "[^"]+" CREATED/.test(line), `${id}: ${line}`);
+  }
+  const last = logs[logs.length - 1] ?? '';
+  assert.match(last, /^Setup complete\. Config [0-9a-f]{8}: 12 events; 12 Events row\(s\) added; 12 event tab\(s\) created \(.*\), 0 already existed\./);
+});
+t('setupSheet seeds the Events tab from Config.gs: one row per event with id, code, name_en, sheet_name, deadline_iso, is_open TRUE', () => {
+  const rt = createGasRuntime();
+  setup(rt);
+  assert.equal(rt.events().getLastRow(), 13);
+  const cfg = JSON.parse(JSON.stringify(rt.ctx.CONFIG)) as { events: Record<string, { code: string; name: { en: string }; sheetName: string; deadline: string }> };
+  for (const [id, e] of Object.entries(cfg.events)) {
+    assert.equal(rt.eventField(id, 'code'), e.code);
+    assert.equal(rt.eventField(id, 'name_en'), e.name.en);
+    assert.equal(rt.eventField(id, 'sheet_name'), e.sheetName);
+    assert.equal(rt.eventField(id, 'deadline_iso'), e.deadline);
+    assert.equal(rt.eventField(id, 'is_open'), 'TRUE');
+    assert.equal(rt.tab(id).getRange(1, 1, 1, 13).getDisplayValues()[0]?.join('|'), TAB_HEADERS);
+  }
+});
+t('re-running setupSheet reports "already there / already existed" for every event and changes nothing', () => {
+  const rt = createGasRuntime();
+  setup(rt);
+  reg(rt);
+  const before = rt.ss.snapshot();
+  const logs = captureLogs(rt);
+  setup(rt);
+  assert.equal(rt.ss.snapshot(), before);
+  for (const id of ids(rt)) {
+    const line = logs.find((l) => l.startsWith(`${id}: `));
+    assert.ok(line && /Events row already there/.test(line) && /already existed/.test(line), `${id}: ${line}`);
+  }
+  assert.match(logs[logs.length - 1] ?? '', /0 Events row\(s\) added; 0 event tab\(s\) created, 12 already existed\./);
+});
+t('a partly set-up spreadsheet: only the missing tab is added, and it is reported as such', () => {
+  const rt = createGasRuntime();
+  setup(rt);
+  rt.ss.sheets.splice(rt.ss.sheets.indexOf(rt.tab('s-poem')), 1);
+  const logs = captureLogs(rt);
+  setup(rt);
+  assert.ok(logs.some((l) => /^s-poem: .*CREATED/.test(l)));
+  assert.ok(logs.some((l) => /^s-essay: .*already existed/.test(l)));
+  assert.match(logs[logs.length - 1] ?? '', /1 event tab\(s\) created \(POM – Poem\), 11 already existed/);
+});
+t('setupSheet with an EMPTY Config.gs events list throws "Config.gs has no events — paste the latest Config.gs" and touches nothing', () => {
+  const rt = createGasRuntime();
+  cfgOf(rt).events = {};
+  assert.throws(() => setup(rt), /Config\.gs has no events — paste the latest Config\.gs/);
+  assert.equal(sheetCount(rt), 0, 'not even the Events tab is created');
+  const logs = captureLogs(rt);
+  assert.throws(() => setup(rt), /no events/);
+  assert.ok(!logs.some((l) => /Setup complete/.test(l)));
+});
+t('setupSheet on an existing spreadsheet with empty Config: nothing is changed or deleted', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  const before = rt.ss.snapshot();
+  cfgOf(rt).events = {};
+  assert.throws(() => setup(rt), /no events/);
+  assert.equal(rt.ss.snapshot(), before);
+});
+t('setupSheet throws instead of "Setup complete" when the Events tab ends up without event rows', () => {
+  const rt = createGasRuntime();
+  const logs = captureLogs(rt);
+  rt.ctx.appendByHeader_ = () => undefined; // simulate writes that silently do nothing
+  assert.throws(() => setup(rt), /has no sheet_name in the Events tab|Setup failed/);
+  assert.ok(!logs.some((l) => /Setup complete/.test(l)));
+});
+t('setupSheet with a stale schema (Config.gs from another version) → CONFIG_MISMATCH error, nothing created', () => {
+  const rt = createGasRuntime();
+  rt.ctx.CONFIG_SCHEMA = GAS_CONFIG_SCHEMA - 1;
+  assert.throws(() => setup(rt), /Config\.gs is schema 1 but Code\.gs expects schema 2/);
+  assert.equal(sheetCount(rt), 0);
+});
+t('checkConfig() logs version, schema and event count — and fails on an empty Config', () => {
+  const rt = createGasRuntime();
+  const logs = captureLogs(rt);
+  (rt.ctx.checkConfig as () => void)();
+  assert.match(logs[0] ?? '', /^Config\.gs OK — version [0-9a-f]{8}, schema 2, 12 events: s-essay/);
+  cfgOf(rt).events = {};
+  assert.throws(() => (rt.ctx.checkConfig as () => void)(), /no events/);
+});
+
+console.log('\nSERVER reasons CONFIG_MISMATCH / CONFIG_EMPTY');
+const breakers: [string, string, (rt: GasRuntime) => void][] = [
+  ['Code.gs and Config.gs disagree on the schema', 'CONFIG_MISMATCH', (rt) => void (rt.ctx.CONFIG_SCHEMA = 1)],
+  ['an old Config.gs without CONFIG_SCHEMA', 'CONFIG_MISMATCH', (rt) => void (rt.ctx.CONFIG_SCHEMA = undefined)],
+  ['an old Config.gs without CONFIG_VERSION', 'CONFIG_MISMATCH', (rt) => void (rt.ctx.CONFIG_VERSION = undefined)],
+  ['no CONFIG at all', 'CONFIG_MISMATCH', (rt) => void (rt.ctx.CONFIG = undefined)],
+  ['Config.gs with zero events', 'CONFIG_EMPTY', (rt) => void (cfgOf(rt).events = {})],
+];
+for (const [what, reason, breakIt] of breakers) {
+  t(`${what} → status, register and lookup answer SERVER/${reason}; nothing written, no lock taken`, () => {
+    const rt = createOpenRuntime();
+    reg(rt, { id: '1BY23CS500' }); // one real registration to prove nothing else changes
+    const logs = captureLogs(rt);
+    const before = rt.ss.snapshot();
+    const acquired = rt.lock.acquired;
+    breakIt(rt);
+    rt.cache.clear();
+    const want = { ok: false, code: 'SERVER', reason };
+    assert.deepEqual(rt.get({ action: 'status' }), want);
+    assert.deepEqual(reg(rt), want);
+    assert.deepEqual(rt.post(lookupBody), want);
+    assert.equal(rt.ss.snapshot(), before);
+    assert.equal(rt.lock.acquired, acquired, 'rejected before taking the lock');
+    assert.equal(logs.filter((l) => new RegExp(`reason=${reason}`).test(l)).length, 3, logs.join(' | '));
+  });
+}
+t('a stale status cache cannot hide a broken Config.gs', () => {
+  const rt = createOpenRuntime();
+  st(rt); // fills the cache
+  rt.ctx.CONFIG_SCHEMA = 1;
+  assert.deepEqual(rt.get({ action: 'status' }), { ok: false, code: 'SERVER', reason: 'CONFIG_MISMATCH' });
 });
 
 console.log('\nClient/server parity');

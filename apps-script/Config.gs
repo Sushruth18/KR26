@@ -6,6 +6,11 @@
 // redeploy (see apps-script/README.md, "Updating the script").
 // ============================================================================
 
+// Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
+// GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
+var CONFIG_SCHEMA = 2;
+var CONFIG_VERSION = 'e9b500b5';
+
 var CONFIG = {
   "minFormMs": 3000,
   "departments": [
