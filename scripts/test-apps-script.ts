@@ -45,32 +45,145 @@ const quiz = {
   members: [{ name: 'Ravi K', id: '1BY23CS011', phone: '9845011111' }],
 };
 const reg = (rt: GasRuntime, over: Record<string, unknown> = {}) => rt.post({ ...base, ...over });
-const regRow = (rt: GasRuntime, n: number) => rt.regs().getRange(n, 1, 1, 14).getDisplayValues()[0] ?? [];
+/** Row n of an event's own tab (13 columns: timestamp | reg_id | category | name | usn | dept | sem | phone | email | team | members_json | member_ids | consent). */
+const regRow = (rt: GasRuntime, n: number, eventId = 's-essay') => rt.tab(eventId).getRange(n, 1, 1, 13).getDisplayValues()[0] ?? [];
+const setup = (rt: GasRuntime) => (rt.ctx.setupSheet as () => void)();
+const st = (rt: GasRuntime) => {
+  rt.cache.clear();
+  return rt.get({ action: 'status' }) as unknown as {
+    ok: boolean;
+    serverTime: string;
+    events: Record<string, { isOpen: boolean; deadline: string | null; registeredCount: number }>;
+  };
+};
+const ids = (rt: GasRuntime) => Object.keys((rt.ctx.CONFIG as { events: Record<string, unknown> }).events);
+const TAB_HEADERS = 'timestamp|reg_id|category|name|usn_or_empid|department|semester|phone|email|team_name|members_json|member_ids|consent_photo';
 
 console.log('\nSetup & status');
-t('setupSheet creates both tabs with headers; every event seeded closed (is_open FALSE)', () => {
+t('setupSheet creates the Events tab and one tab per event — all 12 — and NO shared Registrations tab', () => {
   const rt = createGasRuntime();
-  (rt.ctx.setupSheet as () => void)();
-  assert.equal(rt.events().getRange(1, 1, 1, 6).getDisplayValues()[0]?.join('|'), 'id|code|name_en|seats|deadline_iso|is_open');
-  assert.equal(rt.regs().getLastColumn(), 14);
+  setup(rt);
+  assert.equal(rt.events().getRange(1, 1, 1, 6).getDisplayValues()[0]?.join('|'), 'id|code|name_en|sheet_name|deadline_iso|is_open');
   assert.equal(rt.events().getLastRow(), 13);
-  const st = rt.get({ action: 'status' }) as unknown as { events: Record<string, { isOpen: boolean; seatsLeft: number }> };
-  assert.equal(st.events['s-essay']?.isOpen, false);
-  assert.equal(st.events['s-essay']?.seatsLeft, 100);
-  assert.equal(reg(rt).code, 'CLOSED');
-  assert.equal(reg(rt).reason, 'NOT_OPEN');
-  (rt.ctx.setupSheet as () => void)(); // re-running must not duplicate events
-  assert.equal(rt.events().getLastRow(), 13);
+  assert.equal(ids(rt).length, 12);
+  const names = rt.ss.getSheets().map((x) => x.getName());
+  assert.equal(names.length, 13, `tabs: ${names.join(', ')}`);
+  assert.equal(names.includes('Registrations'), false);
+  for (const id of ids(rt)) {
+    const tab = rt.tab(id);
+    assert.equal(tab.getRange(1, 1, 1, 13).getDisplayValues()[0]?.join('|'), TAB_HEADERS, id);
+    assert.equal(tab.getLastColumn(), 13);
+    assert.equal(tab.getLastRow(), 1, 'header only');
+  }
+  assert.equal(rt.eventField('s-essay', 'sheet_name'), 'ESY – Essay Writing');
+  assert.equal(rt.tab('s-essay').getName(), 'ESY – Essay Writing');
+  assert.equal(rt.tab('f-group-singing').getName(), 'FGS – Faculty Group Singing');
 });
-t('status reports seats/seatsLeft/isOpen/deadline per event and serverTime', () => {
+t('every event starts open (is_open TRUE), so registration works straight after setup — no opening date', () => {
+  const rt = createGasRuntime();
+  setup(rt);
+  for (const id of ids(rt)) assert.equal(rt.eventField(id, 'is_open'), 'TRUE', id);
+  assert.equal(st(rt).events['s-essay']?.isOpen, true);
+  assert.equal(reg(rt).ok, true);
+});
+t('event tabs: header row frozen and bold, data columns are plain text', () => {
+  const rt = createGasRuntime();
+  const frozen: string[] = [];
+  const bold: string[] = [];
+  // Spy on the fake tab methods as they are created.
+  const origInsert = rt.ss.insertSheet.bind(rt.ss);
+  rt.ss.insertSheet = (n: string) => {
+    const sh = origInsert(n);
+    const f = sh.setFrozenRows.bind(sh);
+    sh.setFrozenRows = (() => (frozen.push(n), f())) as typeof sh.setFrozenRows;
+    const g = sh.getRange.bind(sh);
+    sh.getRange = ((...a: Parameters<typeof sh.getRange>) => {
+      const r = g(...a);
+      const w = r.setFontWeight.bind(r);
+      r.setFontWeight = ((...x: Parameters<typeof r.setFontWeight>) => (a[0] === 1 && bold.push(n), w(...x))) as typeof r.setFontWeight;
+      return r;
+    }) as typeof sh.getRange;
+    return sh;
+  };
+  setup(rt);
+  for (const id of ids(rt)) {
+    const name = rt.tab(id).getName();
+    assert.ok(frozen.includes(name), `${name} frozen`);
+    assert.ok(bold.includes(name), `${name} header bold`);
+    for (const row of [2, 3, 500, 1000]) {
+      for (let c = 1; c <= 13; c++) assert.equal(rt.tab(id).formats[row - 1]?.[c - 1], '@', `${name} r${row}c${c}`);
+    }
+  }
+});
+t('status reports isOpen/deadline/registeredCount per event — and no seats anywhere', () => {
   const rt = createOpenRuntime();
   reg(rt);
-  rt.cache.clear();
-  const st = rt.get({ action: 'status' }) as unknown as { ok: boolean; serverTime: string; events: Record<string, { seats: number; seatsLeft: number; isOpen: boolean; deadline: string }> };
-  assert.equal(st.ok, true);
-  assert.deepEqual(st.events['s-essay'], { seats: 100, seatsLeft: 99, isOpen: true, deadline: '2026-11-18T18:29:00.000Z' });
-  assert.equal(st.events['s-quiz']?.seats, 30);
-  assert.ok(!Number.isNaN(Date.parse(st.serverTime)));
+  reg(rt, { id: '1BY23CS002' });
+  rt.post(quiz);
+  const s0 = st(rt);
+  assert.equal(s0.ok, true);
+  assert.deepEqual(s0.events['s-essay'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 2 });
+  assert.deepEqual(s0.events['s-quiz'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 1 });
+  assert.deepEqual(s0.events['s-poem'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 0 });
+  assert.ok(!Number.isNaN(Date.parse(s0.serverTime)));
+  assert.doesNotMatch(JSON.stringify(s0), /seat/i);
+});
+t('setupSheet is safe to run again: a second run changes nothing', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  rt.post(quiz);
+  rt.setEventField('s-debate', 'is_open', 'FALSE'); // a coordinator's manual close must survive
+  const before = rt.ss.snapshot();
+  const tabsBefore = rt.ss.getSheets().length;
+  setup(rt);
+  setup(rt);
+  assert.equal(rt.ss.getSheets().length, tabsBefore);
+  assert.equal(rt.ss.snapshot(), before);
+  assert.equal(rt.eventField('s-debate', 'is_open'), 'FALSE');
+  assert.equal(rt.events().getLastRow(), 13);
+  assert.equal(rt.countRegs('s-essay'), 1);
+});
+t('setupSheet only adds what is missing: a deleted tab is recreated empty, other tabs keep their rows', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  reg(rt, { eventId: 's-poem' });
+  rt.ss.sheets.splice(rt.ss.sheets.indexOf(rt.tab('s-poem')), 1); // coordinator deleted the Poem tab
+  setup(rt);
+  assert.equal(rt.countRegs('s-essay'), 1);
+  assert.equal(rt.countRegs('s-poem'), 0);
+  assert.equal(rt.tab('s-poem').getName(), 'POM – Poem');
+});
+t('setupSheet leaves an old shared "Registrations" tab untouched (and does not use it)', () => {
+  const rt = createGasRuntime();
+  const old = rt.ss.insertSheet('Registrations');
+  old.getRange(1, 1, 1, 3).setValues([['timestamp', 'reg_id', 'event_id']]);
+  old.getRange(2, 1, 1, 3).setValues([['2026-11-01', 'KR26-ESY-0007', 's-essay']]);
+  const snap = JSON.stringify([old.cells, old.formats]);
+  setup(rt);
+  assert.equal(JSON.stringify([old.cells, old.formats]), snap);
+  assert.equal(reg(rt).regId, 'KR26-ESY-0001'); // numbering comes from the event tab, not the old tab
+  assert.equal(JSON.stringify([old.cells, old.formats]), snap);
+  assert.equal(rt.countRegs('s-essay'), 1);
+});
+t('setupSheet upgrades an older Events tab (seats column, no sheet_name): adds sheet_name, keeps seats and is_open', () => {
+  const rt = createGasRuntime();
+  const evs = rt.ss.insertSheet('Events');
+  evs.getRange(1, 1, 1, 6).setValues([['id', 'code', 'name_en', 'seats', 'deadline_iso', 'is_open']]);
+  evs.getRange(2, 1, 1, 6).setValues([['s-essay', 'ESY', 'Essay Writing', '100', '2026-11-18T23:59:00+05:30', 'FALSE']]);
+  setup(rt);
+  const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
+  assert.deepEqual(headers, ['id', 'code', 'name_en', 'seats', 'deadline_iso', 'is_open', 'sheet_name']);
+  assert.equal(rt.eventField('s-essay', 'sheet_name'), 'ESY – Essay Writing');
+  assert.equal(rt.eventField('s-essay', 'is_open'), 'FALSE'); // existing value kept
+  assert.equal(rt.eventField('s-poem', 'is_open'), 'TRUE');
+  assert.equal(rt.events().getLastRow(), 13);
+});
+t('an event tab with a wrong header row makes setupSheet stop with a clear error (nothing overwritten)', () => {
+  const rt = createGasRuntime();
+  const bad = rt.ss.insertSheet('ESY – Essay Writing');
+  bad.getRange(1, 1, 1, 2).setValues([['foo', 'bar']]);
+  assert.throws(() => setup(rt), /row 1 must be/);
+  assert.equal(bad.get(1, 1), 'foo');
 });
 t('unknown GET action / bad JSON / unknown POST action → VALIDATION', () => {
   const rt = createOpenRuntime();
@@ -86,13 +199,14 @@ t('success returns regId KR26-ESY-0001 and writes a normalised plain-text row', 
   assert.deepEqual(r, { ok: true, regId: 'KR26-ESY-0001', event: 's-essay', name: 'Ananya Rao' });
   const row = regRow(rt, 2);
   assert.equal(row[1], 'KR26-ESY-0001');
-  assert.equal(row[3], 'students'); // category derived from the event
-  assert.equal(row[5], '1BY23CS001'); // USN upper-cased
-  assert.equal(row[7], '3');
-  assert.equal(row[8], '9845012345'); // +91 and spaces stripped, kept as text
-  assert.equal(row[9], 'ananya@example.com');
-  assert.equal(row[13], 'FALSE');
-  assert.ok(rt.regs().formats[1]?.every((f) => f === '@'), 'every written cell is plain-text format');
+  assert.equal(row[2], 'students'); // category derived from the event
+  assert.equal(row[3], 'Ananya Rao');
+  assert.equal(row[4], '1BY23CS001'); // USN upper-cased
+  assert.equal(row[6], '3');
+  assert.equal(row[7], '9845012345'); // +91 and spaces stripped, kept as text
+  assert.equal(row[8], 'ananya@example.com');
+  assert.equal(row[12], 'FALSE');
+  assert.ok(rt.tab('s-essay').formats[1]?.every((f) => f === '@'), 'every written cell is plain-text format');
 });
 t('running number per event: 0001, 0002 for essay; quiz starts at 0001', () => {
   const rt = createOpenRuntime();
@@ -105,7 +219,7 @@ t('after a coordinator deletes a middle row, numbering continues from the highes
   reg(rt);
   reg(rt, { id: '1BY23CS002' });
   reg(rt, { id: '1BY23CS003' });
-  rt.regs().deleteRow(3); // delete KR26-ESY-0002
+  rt.tab('s-essay').deleteRow(3); // delete KR26-ESY-0002
   assert.equal(reg(rt, { id: '1BY23CS004' }).regId, 'KR26-ESY-0004');
 });
 t('the same person may register for several different events', () => {
@@ -119,23 +233,23 @@ t('faculty event: employee ID accepted, semester ignored, category faculty', () 
   const r = reg(rt, { eventId: 'f-debate', id: 'emp 1042', semester: 5 });
   assert.equal(r.ok, true);
   assert.equal(r.regId, 'KR26-FDB-0001');
-  const row = regRow(rt, 2);
-  assert.equal(row[3], 'faculty');
-  assert.equal(row[5], 'EMP1042');
-  assert.equal(row[7], '');
+  const row = regRow(rt, 2, 'f-debate');
+  assert.equal(row[2], 'faculty');
+  assert.equal(row[4], 'EMP1042');
+  assert.equal(row[6], '');
 });
 t('team registration stores members_json and member_ids', () => {
   const rt = createOpenRuntime();
   assert.equal(rt.post(quiz).ok, true);
-  const row = regRow(rt, 2);
-  assert.equal(row[10], 'Kannada Kalpa');
-  assert.deepEqual(JSON.parse(row[11] ?? ''), [{ name: 'Ravi K', id: '1BY23CS011', phone: '9845011111' }]);
-  assert.equal(row[12], '1BY23CS011');
+  const row = regRow(rt, 2, 's-quiz');
+  assert.equal(row[9], 'Kannada Kalpa');
+  assert.deepEqual(JSON.parse(row[10] ?? ''), [{ name: 'Ravi K', id: '1BY23CS011', phone: '9845011111' }]);
+  assert.equal(row[11], '1BY23CS011');
 });
 t('"Other" department is stored as "Other: <text>"', () => {
   const rt = createOpenRuntime();
   assert.equal(reg(rt, { department: 'Other', departmentOther: 'Robotics' }).ok, true);
-  assert.equal(regRow(rt, 2)[6], 'Other: Robotics');
+  assert.equal(regRow(rt, 2)[5], 'Other: Robotics');
 });
 t('confirmation email is sent to the normalised address with the regId', () => {
   const rt = createOpenRuntime();
@@ -160,14 +274,14 @@ t("another college's USN 1TD24CS001 registers, and the duplicate check still cat
   const rt = createOpenRuntime();
   const r = reg(rt, { id: '1TD24CS001' });
   assert.equal(r.ok, true);
-  assert.equal(regRow(rt, 2)[5], '1TD24CS001');
+  assert.equal(regRow(rt, 2)[4], '1TD24CS001');
   assert.deepEqual(reg(rt, { id: ' 1td24 cs001 ', name: 'Someone Else' }), { ok: false, code: 'DUPLICATE', regId: r.regId });
 });
 t('an odd value "abc-123" registers (stored as ABC-123), and "ABC - 123" is caught as a duplicate', () => {
   const rt = createOpenRuntime();
   const r = reg(rt, { id: 'abc-123' });
   assert.equal(r.ok, true);
-  assert.equal(regRow(rt, 2)[5], 'ABC-123');
+  assert.equal(regRow(rt, 2)[4], 'ABC-123');
   assert.deepEqual(reg(rt, { id: 'ABC - 123', name: 'Someone Else' }), { ok: false, code: 'DUPLICATE', regId: r.regId });
 });
 t('exactly 20 characters accepted; inner spaces removed before the length check', () => {
@@ -178,7 +292,7 @@ t('exactly 20 characters accepted; inner spaces removed before the length check'
 t('team members with any USN format register and are duplicate-checked', () => {
   const rt = createOpenRuntime();
   assert.equal(rt.post({ ...quiz, id: '1TD24CS001', members: [{ name: 'Ravi K', id: 'abc-123', phone: '9845011111' }] }).ok, true);
-  assert.equal(regRow(rt, 2)[12], 'ABC-123');
+  assert.equal(regRow(rt, 2, 's-quiz')[11], 'ABC-123');
   const r = rt.post({ ...quiz, id: 'xyz 9', members: [{ name: 'Meera S', id: 'ABC-123', phone: '9845022222' }] });
   assert.deepEqual(r, { ok: false, code: 'DUPLICATE', regId: 'KR26-QIZ-0001' });
   assert.equal(rt.post({ ...quiz, id: 'xyz 9', members: [{ name: 'Meera S', id: '1td24cs001', phone: '9845022222' }] }).code, 'DUPLICATE');
@@ -236,21 +350,7 @@ t('faculty team member employee IDs are duplicate-checked too', () => {
   const r = rt.post({ ...fac, id: 'EMP9', members: [{ name: 'Chetan', id: 'emp3', phone: '9845000009' }, { name: 'Divya', id: 'EMP8', phone: '9845000008' }] });
   assert.equal(r.code, 'DUPLICATE');
 });
-t('duplicate wins over FULL (an already-registered person is told their ID)', () => {
-  const rt = createOpenRuntime();
-  reg(rt);
-  rt.setEventField('s-essay', 'seats', '1');
-  assert.equal(reg(rt).code, 'DUPLICATE');
-  assert.equal(reg(rt, { id: '1BY23CS099' }).code, 'FULL');
-});
-
-console.log('\nRegister — FULL / CLOSED / deadline');
-t('FULL when registrations reach the Sheet seat count (a team = 1 seat)', () => {
-  const rt = createOpenRuntime();
-  rt.setEventField('s-quiz', 'seats', '1');
-  assert.equal(rt.post(quiz).ok, true);
-  assert.deepEqual(rt.post({ ...quiz, id: '1BY23CS050', members: [{ name: 'Nikhil', id: '1BY23CS051', phone: '9845055555' }] }), { ok: false, code: 'FULL' });
-});
+console.log('\nRegister — CLOSED / deadline (no seat limit exists)');
 t('CLOSED/NOT_OPEN when the coordinator sets is_open to FALSE', () => {
   const rt = createOpenRuntime();
   rt.setEventField('s-essay', 'is_open', 'FALSE');
@@ -265,15 +365,35 @@ t('a broken deadline cell fails closed (never silently open)', () => {
   const rt = createOpenRuntime();
   rt.setEventField('s-essay', 'deadline_iso', '18/11 midnight');
   assert.equal(reg(rt).code, 'CLOSED');
-  rt.cache.clear();
-  const st = rt.get({ action: 'status' }) as unknown as { events: Record<string, { isOpen: boolean }> };
-  assert.equal(st.events['s-essay']?.isOpen, false);
+  assert.equal(st(rt).events['s-essay']?.isOpen, false);
 });
-t('Sheet seats win over events.json (seats raised to 150 in the Sheet)', () => {
+t('closing one event with is_open does not affect the others; reopening works again', () => {
   const rt = createOpenRuntime();
-  rt.setEventField('s-essay', 'seats', '150');
-  const st = rt.get({ action: 'status' }) as unknown as { events: Record<string, { seats: number }> };
-  assert.equal(st.events['s-essay']?.seats, 150);
+  rt.setEventField('s-essay', 'is_open', 'FALSE');
+  assert.equal(st(rt).events['s-essay']?.isOpen, false);
+  assert.equal(st(rt).events['s-poem']?.isOpen, true);
+  assert.equal(reg(rt, { eventId: 's-poem' }).ok, true);
+  rt.setEventField('s-essay', 'is_open', 'TRUE');
+  assert.equal(reg(rt).ok, true);
+});
+t('an event is open until its Sheet deadline: the status flips to closed once the deadline passes', () => {
+  const rt = createOpenRuntime();
+  assert.equal(st(rt).events['s-essay']?.isOpen, true);
+  rt.setEventField('s-essay', 'deadline_iso', '2020-01-01T00:00:00+05:30');
+  assert.equal(st(rt).events['s-essay']?.isOpen, false);
+});
+t('300 registrations for one event all succeed (there is no cap) with sequential reg IDs', () => {
+  const rt = createOpenRuntime();
+  for (let i = 1; i <= 300; i++) {
+    const r = reg(rt, { id: `1BY23CS${String(i).padStart(3, '0')}`, phone: `98450${String(10000 + i)}` });
+    assert.equal(r.ok, true, `registration #${i}: ${JSON.stringify(r)}`);
+    assert.equal(r.regId, `KR26-ESY-${String(i).padStart(4, '0')}`);
+  }
+  assert.equal(rt.countRegs('s-essay'), 300);
+  assert.equal(rt.tab('s-essay').getLastRow(), 301);
+  assert.equal(st(rt).events['s-essay']?.registeredCount, 300);
+  assert.equal(st(rt).events['s-essay']?.isOpen, true);
+  assert.equal(rt.post({ action: 'lookup', id: '1BY23CS300', phone: '9845010300' }).ok, true);
 });
 
 console.log('\nRegister — VALIDATION (server re-checks everything)');
@@ -301,7 +421,7 @@ for (const [name, over, field] of cases) {
   t(`${name} → VALIDATION field "${field}"`, () => {
     const rt = createOpenRuntime();
     assert.deepEqual(reg(rt, over), { ok: false, code: 'VALIDATION', field });
-    assert.equal(rt.countRegs(String(over.eventId ?? 's-essay')), 0);
+    assert.equal(ids(rt).reduce((n, id) => n + rt.countRegs(id), 0), 0, 'nothing written to any tab');
   });
 }
 t('MBA semester 3 accepted', () => assert.equal(reg(createOpenRuntime(), { department: 'MBA', semester: 3 }).ok, true));
@@ -341,16 +461,16 @@ t('an email that passes format checks but starts with "=" is stored as text, nev
   const rt = createOpenRuntime();
   const r = reg(rt, { email: '=HYPERLINK("http://evil")@x.co'.replace(/[()"/:]/g, '') });
   assert.equal(r.ok, true);
-  assert.equal(rt.regs().hasFormula(), false);
-  assert.match(regRow(rt, 2)[9] ?? '', /^=hyperlink/);
+  assert.equal(rt.tab('s-essay').hasFormula(), false);
+  assert.match(regRow(rt, 2)[8] ?? '', /^=hyperlink/);
   const r2 = reg(rt, { id: '1BY23CS002', email: '+cmd@x.co' });
   assert.equal(r2.ok, true);
-  assert.equal(regRow(rt, 3)[9], '+cmd@x.co');
-  assert.equal(rt.regs().hasFormula(), false);
+  assert.equal(regRow(rt, 3)[8], '+cmd@x.co');
+  assert.equal(rt.tab('s-essay').hasFormula(), false);
 });
 t('setupSheet writes the Events tab as plain text too (deadline stays ISO)', () => {
   const rt = createOpenRuntime();
-  assert.equal(rt.events().getRange(2, 5).getDisplayValues()[0]?.[0], '2026-11-18T23:59:00+05:30');
+  assert.equal(rt.eventField('s-essay', 'deadline_iso'), '2026-11-18T23:59:00+05:30');
 });
 
 console.log('\nLock');
@@ -377,14 +497,14 @@ t('lock not obtainable within 20 s → SERVER/BUSY, nothing written', () => {
 });
 t('Sheet failure inside the lock → SERVER, and the lock is still released', () => {
   const rt = createOpenRuntime();
-  rt.regs().throwOnAccess = true;
+  rt.tab('s-essay').throwOnAccess = true;
   assert.deepEqual(reg(rt), { ok: false, code: 'SERVER' });
   assert.equal(rt.lock.held, false);
   assert.equal(rt.lock.released, 1);
 });
-t('lock is held while the row is appended (seat check and write are atomic)', () => {
+t('lock is held while the row is appended (duplicate check, numbering and write are atomic)', () => {
   const rt = createOpenRuntime();
-  const sheet = rt.regs();
+  const sheet = rt.tab('s-essay');
   const orig = sheet.write.bind(sheet);
   let heldDuringWrite = true;
   sheet.write = (r, c, v) => {
@@ -409,6 +529,35 @@ t('ID + full phone → passes (regId, event, name only)', () => {
     ],
   });
 });
+t('lookup searches every event tab and returns all passes found (individual + team, across tabs)', () => {
+  const rt = createOpenRuntime();
+  reg(rt); // Essay, Ananya 1BY23CS001 / 9845012345
+  reg(rt, { eventId: 's-poem' });
+  reg(rt, { eventId: 'f-debate', id: 'EMP9', phone: '9000000001' }); // someone else, other tab
+  rt.post({ ...quiz, id: '1BY23CS001', phone: '9845012345', members: [{ name: 'Ravi K', id: '1BY23CS011', phone: '9845011111' }] });
+  rt.post({ ...base, eventId: 's-painting', id: '1BY23CS077', phone: '9845077777' });
+  const r = rt.post({ action: 'lookup', id: '1by23cs001', phone: '9845012345' }) as unknown as { ok: boolean; passes: { regId: string; event: string; name: string }[] };
+  assert.equal(r.ok, true);
+  assert.deepEqual(
+    r.passes.map((p) => `${p.event}:${p.regId}`),
+    ['s-essay:KR26-ESY-0001', 's-poem:KR26-POM-0001', 's-quiz:KR26-QIZ-0001'],
+  );
+  assert.ok(r.passes.every((p) => Object.keys(p).sort().join() === 'event,name,regId'), 'only regId, event, name');
+  // a team member found in the Quiz tab with their own phone
+  assert.deepEqual(rt.post({ action: 'lookup', id: '1BY23CS011', phone: '9845011111' }), {
+    ok: true,
+    passes: [{ regId: 'KR26-QIZ-0001', event: 's-quiz', name: 'Ravi K' }],
+  });
+});
+t('lookup survives one broken tab and still finds passes in the others', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  reg(rt, { eventId: 's-poem' });
+  rt.ss.sheets.splice(rt.ss.sheets.indexOf(rt.tab('s-essay')), 1);
+  const r = rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }) as unknown as { ok: boolean; passes: { event: string }[] };
+  assert.equal(r.ok, true);
+  assert.deepEqual(r.passes.map((p) => p.event), ['s-poem']);
+});
 t('team member can look up with their own ID + phone', () => {
   const rt = createOpenRuntime();
   rt.post(quiz);
@@ -431,6 +580,136 @@ t('5 failed lookups for one ID → RATE_LIMITED, even with the right phone', () 
   reg(rt);
   for (let i = 0; i < 5; i++) rt.post({ action: 'lookup', id: '1BY23CS001', phone: `98450000${10 + i}` });
   assert.deepEqual(rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }), { ok: false, code: 'RATE_LIMITED' });
+});
+
+console.log('\nOne tab per event');
+t('a registration lands only in its own event tab — every other tab stays untouched', () => {
+  const rt = createOpenRuntime();
+  const others = ids(rt).filter((id) => id !== 's-essay');
+  const before = Object.fromEntries(others.map((id) => [id, JSON.stringify([rt.tab(id).cells, rt.tab(id).formats])]));
+  assert.equal(reg(rt).ok, true);
+  assert.equal(rt.tab('s-essay').getLastRow(), 2);
+  assert.equal(regRow(rt, 2)[1], 'KR26-ESY-0001');
+  for (const id of others) assert.equal(JSON.stringify([rt.tab(id).cells, rt.tab(id).formats]), before[id], `${id} untouched`);
+  assert.equal(rt.events().getLastRow(), 13, 'Events tab gets no registration rows');
+});
+t('two events → two separate rows in two separate tabs (no shared tab)', () => {
+  const rt = createOpenRuntime();
+  assert.equal(reg(rt).regId, 'KR26-ESY-0001');
+  assert.equal(reg(rt, { eventId: 's-poem' }).regId, 'KR26-POM-0001');
+  assert.equal(rt.tab('s-essay').getLastRow(), 2);
+  assert.equal(rt.tab('s-poem').getLastRow(), 2);
+  assert.equal(regRow(rt, 2, 's-essay')[1], 'KR26-ESY-0001');
+  assert.equal(regRow(rt, 2, 's-poem')[1], 'KR26-POM-0001');
+  assert.notEqual(rt.tab('s-essay'), rt.tab('s-poem'));
+  assert.equal(rt.ss.getSheetByName('Registrations'), null);
+});
+t('the same ID can register for two different events, but a second time for the same event is DUPLICATE', () => {
+  const rt = createOpenRuntime();
+  const first = reg(rt);
+  assert.equal(reg(rt, { eventId: 's-poem' }).ok, true);
+  assert.equal(reg(rt, { eventId: 's-painting' }).ok, true);
+  assert.deepEqual(reg(rt), { ok: false, code: 'DUPLICATE', regId: first.regId });
+  assert.deepEqual(reg(rt, { eventId: 's-poem' }), { ok: false, code: 'DUPLICATE', regId: 'KR26-POM-0001' });
+  assert.equal(rt.countRegs('s-essay'), 1);
+  assert.equal(rt.countRegs('s-poem'), 1);
+});
+t('a team member of one event may register on their own for another event', () => {
+  const rt = createOpenRuntime();
+  assert.equal(rt.post(quiz).ok, true);
+  assert.equal(reg(rt, { id: '1BY23CS011', name: 'Ravi K' }).ok, true); // Ravi is in a Quiz team and registers for Essay
+});
+t('reg ID numbering is per tab: busy events do not advance the others', () => {
+  const rt = createOpenRuntime();
+  for (let i = 1; i <= 5; i++) assert.equal(reg(rt, { id: `1BY23CS00${i}` }).regId, `KR26-ESY-000${i}`);
+  assert.equal(reg(rt, { eventId: 's-poem' }).regId, 'KR26-POM-0001');
+  assert.equal(rt.post(quiz).regId, 'KR26-QIZ-0001');
+  assert.equal(reg(rt, { id: '1BY23CS006' }).regId, 'KR26-ESY-0006');
+  assert.equal(reg(rt, { eventId: 's-poem', id: '1BY23CS002' }).regId, 'KR26-POM-0002');
+});
+t('numbering uses the highest number IN THAT TAB (a hand-added higher row is respected, other tabs ignored)', () => {
+  const rt = createOpenRuntime();
+  rt.tab('s-poem').getRange(2, 1, 1, 13).setValues([['t', 'KR26-POM-0041', 'students', 'X Y', 'OLD1', 'CSE', '3', '9845000000', 'a@b.co', '', '', '', 'FALSE']]);
+  assert.equal(reg(rt, { eventId: 's-poem' }).regId, 'KR26-POM-0042');
+  assert.equal(reg(rt).regId, 'KR26-ESY-0001');
+});
+t('duplicate checks cover the registrant and all members, only inside the event tab', () => {
+  const rt = createOpenRuntime();
+  rt.post(quiz);
+  // same people in a different event are fine
+  assert.equal(rt.post({ ...quiz, eventId: 's-treasure-hunt', teamName: 'Hunters', members: [...quiz.members, { name: 'Meera S', id: '1BY23CS012', phone: '9845022222' }] }).ok, true);
+  // ...but not again in the Quiz
+  assert.equal(rt.post({ ...quiz, id: '1BY23CS099' }).code, 'DUPLICATE'); // member 1BY23CS011 already in the quiz team
+});
+t('a coordinator can rename a tab: update the sheet_name cell and registrations follow the renamed tab', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  rt.tab('s-essay').setName('Essay – final list');
+  rt.setEventField('s-essay', 'sheet_name', 'Essay – final list');
+  const r = reg(rt, { id: '1BY23CS002' });
+  assert.equal(r.regId, 'KR26-ESY-0002');
+  assert.equal(rt.ss.getSheetByName('Essay – final list')?.getLastRow(), 3);
+  assert.equal(rt.ss.getSheetByName('ESY – Essay Writing'), null);
+  assert.equal(rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }).ok, true);
+  setup(rt); // setupSheet must follow the rename, not re-create "ESY – Essay Writing"
+  assert.equal(rt.ss.getSheetByName('ESY – Essay Writing'), null);
+});
+t('renaming the tab WITHOUT updating sheet_name → SERVER and nothing is written anywhere', () => {
+  const rt = createOpenRuntime();
+  rt.tab('s-essay').setName('Essay – renamed but cell not updated');
+  const before = rt.ss.snapshot();
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER' });
+  assert.equal(rt.ss.snapshot(), before);
+  assert.equal(rt.lock.held, false);
+});
+
+console.log('\nMissing / broken tabs never write to the wrong place');
+t('missing event tab → SERVER, a clear log message, and no row anywhere', () => {
+  const rt = createOpenRuntime();
+  const logs: string[] = [];
+  (rt.ctx.console as { error: (m: string) => void }).error = (m: string) => logs.push(String(m));
+  rt.ss.sheets.splice(rt.ss.sheets.indexOf(rt.tab('s-essay')), 1);
+  const before = rt.ss.snapshot();
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER' });
+  assert.equal(rt.ss.snapshot(), before, 'no cell anywhere changed');
+  assert.ok(logs.some((l) => /tab "ESY – Essay Writing" not found/.test(l) && /s-essay/.test(l)), `log: ${logs.join(' | ')}`);
+  assert.equal(rt.lock.held, false);
+  // the other events keep working
+  assert.equal(reg(rt, { eventId: 's-poem' }).ok, true);
+});
+t('a missing tab shows as closed in the status (so the site does not offer a broken Register button)', () => {
+  const rt = createOpenRuntime();
+  rt.ss.sheets.splice(rt.ss.sheets.indexOf(rt.tab('s-essay')), 1);
+  const s1 = st(rt);
+  assert.equal(s1.events['s-essay']?.isOpen, false);
+  assert.equal(s1.events['s-poem']?.isOpen, true);
+});
+t('empty sheet_name → SERVER, nothing written', () => {
+  const rt = createOpenRuntime();
+  rt.setEventField('s-essay', 'sheet_name', '');
+  const before = rt.ss.snapshot();
+  assert.equal(reg(rt).code, 'SERVER');
+  assert.equal(rt.ss.snapshot(), before);
+});
+t('sheet_name pointing at another event\'s tab (or at "Events") → SERVER, nothing written', () => {
+  const rt = createOpenRuntime();
+  rt.setEventField('s-essay', 'sheet_name', 'POM – Poem');
+  const before = rt.ss.snapshot();
+  assert.equal(reg(rt).code, 'SERVER');
+  assert.equal(reg(rt, { eventId: 's-poem', id: '1BY23CS002' }).code, 'SERVER'); // both are ambiguous now
+  assert.equal(rt.ss.snapshot(), before);
+  rt.setEventField('s-essay', 'sheet_name', 'Events');
+  const beforeEvents = rt.ss.snapshot(); // after the cell edit itself
+  assert.equal(reg(rt).code, 'SERVER');
+  assert.equal(rt.ss.snapshot(), beforeEvents);
+  assert.equal(rt.events().getLastRow(), 13);
+});
+t('a tab whose header row is not the registration layout is never written to', () => {
+  const rt = createOpenRuntime();
+  rt.tab('s-essay').getRange(1, 2).setValues([['something_else']]);
+  const before = rt.ss.snapshot();
+  assert.equal(reg(rt).code, 'SERVER');
+  assert.equal(rt.ss.snapshot(), before);
 });
 
 console.log('\nClient/server parity');

@@ -1,27 +1,37 @@
 /**
- * Last-seat race test: fires several registrations for the SAME event at the same instant.
- * With exactly one seat left, exactly one must succeed and every other must get FULL.
+ * Concurrency test: fires many registrations for the SAME event at the same instant and checks that
+ * every one of them succeeds, with unique, sequential reg IDs and no duplicate rows. There is no seat
+ * limit, so there is no FULL case — what this proves is that LockService really serialises the
+ * "read the tab → pick the next number → append the row" step.
  *
- *   npm run race -- <endpoint-url> [eventId] [count]
+ *   npm run race -- <endpoint-url> [eventId] [count]        (default: s-essay, 10 requests)
  *
  * Against the deployed Apps Script (the real test of LockService):
- *   1. In the Sheet's Events tab, pick a test event (default s-essay) and set its `seats` to
- *      (number of rows it already has in Registrations) + 1, and `is_open` to TRUE.
+ *   1. Pick a test event (default s-essay) that is open (is_open TRUE, deadline in the future).
  *   2. npm run race -- "https://script.google.com/macros/s/XXXX/exec"
- *   3. Afterwards delete the one test row from Registrations and restore `seats`.
- * Against the local mock: npm run race -- http://localhost:5173/mock-api   (sets seats itself)
+ *   3. Afterwards delete the test rows (names "Race Test …", USNs 1BY99ZZ…) from that event's own tab.
+ * Against the local mock: npm run race -- http://localhost:5173/mock-api
+ *
+ * Note: each request holds the script lock for roughly 1–2 s on the real script and waits up to 20 s for
+ * it, so a very large burst can legitimately come back "SERVER / BUSY" (the website tells the visitor to
+ * try again). That is reported as a failure here too — lower the count if you only want to test ordering.
  */
-const [endpoint, eventId = 's-essay', countArg = '5'] = process.argv.slice(2);
+const [endpoint, eventId = 's-essay', countArg = '10'] = process.argv.slice(2);
 if (!endpoint) {
   console.error('Usage: npm run race -- <endpoint-url> [eventId] [count]');
   process.exit(2);
 }
-const count = Math.max(2, Number(countArg) || 5);
-const isMock = endpoint.includes('/mock-api');
+const count = Math.max(2, Number(countArg) || 10);
 
 interface Status {
   ok: boolean;
-  events: Record<string, { seatsLeft: number; isOpen: boolean }>;
+  events: Record<string, { isOpen: boolean; registeredCount: number }>;
+}
+interface Result {
+  ok: boolean;
+  code?: string;
+  reason?: string;
+  regId?: string;
 }
 
 async function status(): Promise<Status> {
@@ -29,24 +39,19 @@ async function status(): Promise<Status> {
   return (await r.json()) as Status;
 }
 
+const num = (regId: string) => parseInt(regId.split('-').pop() ?? '', 10);
+
 async function main() {
-  if (isMock) {
-    const s = await status();
-    const used = 100 - (s.events[eventId]?.seatsLeft ?? 100);
-    await fetch(`${endpoint.replace(/\/$/, '')}/__set?id=${eventId}&header=seats&value=${used + 1}`);
-  }
-  // Status is cached server-side for up to 10 s; that's fine for this check.
   const before = (await status()).events[eventId];
-  console.log(`Before: ${eventId} seatsLeft=${before?.seatsLeft} isOpen=${before?.isOpen}`);
-  if (!before?.isOpen) throw new Error(`${eventId} is not open — set is_open to TRUE first.`);
-  if (before.seatsLeft !== 1) console.warn(`  ! seatsLeft is ${before.seatsLeft}, not 1 — set seats so exactly one is left.`);
+  console.log(`Before: ${eventId} isOpen=${before?.isOpen} registeredCount=${before?.registeredCount}`);
+  if (!before?.isOpen) throw new Error(`${eventId} is not open — set is_open to TRUE (and check its deadline) first.`);
 
   const stamp = Date.now() % 1000;
   const bodies = Array.from({ length: count }, (_, i) => ({
     action: 'register',
     eventId,
-    name: `Race Test ${String.fromCharCode(65 + i)}`,
-    id: `1BY99ZZ${String((stamp + i) % 1000).padStart(3, '0')}`,
+    name: `Race Test ${String.fromCharCode(65 + (i % 26))}${i >= 26 ? String.fromCharCode(65 + Math.floor(i / 26)) : ''}`,
+    id: `1BY99ZZ${String((stamp * 7 + i) % 1000).padStart(3, '0')}${String(i).padStart(2, '0')}`,
     department: 'CSE',
     departmentOther: '',
     semester: 1,
@@ -63,24 +68,51 @@ async function main() {
 
   const t0 = Date.now();
   const results = await Promise.all(
-    bodies.map(async (b) => {
+    bodies.map(async (b): Promise<Result> => {
       try {
         const r = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(b), redirect: 'follow' });
-        return (await r.json()) as { ok: boolean; code?: string; regId?: string };
+        return (await r.json()) as Result;
       } catch (e) {
         return { ok: false, code: `NETWORK ${(e as Error).message}` };
       }
     }),
   );
-  results.forEach((r, i) => console.log(`  #${i + 1} ${bodies[i]!.id}: ${r.ok ? `OK ${r.regId}` : r.code}`));
-  const ok = results.filter((r) => r.ok).length;
-  const full = results.filter((r) => r.code === 'FULL').length;
-  console.log(`\n${count} simultaneous requests in ${Date.now() - t0} ms → ${ok} succeeded, ${full} FULL.`);
-  if (ok === 1 && full === count - 1) console.log('PASS: exactly one registration took the last seat.');
-  else {
-    console.log('FAIL: expected exactly 1 success and the rest FULL.');
+  results.forEach((r, i) => console.log(`  #${String(i + 1).padStart(2)} ${bodies[i]!.id}: ${r.ok ? `OK ${r.regId}` : `${r.code}${r.reason ? `/${r.reason}` : ''}`}`));
+
+  const failures: string[] = [];
+  const okResults = results.filter((r) => r.ok);
+  const bad = results.filter((r) => !r.ok);
+  if (bad.length) {
+    const busy = bad.filter((r) => r.code === 'SERVER' && r.reason === 'BUSY').length;
+    failures.push(`${bad.length} of ${count} did not succeed (${busy} lock timeouts "BUSY") — expected every request to succeed`);
+  }
+
+  const regIds = okResults.map((r) => r.regId!);
+  const unique = new Set(regIds);
+  if (unique.size !== regIds.length) failures.push(`duplicate reg IDs handed out: ${regIds.filter((x, i) => regIds.indexOf(x) !== i).join(', ')}`);
+
+  const nums = regIds.map(num).sort((a, b) => a - b);
+  const contiguous = nums.every((n, i) => i === 0 || n === nums[i - 1]! + 1);
+  if (!contiguous) failures.push(`reg IDs are not sequential: ${nums.join(', ')}`);
+  if (regIds.some((r) => !new RegExp(`^KR26-[A-Z]{3}-\\d{4}$`).test(r))) failures.push('a reg ID has an unexpected format');
+  const first = nums[0];
+  if (before && first !== undefined && first !== before.registeredCount + 1) {
+    console.log(`  note: numbering started at ${first} but the tab had ${before.registeredCount} registrations — fine if rows were deleted earlier.`);
+  }
+
+  // The status cache is cleared by every registration, so this is the fresh count.
+  const after = (await status()).events[eventId];
+  const delta = (after?.registeredCount ?? 0) - (before.registeredCount ?? 0);
+  if (delta !== okResults.length) {
+    failures.push(`the tab grew by ${delta} rows but ${okResults.length} registrations succeeded (another visitor may have registered meanwhile)`);
+  }
+
+  console.log(`\n${count} simultaneous requests in ${Date.now() - t0} ms → ${okResults.length} succeeded, ${unique.size} unique reg IDs${nums.length ? ` (${nums[0]}–${nums[nums.length - 1]})` : ''}.`);
+  if (failures.length) {
+    console.log('FAIL:\n  - ' + failures.join('\n  - '));
     process.exit(1);
   }
+  console.log('PASS: all registrations succeeded with unique, sequential reg IDs and no duplicate rows.');
 }
 
 main().catch((e) => {

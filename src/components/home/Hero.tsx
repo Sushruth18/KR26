@@ -4,7 +4,7 @@ import { LinkButton } from '../ui/Button';
 import { useLang } from '../../hooks/useLang';
 import { useNow } from '../../hooks/useNow';
 import { site } from '../../lib/data';
-import { formatDate, formatDeadline, formatNumber, istParts } from '../../lib/format';
+import { formatDeadline, formatNumber, istParts } from '../../lib/format';
 import { registrationWindow } from '../../lib/festival';
 import { CollegeRow } from './CollegeRow';
 import { TwoDayStrip } from './TwoDayStrip';
@@ -54,16 +54,11 @@ export function Hero() {
   );
 }
 
-/** One line under the CTA: when registration opens, the deadline, or that it has closed. */
+/** One line under the CTA: the registration deadline, or that registration has closed. */
 function RegistrationNote() {
   const { t } = useTranslation();
   const lang = useLang();
   const win = registrationWindow(site, useNow(60_000));
-  const text =
-    win === 'notOpen'
-      ? t('state.opensOn', { date: formatDate(site.registrationOpen, lang) })
-      : win === 'open'
-        ? t('home.regBy', { when: formatDeadline(site.registrationClose, lang) })
-        : t('home.regClosed');
+  const text = win === 'open' ? t('home.regBy', { when: formatDeadline(site.registrationClose, lang) }) : t('home.regClosed');
   return <p className="mb-0 mt-3 min-h-[1.6em] text-sm text-ivory-300">{text}</p>;
 }

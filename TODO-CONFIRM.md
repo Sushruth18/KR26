@@ -6,7 +6,6 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 - [ ] Start **time** (shown as "Time to be announced" until set)
 - [ ] **Venue** (kn + en)
 - [ ] **Team size** (seeded from the budget proposal; confirm min/max)
-- [ ] **Seats** — placeholders: 100 individual, 30 team. Real numbers go in the Google Sheet `Events` tab (Sheet wins at runtime)
 - [ ] **Rules** (kn + en)
 - [ ] **Coordinator** name + phone (`tel:` link hidden until set)
 
@@ -42,6 +41,7 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 
 ## Deployment
 - [ ] `VITE_REGISTRATION_ENDPOINT` — Apps Script web-app URL (Netlify env var; the Netlify build fails without it)
-- [ ] Deploy the Apps Script (apps-script/README.md) and run `npm run race -- <url>` against it — the real last-seat test
-- [ ] Set `is_open` = TRUE in the Sheet on 8 Nov (seeded FALSE)
+- [ ] Deploy the Apps Script (apps-script/README.md) and run `npm run race -- <url>` against it — the real concurrency test (all simultaneous registrations must succeed with unique, sequential IDs)
+- [ ] Registration is open from the moment `setupSheet` runs (every event is created with `is_open` = TRUE). Run `setupSheet` only when you are ready to take registrations, or untick `is_open` per event to hold some back
+- [ ] If an older Sheet already exists: run the new `setupSheet` (adds the `sheet_name` column and the 12 event tabs), tick `is_open` where it is still FALSE, delete the old `Registrations` tab by hand once nothing is needed from it, and delete the leftover `seats` column if you like
 - [ ] Gmail daily email quota for confirmation mails (consumer accounts are limited)

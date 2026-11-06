@@ -4,11 +4,10 @@
  * produced by changing the fake Sheet so Code.gs itself returns the error — not by canned replies.
  *
  *   duplicate  register the same body first, then again → real DUPLICATE with the real regId
- *   full       seats := current count for that event      → real FULL
- *   closed     is_open := FALSE                           → real CLOSED / NOT_OPEN
+ *   closed     is_open := FALSE                           → real CLOSED / NOT_OPEN (a coordinator closed it)
  *   deadline   deadline_iso := 2020                       → real CLOSED / DEADLINE
  *   validation phone := 5555555555 (fails the phone rule) → real VALIDATION field "phone"
- *   server     Registrations tab throws                   → real SERVER
+ *   server     the event's own tab throws                 → real SERVER
  *   network    submit: socket destroyed, no response      → fetch() rejects in the browser
  *   slow       submit: 25 s delay (client times out at 20 s)
  *   statusdown status GET: socket destroyed               → UI falls back to events.json + clock
@@ -66,8 +65,6 @@ export function handlePost(rt: GasRuntime, raw: string, mock: string | null) {
     case 'duplicate':
       rt.post(body);
       return rt.post(body);
-    case 'full':
-      return withEventField(rt, eventId, 'seats', String(rt.countRegs(eventId)), () => rt.post(body));
     case 'closed':
       return withEventField(rt, eventId, 'is_open', 'FALSE', () => rt.post(body));
     case 'deadline':
@@ -75,7 +72,12 @@ export function handlePost(rt: GasRuntime, raw: string, mock: string | null) {
     case 'validation':
       return rt.post({ ...body, phone: '5555555555' });
     case 'server': {
-      const sheet = rt.regs();
+      let sheet;
+      try {
+        sheet = rt.tab(eventId);
+      } catch {
+        return rt.post(body); // unknown event id — let Code.gs reject it normally
+      }
       sheet.throwOnAccess = true;
       try {
         return rt.post(body);
@@ -109,7 +111,7 @@ export function mockGas(): Plugin {
             rt = null;
             return send(res, { ok: true, reset: true });
           }
-          // Edit one Events-tab cell, like a coordinator would: /__set?id=s-essay&header=seats&value=3
+          // Edit one Events-tab cell, like a coordinator would: /__set?id=s-essay&header=is_open&value=FALSE
           if (url.pathname === '/__set') {
             const q = url.searchParams;
             const prev = runtime().setEventField(q.get('id') ?? '', q.get('header') ?? '', q.get('value') ?? '');

@@ -22,7 +22,6 @@ export const eventSchema = z.object({
   time: z.union([hhmm, z.literal(TODO)]),
   venue: bilingual,
   teamSize: z.object({ min: z.number().int().min(1), max: z.number().int().min(1) }),
-  seats: z.number().int().min(1),
   deadline: isoDateTime,
   prizes: z.discriminatedUnion('type', [
     z.object({ type: z.literal('cash'), first: z.number().int().positive(), second: z.number().int().positive() }),
@@ -90,7 +89,6 @@ export const siteSchema = z.object({
   competitionsEnd: isoDateTime,
   eventStart: isoDateTime,
   eventEnd: isoDateTime,
-  registrationOpen: isoDateTime,
   registrationClose: isoDateTime,
   prizePoolTotal: z.number().int().positive(),
   /** Empty string = not yet confirmed; UI hides the element. */

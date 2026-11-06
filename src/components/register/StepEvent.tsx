@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useWatch } from 'react-hook-form';
-import { events, getEvent, site } from '../../lib/data';
-import { formatDate } from '../../lib/format';
+import { events, getEvent } from '../../lib/data';
 import type { ResolvedEvent } from '../../lib/eventState';
 import type { RegistrationValues } from '../../lib/validation';
 import { useLang } from '../../hooks/useLang';
@@ -54,7 +53,6 @@ export function StepEvent({ resolved, loading, failed }: Props) {
       {r && !r.canRegister && !loading && (
         <p className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-sm" role="alert" data-testid="cannot-register">
           {t('register.cannotRegister', { reason: t(`state.${r.state}`) })}
-          {r.state === 'opensSoon' && ` ${t('state.opensOn', { date: formatDate(site.registrationOpen, lang) })}`}
         </p>
       )}
     </div>

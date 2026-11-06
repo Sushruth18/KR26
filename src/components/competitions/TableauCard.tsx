@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { CalendarDays, Clock, Hourglass, MapPin, Ticket, Users } from 'lucide-react';
+import { CalendarDays, Clock, Hourglass, MapPin, Users } from 'lucide-react';
 import { useLang } from '../../hooks/useLang';
 import { useReducedMotion } from '../../hooks/useMotionPrefs';
 import { site } from '../../lib/data';
@@ -76,13 +76,6 @@ export function TableauCard({ event, resolved, loading, index }: Props) {
           <Meta icon={<Hourglass size={16} />} label={t('competitions.deadline')} showLabel>
             {formatDeadline(resolved.deadline, lang)}
           </Meta>
-          {!loading && resolved.seatsLeft != null && (
-            <Meta icon={<Ticket size={16} />} label={t('register.summary.seats')}>
-              <span data-testid={`seats-${event.id}`}>
-                {t('competitions.seatsLeft', { left: formatNumber(resolved.seatsLeft, lang), total: formatNumber(resolved.seats, lang) })}
-              </span>
-            </Meta>
-          )}
         </dl>
 
         <div className="mt-4">

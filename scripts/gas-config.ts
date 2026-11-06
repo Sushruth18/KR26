@@ -7,6 +7,16 @@ import { resolve } from 'node:path';
 import { eventsSchema, siteSchema } from '../src/lib/schemas.ts';
 import { RULES } from '../src/lib/rules.ts';
 
+/** Google Sheets forbids these characters in a tab name, and caps it at 100 characters. */
+const BAD_TAB_CHARS = /[[\]*?:/\\]/;
+
+/** Default tab name for an event's registrations, e.g. "ESY – Essay Writing". */
+export function sheetNameFor(e: { code: string; name: { en: string } }): string {
+  const name = `${e.code} – ${e.name.en}`;
+  if (BAD_TAB_CHARS.test(name) || name.length > 100) throw new Error(`events.json: "${name}" is not a valid Google Sheets tab name`);
+  return name;
+}
+
 export function buildGasConfigSource(root = process.cwd()): string {
   const read = (f: string) => JSON.parse(readFileSync(resolve(root, 'src/data', f), 'utf8'));
   const site = siteSchema.parse(read('site.json'));
@@ -32,7 +42,7 @@ export function buildGasConfigSource(root = process.cwd()): string {
           date: e.date,
           time: e.time,
           venue: e.venue,
-          seats: e.seats,
+          sheetName: sheetNameFor(e),
           deadline: e.deadline,
         },
       ]),

@@ -44,7 +44,7 @@ export function SubmitAlert({ error, onRetry, retrying }: Props) {
             {t('submit.findPass')}
           </LinkButton>
         )}
-        {(error.code === 'FULL' || error.code === 'CLOSED') && (
+        {error.code === 'CLOSED' && (
           <LinkButton to="/competitions" variant="ghost">
             {t('submit.otherEvents')}
           </LinkButton>

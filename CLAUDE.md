@@ -14,7 +14,7 @@ When something here conflicts with your defaults, this file wins. When something
   - **Day 1 — Competitions:** **20 November 2026** (Friday). All 12 competitions (students + faculty) happen this day.
   - **Day 2 — Karnataka Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — bike rally, inauguration & Dasara procession, performances, jamming.
   - All dates (both days, countdown targets, registration window, per-event `deadline`) come from `src/data/site.json` / `events.json` — never hard-code a date in a component.
-- **Registration:** goes live by **8 Nov 2026**; closes **18 Nov 2026, 23:59 IST** (one day of buffer before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
+- **Registration:** **open from now** (no opening date, no seat limits); closes **18 Nov 2026, 23:59 IST** (one day of buffer before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
 - **Source of event data:** `Kannada_Rajyotsava_26_Budget_Proposal.docx` (schedule + prize breakdown) — §5.3 and §6 below are taken from it.
 - **Predecessor:** https://kr2k25-bmsit.netlify.app/ — keep every tab it had, redesign everything else.
 - **Audience:** students and faculty, ~90% on mobile phones, many on mid/low-end Android. Kannada is the default language.
@@ -157,11 +157,12 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 - Segmented toggle **ವಿದ್ಯಾರ್ಥಿಗಳು / ಅಧ್ಯಾಪಕರು** (Students / Faculty), synced to `?for=students|faculty`.
 - Grid of **TableauCards** (1 col mobile, 2 tablet, 3 desktop). Each card:
   - icon, name, date, time, venue, team size, 1st/2nd prize — or a "ಸ್ಮರಣಿಕೆ / Memento" badge when `prizes.type === "memento"` (all faculty events)
-  - status pill: **Open** (green) · **Few seats left** (saffron, when ≤ 15% left) · **Closed** · **Completed**
+  - status pill: **Open** (green) · **Closed** (a coordinator switched it off) · **Deadline passed** · **Completed** — there are no seat counts, "few seats" or "full" states
+  - the Sheet's `is_open` is the coordinators' manual close switch; an event is open unless it is `FALSE` or its deadline has passed
   - "ನಿಯಮಗಳು / Rules" expandable (accessible disclosure, animated height)
   - coordinator name + `tel:` link
   - **Register** button → `/register?event=<id>`; disabled with reason when closed
-- Status comes from the backend status endpoint (§7); fall back to `events.json` + client clock if the endpoint fails, and show a small "live seat count unavailable" note.
+- Status comes from the backend status endpoint (§7); fall back to `events.json` + client clock if the endpoint fails (events stay open until their deadline), and show a small "live open/closed status unavailable" note.
 - Skeleton shimmer while status loads.
 
 ### 5.3 Event Details `/event`
@@ -213,14 +214,14 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 
 ### 5.6 Register `/register`
 See §7 for the backend contract. The page is a styled multi-step form ("Join the procession"):
-1. **Choose event** — preselected from `?event=`; shows event summary + seats left.
+1. **Choose event** — preselected from `?event=`; shows the event summary and its open/closed status (no seat count).
 2. **Your details** — category (student/faculty), name, USN or employee ID, department, semester (students), phone, email.
 3. **Team** (only if `teamSize.max > 1`) — dynamic member rows (name, USN, phone), min/max enforced per event; team name.
 4. **Review & submit** — summary, consent checkboxes (rules agreement; photo/video consent), submit.
 - Inline validation with zod, messages in the current language. Preserve entered data in sessionStorage on reload (try/catch).
 - Hidden honeypot field `website`; reject if filled.
 - Submit button shows a spinner and is disabled during submit; disable double submit.
-- Error states with a friendly message and retry: network failure, event full, deadline passed, duplicate registration (show the existing registration ID), validation error from server.
+- Error states with a friendly message and retry: network failure, event closed by a coordinator, deadline passed, duplicate registration (show the existing registration ID), validation error from server.
 
 ### 5.7 Pass `/register/success`
 - A "procession pass" card: Ambari motif, event name, participant name(s), registration ID (e.g. `KR26-DEB-0042`), "ದಿನ ೧ · ೨೦ ನವೆಂಬರ್" / "Day 1 · 20 Nov" with event time/venue, "Show this at the venue", plus a line inviting them to the Day 2 procession on 21 Nov.
@@ -246,7 +247,6 @@ All content lives in JSON; components never hard-code event data.
     "time": "14:00",
     "venue": { "kn": "TODO-CONFIRM", "en": "TODO-CONFIRM" },
     "teamSize": { "min": 1, "max": 1 },
-    "seats": 60,
     "deadline": "2026-11-18T23:59:00+05:30",
     "prizes": { "type": "cash", "first": 2000, "second": 1000 },
     "rules": { "kn": ["TODO-CONFIRM"], "en": ["TODO-CONFIRM"] },
@@ -255,7 +255,7 @@ All content lives in JSON; components never hard-code event data.
   }
 ]
 ```
-`prizes` is either `{ "type": "cash", "first": n, "second": n }` or `{ "type": "memento" }`.
+Events have **no `seats` field** — registration is unlimited. `prizes` is either `{ "type": "cash", "first": n, "second": n }` or `{ "type": "memento" }`.
 The prize-pool plaque sums only cash prizes. Add a build-time check in `validate-data.ts` that the cash
 total equals `site.json → prizePoolTotal` (39000) and fails the build if not.
 
@@ -287,7 +287,7 @@ Rangoli is new this year and fits the theme perfectly — give its card a kolam-
 - `guests.json` — `[{ name:{kn,en}, title:{kn,en}, photo }]`
 - `team.json` — `[{ group:{kn,en}, members:[{ name:{kn,en}, role:{kn,en}, photo, linkedin?, instagram? }] }]`
 - `gallery.json` — `{ photos:[{ year, src, alt:{kn,en}, caption? }], reels:[{ year, poster, video?|url?, title }] }`
-- `site.json` — `competitionsStart` ("2026-11-20T09:00:00+05:30" — TODO-CONFIRM start time), `competitionsEnd` ("2026-11-20T18:00:00+05:30" — TODO-CONFIRM), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), registration open/close ISO (`registrationClose` "2026-11-18T23:59:00+05:30"), `prizePoolTotal` (39000), Instagram URL, contact email.
+- `site.json` — `competitionsStart` ("2026-11-20T09:00:00+05:30" — TODO-CONFIRM start time), `competitionsEnd` ("2026-11-20T18:00:00+05:30" — TODO-CONFIRM), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), the registration close time (`registrationClose` "2026-11-18T23:59:00+05:30"; there is **no** `registrationOpen` — registration is open from the start), `prizePoolTotal` (39000), Instagram URL, contact email.
 
 Validate every data file with a zod schema at build time (a small `scripts/validate-data.ts` run in `prebuild`).
 
@@ -295,23 +295,25 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 
 ## 7. Registration backend — Google Apps Script + Sheet
 
-### Sheet layout (one spreadsheet)
-- **`Events`** tab (coordinators control this): `id | code | name_en | seats | deadline_iso | is_open (TRUE/FALSE)`. Server reads seats/deadline/open from here — coordinators can close an event or change seats without redeploying the site.
-- **`Registrations`** tab: `timestamp | reg_id | event_id | category | name | usn_or_empid | department | semester | phone | email | team_name | members_json | member_usns (comma-separated) | consent_photo | user_agent`.
-- Optional per-event views can be added later with `FILTER()` formulas — do not write to multiple tabs.
+### Sheet layout (one spreadsheet, one tab per event)
+- **`Events`** tab (coordinators control this): `id | code | name_en | sheet_name | deadline_iso | is_open (TRUE/FALSE)`. The server reads the deadline, the open switch and the event's tab name from here — coordinators can close an event (`is_open` FALSE), move its deadline or rename its tab without redeploying the site. There is **no seats column**.
+- **One tab per event** (12), named by `sheet_name`, default `<CODE> – <English name>` (e.g. `ESY – Essay Writing`), created by `setupSheet` with a frozen, bold header row and plain-text data columns: `timestamp | reg_id | category | name | usn_or_empid | department | semester | phone | email | team_name | members_json | member_ids | consent_photo` (no `event_id` — the tab is the event). **There is no shared `Registrations` tab**; an old one is never read, written or deleted by the script (the README tells coordinators to delete it by hand).
+- `Code.gs` finds an event's tab **only through the `sheet_name` cell**. If the cell is empty, the tab is missing, two events share a tab, or the tab's header row is not the layout above → `SERVER` (logged with the event id and tab name) and **nothing is written anywhere**. It never falls back to another tab. The status endpoint reports such an event as closed.
+- `setupSheet` is idempotent: it only adds a missing Events tab/row/column, event tab or header (new event rows start with `is_open` = **TRUE**); it never deletes, clears or overwrites data, and keeps coordinator edits. An older Events tab (with `seats`, no `sheet_name`) is upgraded in place.
 
 ### `apps-script/Code.gs` (write this file in the repo; it is deployed by hand)
-- `doGet(e)` with `action=status` → `{ ok:true, events:{ [id]: { seatsLeft, isOpen, deadline } }, serverTime }`.
+- `doGet(e)` with `action=status` → `{ ok:true, events:{ [id]: { isOpen, deadline, registeredCount } }, serverTime }`. `registeredCount` is for coordinators and the race test; the UI never shows it. `isOpen` = `is_open` TRUE **and** now < deadline **and** the event's tab exists.
 - `doPost(e)` with JSON body (sent as `Content-Type: text/plain` to avoid CORS preflight) → register.
 - Register flow, all inside `LockService.getScriptLock().waitLock(20000)`:
   1. Parse + re-validate every field server-side (same rules as the client). Reject honeypot.
-  2. Check event exists, `is_open`, now < deadline, seats left > 0 (seats count = number of registrations, a team = 1 seat).
-  3. Duplicate check: the same USN/emp ID (main registrant or any team member) already registered for that event → return `{ ok:false, code:"DUPLICATE", regId }`.
-  4. Generate `reg_id` = `KR26-<CODE>-<4-digit running number per event>`.
-  5. Append row, release lock.
+  2. Check event exists, `is_open` is TRUE and now < deadline. There is no seat limit.
+  3. Resolve the event's own tab (via `sheet_name`), then duplicate check inside that tab only: the same USN/emp ID (main registrant or any team member) already registered for that event → return `{ ok:false, code:"DUPLICATE", regId }`.
+  4. Generate `reg_id` = `KR26-<CODE>-<4-digit number>` = highest existing number **in that tab** + 1.
+  5. Append the row to that tab, release lock.
   6. Send confirmation email with `MailApp` (wrapped in try/catch — failure must not fail the registration). Mention in README that consumer Gmail accounts have a daily email quota.
   7. Return `{ ok:true, regId, event, name }`.
-- Error codes: `VALIDATION`, `CLOSED`, `FULL`, `DUPLICATE`, `SERVER`. Always return JSON via `ContentService` with `MimeType.JSON`.
+- `lookup` searches **every event tab** and returns every pass found.
+- Error codes: `VALIDATION`, `CLOSED`, `DUPLICATE`, `SERVER` (there is no `FULL`). Always return JSON via `ContentService` with `MimeType.JSON`.
 - Normalise: trim, collapse spaces, remove all spaces in and uppercase USN/employee ID, strip `+91`/spaces from phone, lowercase email.
 
 ### Validation rules (shared: `src/lib/validation.ts` and mirrored in `Code.gs`)
@@ -360,8 +362,8 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - [ ] Every route checked at 360px, 768px, 1280px — no horizontal scroll, no clipped Kannada
 - [ ] Reduced-motion mode checked
 - [ ] Footer appears exactly once on every page
-- [ ] Registration tested end-to-end: success, duplicate, full, closed, deadline passed, validation error, network failure
-- [ ] Two simultaneous registrations for the last seat → exactly one succeeds
+- [ ] Registration tested end-to-end: success, duplicate, closed, deadline passed, validation error, network failure
+- [ ] Many simultaneous registrations for one event (`npm run race -- <url>`) → all succeed with unique, sequential reg IDs and no duplicate rows
 - [ ] Pass downloads as PNG and .ics opens in a calendar app
 - [ ] Lighthouse targets met on the deployed URL
 - [ ] All `TODO-CONFIRM` items listed in `TODO-CONFIRM.md`
@@ -374,12 +376,12 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - If a requirement here is impossible or conflicts, stop and say so rather than silently cutting it.
 - Commit locally after each phase; **never push**.
 
-### Phases (registration is prioritised — it must be usable by 8 Nov 2026)
+### Phases (registration is prioritised — it is open from now, see §1)
 | # | Phase | Contents | Status |
 |---|---|---|---|
 | 1 | Foundation | Hand-scaffolded Vite + React + TS strict, Tailwind v3, ESLint/Prettier, tokens, self-hosted fonts, i18n, format utils, data files + build-time validation, Layout/Navbar/Footer, lazy routes, 404 | ✅ done |
-| 2 | Registration (priority) | `validation.ts`, `api.ts`, `apps-script/Code.gs` (+ `action=lookup`) + README, local mock endpoint, Register form, Pass page (PNG + .ics) | ✅ done — real-Sheet race test pending deploy |
-| 3 | Competitions | TableauCard grid, status pills, live seat status, rules disclosure | ✅ done |
+| 2 | Registration (priority) | `validation.ts`, `api.ts`, `apps-script/Code.gs` (+ `action=lookup`) + README, local mock endpoint, Register form, Pass page (PNG + .ics) | ✅ done — real-Sheet race test pending deploy (rev. 2: open from now, no seat limits, one tab per event) |
+| 3 | Competitions | TableauCard grid, status pills, live open/closed status, rules disclosure | ✅ done |
 | 4 | Art + Intro + Home | PalaceSilhouette, AmbariElephant, BrassPlaque, intro splash, hero, countdown, preview strip, deadline banner | ✅ done — kn LCP 0.2–0.3 s over budget in lab (see Home notes) |
 | 5 | Event Details | Day tabs, procession-route timeline, Now/Next, guests, attractions, map | ⏳ |
 | 6 | Gallery + Team | Masonry, lightbox, reels, team troupes (empty states until content arrives) | ⏳ |
@@ -389,9 +391,8 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - **TODO values** (`TODO-CONFIRM` in data) render as "To be announced": hide `tel:` links, all-day `.ics`, "TBA" on the pass; Day 1 events with unknown time go in the "Time TBA" group.
 - **Backend** adds `action=lookup` — requires USN/employee ID **and** the full phone to match; returns only `regId`, `event`, `name`. Used on the pass page when local data is lost.
 - **BMSIT-only.** One person may register for several events; duplicates are checked per event only. Category is derived from the event and locked. Team member rows take a USN (student events) or employee ID (faculty events); the duplicate check covers both.
-- **Sheet wins** over `events.json` / `site.json` at runtime (seats, deadline, is_open). `registrationOpen` = 2026-11-08T00:00:00+05:30 with an "Opens soon" pill; the Sheet's `is_open` is the real switch. Force plain-text writes (formula-injection guard).
+- **Sheet wins** over `events.json` / `site.json` at runtime (deadline, is_open, tab name). **Registration is open from the start** — there is no `registrationOpen` and no "Opens soon" state; `setupSheet` creates every event with `is_open` TRUE and `is_open` is the coordinators' manual close switch. **No seat limits**: no `seats` anywhere (data, schema, Sheet, status, UI), no `FULL` code. Force plain-text writes (formula-injection guard).
 - **Spam guards:** honeypot `website` + minimum time on form (> 3 s, `site.json → minFormSeconds`). `user_agent` is dropped from the Sheet (or stored as client-supplied only).
-- **Seats placeholders:** 100 individual, 30 team (TODO-CONFIRM; real numbers live in the Sheet's Events tab).
 - **Departments** (draft, TODO-CONFIRM): CSE, ISE, AIML, ECE, EEE, ETE, Mech, Civil, MBA, MCA, Other (free text).
 - **Kannada time words:** ಬೆಳಿಗ್ಗೆ (<12), ಮಧ್ಯಾಹ್ನ (12–16), ಸಂಜೆ (16–19), ರಾತ್ರಿ (19+). Own digit mapper; Latin digits stay in reg IDs, phone and USN.
 - **Contact email, Instagram URL, "Made by"** are empty in `site.json` and hidden when empty — never invent them.
@@ -403,11 +404,11 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 
 ### Registration architecture (Phase 2 — refines §7)
 - **One server implementation.** `apps-script/Code.gs` is the only server code. `apps-script/Config.gs` is **generated** (`npm run gas:config`, also on every build) from `site.json`, `events.json` and `src/lib/rules.ts` — never edit it by hand. Validation rules live in `src/lib/rules.ts`; semesters/departments in `site.json` (`semesters.default` = odd semesters 1,3,5,7; `byDepartment` MBA/MCA = 1,3). Client (`src/lib/validation.ts`) and server read the same lists.
-- **Mock = real Code.gs.** `mock/gas-runtime.ts` runs Code.gs in a Node VM with fake Sheet/Lock/Cache/Mail services; `mock/vite-plugin-mock-gas.ts` serves it at `/mock-api` in `npm run dev` only. Force outcomes with `?mock=duplicate|full|closed|deadline|validation|server|network|slow|statusdown` on any page or the dev-only panel (bottom-left). Mock data is in memory and resets when the dev server restarts.
-- **Tests:** `npm run test:server` (Code.gs logic, 70 cases), `npm run e2e` (registration, 19 scenarios) and `npm run e2e:competitions` (Competitions page: kn/en × 320/360/768/1280, 22 checks) — browser, need `npm run dev`; `E2E_BASE` for another port, `npm run race -- <url>` (last-seat concurrency; must be run against the deployed script — the mock is single-threaded).
-- **Sheet column `member_ids`** (not `member_usns`): holds USNs or employee IDs. `user_agent` dropped.
+- **Mock = real Code.gs.** `mock/gas-runtime.ts` runs Code.gs in a Node VM with fake Sheet/Lock/Cache/Mail services; `mock/vite-plugin-mock-gas.ts` serves it at `/mock-api` in `npm run dev` only. Force outcomes with `?mock=duplicate|closed|deadline|validation|server|network|slow|statusdown` on any page or the dev-only panel (bottom-left). Mock data is in memory and resets when the dev server restarts.
+- **Tests:** `npm run test:server` (Code.gs logic against a multi-tab fake spreadsheet, 93 cases), `npm run e2e` (registration, 18 scenarios) and `npm run e2e:competitions` (Competitions page: kn/en × 320/360/768/1280, 22 checks) — browser, need `npm run dev`; `E2E_BASE` for another port, `npm run race -- <url> [eventId] [count]` (fires `count` simultaneous registrations at one event and checks all succeed with unique, sequential reg IDs and no duplicate rows; the real LockService test must be run against the deployed script — the mock is single-threaded).
+- **Sheet column `member_ids`** (not `member_usns`): holds USNs or employee IDs. `user_agent` dropped. `Config.gs` carries each event's default `sheetName` (`npm run gas:config`; `validate-data` rejects invalid or duplicate tab names).
 - **Team size counts the registrant** (Group Dance 6–12 = registrant + 5–11 member rows). Photo/video consent optional; rules consent required.
-- **Extra codes:** `CLOSED` carries `reason: NOT_OPEN | DEADLINE`; `SERVER` may carry `reason: BUSY` (lock timeout); lookup returns `NOT_FOUND` / `RATE_LIMITED` (5 failures per ID per 10 min). Client adds `NETWORK` and `CONFIG` (endpoint not set).
+- **Extra codes:** `CLOSED` carries `reason: NOT_OPEN` (switched off by a coordinator) `| DEADLINE`; `SERVER` may carry `reason: BUSY` (lock timeout); lookup returns `NOT_FOUND` / `RATE_LIMITED` (5 failures per ID per 10 min). Client adds `NETWORK` and `CONFIG` (endpoint not set).
 - The min-time check uses a **client-reported** `elapsedMs`; it stops naive bots, not a determined attacker.
 
 ### Home + art (Phase 4 — refines §3, §5.0, §5.1)

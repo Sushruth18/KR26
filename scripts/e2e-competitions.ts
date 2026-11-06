@@ -4,13 +4,12 @@
  *   2. npm run e2e:competitions    (E2E_BASE, E2E_OUT, CHROME_PATH env vars optional)
  * Both languages × 320/360/768/1280 px: no horizontal scroll, layout columns, no clipped Kannada,
  * footer once, no console errors. Plus behaviour: ?for= sync, Register links, TBA values,
- * hidden tel: links, rules disclosure, live-status fallback ("Opens soon"), reduced motion.
+ * hidden tel: links, rules disclosure, live open/closed status + fallback, reduced motion.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
 import events from '../src/data/events.json' with { type: 'json' };
-import site from '../src/data/site.json' with { type: 'json' };
 
 const BASE = process.env.E2E_BASE ?? 'http://localhost:5173';
 const OUT = resolve(process.env.E2E_OUT ?? 'e2e-output/competitions');
@@ -195,35 +194,47 @@ async function main() {
     'status-down-fallback-kn',
     async (errors) => {
       const page = await open(browser, 'kn', 360, '/competitions?mock=statusdown', errors);
-      const note = await page.$('[data-testid=live-unavailable]');
+      const note = await page.$eval('[data-testid=live-unavailable]', (e) => e.textContent).catch(() => null);
       const states = await page.$$eval('[data-testid=competition-grid] article', (as) => as.map((a) => a.getAttribute('data-state')));
-      const beforeOpen = Date.now() < Date.parse(site.registrationOpen);
-      const reason = await page.$eval('[data-testid=reason-s-essay]', (e) => e.textContent).catch(() => null);
-      const disabled = await page.$eval('[data-testid=register-s-essay]', (b) => (b as HTMLButtonElement).disabled).catch(() => false);
-      expect(note, '"live seat count unavailable" note');
-      if (beforeOpen) {
-        expect(states.every((s) => s === 'opensSoon'), `states ${states.join(',')}`);
-        expect(disabled && reason?.includes('೮ ನವೆಂಬರ್'), `disabled register with "opens on" reason, got ${disabled} "${reason}"`);
-      }
-      const seats = await page.$$('[data-testid^=seats-]');
-      expect(seats.length === 0, 'no seat counts without live data');
+      const beforeDeadline = Date.now() < Date.parse(events[0]!.deadline);
+      const hrefs = await page.$$('[data-testid=competition-grid] a[href^="/register"]');
+      expect(note?.includes('ಲೈವ್ ತೆರೆದ/ಮುಚ್ಚಿದ ಸ್ಥಿತಿ'), `"live open/closed status unavailable" note, got "${note}"`);
+      // Registration is open from the start: without live data the cards fall back to events.json + the clock.
+      const want = beforeDeadline ? 'open' : 'deadline';
+      expect(states.length > 0 && states.every((s) => s === want), `states ${states.join(',')}, expected all "${want}"`);
+      expect(beforeDeadline ? hrefs.length === states.length : hrefs.length === 0, `${hrefs.length} Register links`);
+      expect((await page.$$('[data-testid^=seats-]')).length === 0, 'no seat counts');
       await page.screenshot({ path: resolve(OUT, 'statusdown-kn-360.png'), fullPage: true });
       await page.browserContext().close();
-      return `status endpoint down → note + retry; ${beforeOpen ? `before 8 Nov: all "${states[0]}", Register disabled, reason "${reason}"` : 'after open: fallback allows registration'}`;
+      return `status endpoint down → note + retry; fallback from events.json + clock: all cards "${want}", ${hrefs.length} Register links`;
     },
     /ERR_EMPTY_RESPONSE|Failed to load resource/,
   );
 
-  await scenario('live-seats-and-full-en', async (errors) => {
+  await scenario('live-status-open-and-closed-en', async (errors) => {
+    const set = (value: string) => fetch(`${BASE}/mock-api/__set?id=s-essay&header=is_open&value=${value}`);
     const page = await open(browser, 'en', 768, '/competitions?mock=', errors);
-    const seats = await page.$eval('[data-testid=seats-s-essay]', (e) => e.textContent);
-    expect(seats?.includes('100 of 100'), `live seats "${seats}"`);
-    const full = await open(browser, 'en', 768, '/competitions?mock=full', errors);
-    const fullStates = await full.$$eval('[data-testid=competition-grid] article', (as) => as.map((a) => a.getAttribute('data-state')));
-    const reason = await full.$eval('[data-testid=reason-s-essay]', (e) => e.textContent).catch(() => '');
+    const states = await page.$$eval('[data-testid=competition-grid] article', (as) => as.map((a) => a.getAttribute('data-state')));
+    const text = await page.$eval('main', (e) => e.textContent ?? '');
+    expect(states.every((s) => s === 'open'), `all open from the start, got ${states.join(',')}`);
+    expect(!/seat|opens soon|full/i.test(text), 'no seat / "Opens soon" / "Full" wording on the page');
+    expect((await page.$$('[data-testid^=seats-]')).length === 0, 'no seat counts');
     await page.browserContext().close();
-    await full.browserContext().close();
-    return `live: "${seats}"; ?mock=full → states [${[...new Set(fullStates)].join(',')}]${reason ? `, reason "${reason}"` : ''}`;
+
+    await set('FALSE'); // a coordinator closes one event in the Sheet
+    try {
+      const closed = await open(browser, 'en', 768, '/competitions?mock=', errors);
+      const closedState = await closed.$eval('[data-testid=card-s-essay]', (e) => e.getAttribute('data-state'));
+      const otherState = await closed.$eval('[data-testid=card-s-poem]', (e) => e.getAttribute('data-state'));
+      const disabled = await closed.$eval('[data-testid=register-s-essay]', (b) => (b as HTMLButtonElement).disabled);
+      const reason = await closed.$eval('[data-testid=reason-s-essay]', (e) => e.textContent);
+      expect(closedState === 'closed' && otherState === 'open', `essay ${closedState}, poem ${otherState}`);
+      expect(disabled && /closed/i.test(reason ?? ''), `register disabled with a reason, got ${disabled} "${reason}"`);
+      await closed.browserContext().close();
+      return `all ${states.length} cards open with no seat wording; is_open=FALSE on Essay → that card "closed" (Register disabled: "${reason}"), the rest stay open`;
+    } finally {
+      await set('TRUE');
+    }
   });
 
   await scenario('reduced-motion-kn', async (errors) => {

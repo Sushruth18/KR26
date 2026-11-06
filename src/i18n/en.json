@@ -39,14 +39,10 @@
   },
   "state": {
     "open": "Open",
-    "few": "Few seats left",
-    "full": "Full",
     "closed": "Closed",
     "deadline": "Deadline passed",
-    "opensSoon": "Opens soon",
     "completed": "Completed",
-    "opensOn": "Registration opens on {{date}}",
-    "liveUnavailable": "Live seat count unavailable right now"
+    "liveUnavailable": "Live open/closed status unavailable right now"
   },
   "register": {
     "stepOf": "Step {{n}} of {{total}}",
@@ -66,13 +62,11 @@
       "venue": "Venue",
       "team": "Team size",
       "prizes": "Prizes",
-      "seats": "Seats left",
       "first": "1st",
       "second": "2nd",
       "memento": "Memento",
       "individual": "Individual",
       "people": "{{range}} people (including you)",
-      "seatsOf": "{{left}} of {{total}}",
       "dayLabel": "Day {{n}}"
     },
     "category": "Category",
@@ -137,7 +131,6 @@
     "NETWORK": "Connection problem. Check your internet and try again — what you entered is saved.",
     "SERVER": "Something went wrong on our side. Please try again in a moment.",
     "BUSY": "Lots of people are registering right now. Please try again in a few seconds.",
-    "FULL": "Sorry, this competition is full.",
     "NOT_OPEN": "Registration for this competition is not open right now.",
     "DEADLINE": "The registration deadline for this competition has passed.",
     "DUPLICATE": "You (or someone in your team) are already registered for this competition.",
@@ -196,10 +189,8 @@
     "call": "Call {{name}} ({{phone}})",
     "register": "Register",
     "registerFor": "Register for {{name}}",
-    "checking": "Checking seats…",
-    "seatsLeft": "{{left}} of {{total}} seats left",
+    "checking": "Checking registration status…",
     "reason": {
-      "full": "All seats are taken.",
       "closed": "Registration for this competition is closed.",
       "deadline": "The registration deadline has passed.",
       "completed": "This competition is over — see you at the next one!"

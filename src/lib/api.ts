@@ -18,7 +18,6 @@ const STATUS_CACHE_MS = 30000;
 export type ErrorCode =
   | 'VALIDATION'
   | 'CLOSED'
-  | 'FULL'
   | 'DUPLICATE'
   | 'SERVER'
   | 'NOT_FOUND'
@@ -35,10 +34,10 @@ export interface ApiError {
 }
 
 export interface LiveEventStatus {
-  seats: number;
-  seatsLeft: number;
   isOpen: boolean;
   deadline: string | null;
+  /** For coordinators (and the race test); never shown in the UI. */
+  registeredCount: number;
 }
 export interface StatusResponse {
   ok: true;

@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { ZodTypeAny } from 'zod';
 import type { LogoAsset, LogoKey } from '../src/lib/logos';
+import { sheetNameFor } from './gas-config';
 import {
   eventsSchema,
   gallerySchema,
@@ -54,8 +55,16 @@ if (site && events) {
     if (e.teamSize.min > e.teamSize.max) errors.push(`events.json: ${e.id} teamSize.min > max`);
     if (e.prizes.type === 'cash' && e.category === 'faculty') errors.push(`events.json: ${e.id} faculty events award mementos`);
   }
-  if (new Date(site.registrationOpen) >= new Date(site.registrationClose)) {
-    errors.push('site.json: registrationOpen must be before registrationClose');
+  // Every event gets its own Sheet tab; the names must be valid and unique (sheetNameFor throws on a bad one).
+  const tabs = new Set<string>();
+  for (const e of events) {
+    try {
+      const tab = sheetNameFor(e);
+      if (tabs.has(tab)) errors.push(`events.json: ${e.id} produces a duplicate Sheet tab name "${tab}"`);
+      tabs.add(tab);
+    } catch (err) {
+      errors.push((err as Error).message);
+    }
   }
 }
 

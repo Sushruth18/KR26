@@ -23,8 +23,12 @@ export interface GasRuntime {
   get(params: Record<string, string>): GasResponse;
   post(body: unknown): GasResponse;
   postRaw(raw: string): GasResponse;
+  /** The Events tab. */
   events(): FakeSheet;
-  regs(): FakeSheet;
+  /** The tab an event's registrations go to, found through the Events tab's sheet_name cell (like Code.gs does). */
+  tab(eventId: string): FakeSheet;
+  /** Current value of an Events-tab cell. */
+  eventField(id: string, header: string): string;
   setEventField(id: string, header: string, value: string): string;
   countRegs(eventId: string): number;
 }
@@ -77,11 +81,20 @@ export function createGasRuntime(root = process.cwd()): GasRuntime {
     post: (body) => call('doPost', { postData: { contents: JSON.stringify(body) } }),
     postRaw: (raw) => call('doPost', { postData: { contents: raw } }),
     events: () => sheet('Events'),
-    regs: () => sheet('Registrations'),
+    tab: (eventId) => sheet(rt.eventField(eventId, 'sheet_name')),
+    eventField(id, header) {
+      const s = sheet('Events');
+      const headers = s.getRange(1, 1, 1, s.getLastColumn()).getDisplayValues()[0] ?? [];
+      const col = headers.indexOf(header) + 1;
+      if (col < 1) throw new Error(`no column ${header} in the Events tab`);
+      for (let r = 2; r <= s.getLastRow(); r++) if (String(s.get(r, 1)) === id) return String(s.get(r, col));
+      throw new Error(`event ${id} not in Events tab`);
+    },
     setEventField(id, header, value) {
       const s = sheet('Events');
       const headers = s.getRange(1, 1, 1, s.getLastColumn()).getDisplayValues()[0] ?? [];
       const col = headers.indexOf(header) + 1;
+      if (col < 1) throw new Error(`no column ${header} in the Events tab`);
       for (let r = 2; r <= s.getLastRow(); r++) {
         if (String(s.get(r, 1)) === id) {
           const prev = String(s.get(r, col));
@@ -94,20 +107,18 @@ export function createGasRuntime(root = process.cwd()): GasRuntime {
       throw new Error(`event ${id} not in Events tab`);
     },
     countRegs(eventId) {
-      const s = sheet('Registrations');
+      const s = rt.tab(eventId);
       let n = 0;
-      for (let r = 2; r <= s.getLastRow(); r++) if (String(s.get(r, 3)) === eventId) n++;
+      for (let r = 2; r <= s.getLastRow(); r++) if (String(s.get(r, 2)) !== '') n++; // column 2 = reg_id
       return n;
     },
   };
   return rt;
 }
 
-/** A runtime with tabs created and every event open — what the dev mock starts from. */
+/** A runtime after setupSheet(): the Events tab plus one tab per event, every event open — what the dev mock starts from. */
 export function createOpenRuntime(root = process.cwd()): GasRuntime {
   const rt = createGasRuntime(root);
   (rt.ctx.setupSheet as () => void)();
-  const ids = Object.keys((rt.ctx.CONFIG as { events: Record<string, unknown> }).events);
-  for (const id of ids) rt.setEventField(id, 'is_open', 'TRUE');
   return rt;
 }

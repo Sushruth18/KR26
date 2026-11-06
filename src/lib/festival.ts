@@ -37,10 +37,10 @@ export function remaining(targetIso: string, t: number): Remaining {
   return { days: Math.floor(s / 86400), hours: Math.floor(s / 3600) % 24, minutes: Math.floor(s / 60) % 60, seconds: s % 60 };
 }
 
-export type RegistrationWindow = 'notOpen' | 'open' | 'closed';
+/** Registration is open from the start (no opening date) until `registrationClose`. */
+export type RegistrationWindow = 'open' | 'closed';
 
 export function registrationWindow(site: SiteConfig, t: number): RegistrationWindow {
-  if (t < Date.parse(site.registrationOpen)) return 'notOpen';
   if (t < Date.parse(site.registrationClose)) return 'open';
   return 'closed';
 }
@@ -53,7 +53,7 @@ function istDay(t: number): number {
 
 /**
  * Calendar days until registration closes (0 = closes today), or null when the banner should not show:
- * registration not open yet, already closed, or more than 3 days away.
+ * already closed, or more than 3 days away.
  */
 export function deadlineDaysLeft(site: SiteConfig, t: number): number | null {
   if (registrationWindow(site, t) !== 'open') return null;

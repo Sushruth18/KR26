@@ -4,25 +4,32 @@
  * The Apps Script project needs TWO files: this Code.gs and Config.gs (generated from the
  * website's data — never edit Config.gs by hand). Setup steps: apps-script/README.md.
  *
+ * Layout of the spreadsheet
+ *   Events tab        one row per competition: id | code | name_en | sheet_name | deadline_iso | is_open
+ *   one tab per event named by that row's sheet_name (e.g. "ESY – Essay Writing"), holding only that
+ *                     event's registrations. There is no shared "Registrations" tab.
+ *
  * Endpoints
- *   GET  ?action=status                         -> { ok, events: { [id]: { seats, seatsLeft, isOpen, deadline } }, serverTime }
+ *   GET  ?action=status                         -> { ok, events: { [id]: { isOpen, deadline, registeredCount } }, serverTime }
  *   POST { action: "register", ...fields }      -> { ok:true, regId, event, name } | { ok:false, code, reason?, field?, regId? }
  *   POST { action: "lookup", id, phone }        -> { ok:true, passes:[{ regId, event, name }] } | { ok:false, code }
  * The browser sends POST bodies as Content-Type text/plain so no CORS preflight is needed.
  *
- * Error codes: VALIDATION, CLOSED (reason NOT_OPEN | DEADLINE), FULL, DUPLICATE, SERVER (reason BUSY when the
- * lock could not be acquired), NOT_FOUND and RATE_LIMITED (lookup only).
+ * Registration is open unless the event's is_open cell is not TRUE or its deadline has passed. There is no
+ * seat limit. Error codes: VALIDATION, CLOSED (reason NOT_OPEN = closed by a coordinator | DEADLINE), DUPLICATE,
+ * SERVER (reason BUSY when the lock could not be acquired), NOT_FOUND and RATE_LIMITED (lookup only).
  */
 
 var SHEET_EVENTS = 'Events';
-var SHEET_REGS = 'Registrations';
-var EVENT_HEADERS = ['id', 'code', 'name_en', 'seats', 'deadline_iso', 'is_open'];
+var SHEET_OLD_REGS = 'Registrations'; // retired shared tab — never read or written; setupSheet only mentions it in the log
+var EVENT_HEADERS = ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open'];
+// Columns of every event tab (no event_id: the tab is the event).
 var REG_HEADERS = [
-  'timestamp', 'reg_id', 'event_id', 'category', 'name', 'usn_or_empid', 'department', 'semester',
+  'timestamp', 'reg_id', 'category', 'name', 'usn_or_empid', 'department', 'semester',
   'phone', 'email', 'team_name', 'members_json', 'member_ids', 'consent_photo'
 ];
 var LOCK_WAIT_MS = 20000;
-var STATUS_CACHE_KEY = 'status_v1';
+var STATUS_CACHE_KEY = 'status_v2';
 var STATUS_CACHE_S = 10;
 var LOOKUP_MAX_FAILS = 5;
 var LOOKUP_WINDOW_S = 600;
@@ -190,15 +197,9 @@ function ss_() {
   return SpreadsheetApp.getActiveSpreadsheet();
 }
 
-function sheet_(name) {
-  var sh = ss_().getSheetByName(name);
-  if (!sh) throw new Error('Missing tab "' + name + '" — run setupSheet() once (README step 4).');
-  return sh;
-}
-
-/** Rows as objects keyed by header. Display values, so phone/USN cells are always strings. */
-function readTable_(name) {
-  var values = sheet_(name).getDataRange().getDisplayValues();
+/** Rows of a tab as objects keyed by header. Display values, so phone/USN cells are always strings. */
+function readTable_(sh) {
+  var values = sh.getDataRange().getDisplayValues();
   var headers = (values[0] || []).map(function (h) { return String(h).trim(); });
   var rows = [];
   for (var r = 1; r < values.length; r++) {
@@ -211,18 +212,59 @@ function readTable_(name) {
   return rows;
 }
 
+/** The Events tab as { [eventId]: { sheetName, deadline, isOpen } }. Read by header name, so extra columns are harmless. */
 function readEvents_() {
+  var evSheet = ss_().getSheetByName(SHEET_EVENTS);
+  if (!evSheet) throw new Error('Missing tab "' + SHEET_EVENTS + '" — run setupSheet() once (README step 4).');
   var out = {};
-  readTable_(SHEET_EVENTS).forEach(function (r) {
+  readTable_(evSheet).forEach(function (r) {
     var id = String(r.id).trim();
     if (!id) return;
     out[id] = {
-      seats: parseInt(r.seats, 10) || 0,
+      sheetName: String(r.sheet_name || '').trim(),
       deadline: Date.parse(String(r.deadline_iso).trim()), // NaN if a coordinator broke the format
       isOpen: String(r.is_open).trim().toUpperCase() === 'TRUE'
     };
   });
   return out;
+}
+
+/**
+ * The tab that holds one event's registrations, found through the Events tab's sheet_name cell (so a
+ * coordinator can rename a tab as long as they update that cell). Throws — and the caller answers SERVER —
+ * when the cell is empty, the tab does not exist, two events share a tab or the tab has the wrong header row.
+ * It never falls back to another tab, so a registration can never land in the wrong place.
+ */
+function eventTab_(eventId, events) {
+  var ev = events[eventId];
+  var name = ev ? ev.sheetName : '';
+  if (!name) throw new Error('Event "' + eventId + '" has no sheet_name in the ' + SHEET_EVENTS + ' tab — run setupSheet().');
+  if (name === SHEET_EVENTS) throw new Error('Event "' + eventId + '": sheet_name must not be "' + SHEET_EVENTS + '".');
+  Object.keys(events).forEach(function (other) {
+    if (other !== eventId && events[other].sheetName === name) {
+      throw new Error('Events "' + eventId + '" and "' + other + '" both use the tab "' + name + '" — every event needs its own tab.');
+    }
+  });
+  var sh = ss_().getSheetByName(name);
+  if (!sh) {
+    throw new Error('Event "' + eventId + '": tab "' + name + '" not found. Fix its sheet_name cell in the ' + SHEET_EVENTS +
+      ' tab, or run setupSheet() to recreate the tab.');
+  }
+  var headers = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
+  REG_HEADERS.forEach(function (h) {
+    if (headers.indexOf(h) === -1) throw new Error('Tab "' + name + '" has no "' + h + '" column in row 1 — refusing to write to it.');
+  });
+  return sh;
+}
+
+/** Same as eventTab_ but answers null instead of throwing (status and lookup must not fail because one tab is broken). */
+function eventTabOrNull_(eventId, events) {
+  try {
+    return eventTab_(eventId, events);
+  } catch (err) {
+    console.error(String(err));
+    return null;
+  }
 }
 
 /**
@@ -245,10 +287,6 @@ function appendByHeader_(sh, record) {
   var range = sh.getRange(r, 1, 1, row.length);
   range.setNumberFormat('@'); // plain text: keeps phone numbers, USNs and leading zeros intact
   range.setValues([row]);
-}
-
-function eventRows_(rows, eventId) {
-  return rows.filter(function (r) { return r.event_id === eventId; });
 }
 
 function idsOfRow_(row) {
@@ -296,22 +334,21 @@ function getStatus_() {
     return cached;
   }
   var sheetEvents = readEvents_();
-  var counts = {};
-  readTable_(SHEET_REGS).forEach(function (r) { counts[r.event_id] = (counts[r.event_id] || 0) + 1; });
   var now = Date.now();
   var events = {};
   Object.keys(CONFIG.events).forEach(function (id) {
     var e = sheetEvents[id];
     if (!e) {
-      events[id] = { seats: 0, seatsLeft: 0, isOpen: false, deadline: null };
+      events[id] = { isOpen: false, deadline: null, registeredCount: 0 };
       return;
     }
     var validDeadline = !isNaN(e.deadline);
+    var tab = eventTabOrNull_(id, sheetEvents);
     events[id] = {
-      seats: e.seats,
-      seatsLeft: Math.max(0, e.seats - (counts[id] || 0)),
-      isOpen: e.isOpen && validDeadline && now < e.deadline,
-      deadline: validDeadline ? new Date(e.deadline).toISOString() : null
+      // Open = switched on in the Sheet, deadline not passed, and a tab exists to take the registration.
+      isOpen: e.isOpen && validDeadline && now < e.deadline && tab !== null,
+      deadline: validDeadline ? new Date(e.deadline).toISOString() : null,
+      registeredCount: tab ? readTable_(tab).filter(function (r) { return r.reg_id !== ''; }).length : 0
     };
   });
   var out = { ok: true, events: events, serverTime: new Date(now).toISOString() };
@@ -338,24 +375,24 @@ function register_(b) {
 
   var result;
   try {
-    // Everything from reading seats to writing the row happens while holding the lock,
-    // so two people can never both take the last seat.
-    var live = readEvents_()[p.eventId];
+    // Everything from reading the event's rows to writing the new row happens while holding the lock,
+    // so two simultaneous registrations can never get the same reg_id or both pass the duplicate check.
+    var events = readEvents_();
+    var live = events[p.eventId];
     if (!live || !live.isOpen) return { ok: false, code: 'CLOSED', reason: 'NOT_OPEN' };
     if (isNaN(live.deadline)) return { ok: false, code: 'CLOSED', reason: 'NOT_OPEN' };
     if (Date.now() >= live.deadline) return { ok: false, code: 'CLOSED', reason: 'DEADLINE' };
 
-    var rows = eventRows_(readTable_(SHEET_REGS), p.eventId);
+    var tab = eventTab_(p.eventId, events); // throws -> SERVER; nothing has been written
+    var rows = readTable_(tab);
     var ids = [p.id].concat(p.members.map(function (m) { return m.id; }));
     var dup = findDuplicate_(rows, ids);
     if (dup) return { ok: false, code: 'DUPLICATE', regId: dup };
-    if (rows.length >= live.seats) return { ok: false, code: 'FULL' };
 
     var regId = nextRegId_(ev.code, rows);
-    appendByHeader_(sheet_(SHEET_REGS), {
+    appendByHeader_(tab, {
       timestamp: new Date().toISOString(),
       reg_id: regId,
-      event_id: p.eventId,
       category: p.category,
       name: p.name,
       usn_or_empid: p.id,
@@ -393,25 +430,31 @@ function lookup_(b) {
   var fails = Number(cache.get(key) || 0);
   if (fails >= LOOKUP_MAX_FAILS) return { ok: false, code: 'RATE_LIMITED' };
 
+  // Every event tab is searched; a person registered for several events gets all their passes.
   var passes = [];
-  readTable_(SHEET_REGS).forEach(function (r) {
-    if (normId_(r.usn_or_empid) === id && normPhone_(r.phone) === phone) {
-      passes.push({ regId: r.reg_id, event: r.event_id, name: r.name });
-      return;
-    }
-    if (!r.members_json) return;
-    var members;
-    try {
-      members = JSON.parse(r.members_json);
-    } catch (err) {
-      return;
-    }
-    for (var i = 0; i < members.length; i++) {
-      if (normId_(members[i].id) === id && normPhone_(members[i].phone) === phone) {
-        passes.push({ regId: r.reg_id, event: r.event_id, name: members[i].name });
+  var events = readEvents_();
+  Object.keys(CONFIG.events).forEach(function (eventId) {
+    var tab = eventTabOrNull_(eventId, events);
+    if (!tab) return;
+    readTable_(tab).forEach(function (r) {
+      if (normId_(r.usn_or_empid) === id && normPhone_(r.phone) === phone) {
+        passes.push({ regId: r.reg_id, event: eventId, name: r.name });
         return;
       }
-    }
+      if (!r.members_json) return;
+      var members;
+      try {
+        members = JSON.parse(r.members_json);
+      } catch (err) {
+        return;
+      }
+      for (var i = 0; i < members.length; i++) {
+        if (normId_(members[i].id) === id && normPhone_(members[i].phone) === phone) {
+          passes.push({ regId: r.reg_id, event: eventId, name: members[i].name });
+          return;
+        }
+      }
+    });
   });
 
   if (!passes.length) {
@@ -482,30 +525,79 @@ function checkEmailQuota() {
 }
 
 // ---------------------------------------------------------------------------
-// One-time setup — run from the Apps Script editor (README step 4). Safe to run again:
-// it never deletes or overwrites rows, it only adds missing tabs, headers and events.
+// One-time setup — run from the Apps Script editor (README step 4). Safe to run again, any time:
+// it only ADDS what is missing (the Events tab, an event row, an event tab, a header) and never
+// deletes, clears or overwrites a registration or a coordinator's edit.
 // ---------------------------------------------------------------------------
 
 function setupSheet() {
   var ss = ss_();
   var evSheet = ss.getSheetByName(SHEET_EVENTS) || ss.insertSheet(SHEET_EVENTS);
-  ensureHeaders_(evSheet, EVENT_HEADERS);
-  var regSheet = ss.getSheetByName(SHEET_REGS) || ss.insertSheet(SHEET_REGS);
-  ensureHeaders_(regSheet, REG_HEADERS);
+  ensureEventsHeaders_(evSheet);
 
+  // 1. One row per competition. New rows start OPEN (is_open TRUE); existing rows keep whatever the coordinators set.
   var existing = {};
-  readTable_(SHEET_EVENTS).forEach(function (r) { existing[r.id] = true; });
+  readTable_(evSheet).forEach(function (r) { existing[String(r.id).trim()] = r; });
   Object.keys(CONFIG.events).forEach(function (id) {
-    if (existing[id]) return;
     var e = CONFIG.events[id];
-    // is_open starts FALSE: registration opens when a coordinator ticks the box.
-    appendByHeader_(evSheet, { id: id, code: e.code, name_en: e.name.en, seats: e.seats, deadline_iso: e.deadline, is_open: 'FALSE' });
+    var row = existing[id];
+    if (!row) {
+      appendByHeader_(evSheet, {
+        id: id, code: e.code, name_en: e.name.en, sheet_name: e.sheetName, deadline_iso: e.deadline, is_open: 'TRUE'
+      });
+    } else if (!String(row.sheet_name || '').trim()) {
+      setCellByHeader_(evSheet, row._row, 'sheet_name', e.sheetName); // e.g. a pre-tab-per-event Events tab
+    }
   });
   evSheet.setFrozenRows(1);
-  regSheet.setFrozenRows(1);
-  console.log('Setup complete: tabs "' + SHEET_EVENTS + '" and "' + SHEET_REGS + '" are ready.');
+
+  // 2. One tab per event, named by the Events tab's sheet_name cell (renamed tabs are found again, not duplicated).
+  var events = readEvents_();
+  var used = {};
+  var created = [];
+  Object.keys(CONFIG.events).forEach(function (id) {
+    var name = events[id] ? events[id].sheetName : '';
+    if (!name) throw new Error('Event "' + id + '" has no sheet_name in the ' + SHEET_EVENTS + ' tab.');
+    if (name === SHEET_EVENTS) throw new Error('Event "' + id + '": sheet_name must not be "' + SHEET_EVENTS + '".');
+    if (used[name]) throw new Error('Events "' + used[name] + '" and "' + id + '" use the same sheet_name "' + name + '".');
+    used[name] = id;
+    var sh = ss.getSheetByName(name);
+    if (!sh) {
+      sh = ss.insertSheet(name);
+      created.push(name);
+    }
+    ensureHeaders_(sh, REG_HEADERS);
+    // Plain text for every data column (phone numbers, USNs, leading zeros) — also for rows typed in by hand.
+    if (sh.getMaxRows() > 1) sh.getRange(2, 1, sh.getMaxRows() - 1, REG_HEADERS.length).setNumberFormat('@');
+    sh.setFrozenRows(1);
+  });
+
+  if (ss.getSheetByName(SHEET_OLD_REGS)) {
+    console.warn('An old "' + SHEET_OLD_REGS + '" tab exists. It is no longer used (registrations now go to the per-event tabs) ' +
+      'and was left untouched — delete it by hand once you have copied anything you need.');
+  }
+  console.log('Setup complete. Events tab ready; ' + created.length + ' event tab(s) created' +
+    (created.length ? ': ' + created.join(', ') : '') + '. Nothing was deleted or overwritten.');
 }
 
+/** Events tab: create the header row, or append any required column that is missing. Extra columns are left alone. */
+function ensureEventsHeaders_(sh) {
+  if (sh.getLastRow() < 1 || sh.getLastColumn() < 1) {
+    sh.getRange(1, 1, 1, EVENT_HEADERS.length).setValues([EVENT_HEADERS]);
+    sh.getRange(1, 1, 1, EVENT_HEADERS.length).setFontWeight('bold');
+    return;
+  }
+  var current = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
+  EVENT_HEADERS.forEach(function (h) {
+    if (current.indexOf(h) !== -1) return;
+    var col = current.length + 1;
+    sh.getRange(1, col).setValues([[h]]);
+    sh.getRange(1, col).setFontWeight('bold');
+    current.push(h);
+  });
+}
+
+/** Event tab: create the header row on a brand-new tab; on an existing tab the header row must already match. */
 function ensureHeaders_(sh, headers) {
   var current = sh.getLastRow() >= 1 ? sh.getRange(1, 1, 1, headers.length).getDisplayValues()[0] : [];
   if (current.join('') === '') {
@@ -518,4 +610,15 @@ function ensureHeaders_(sh, headers) {
       throw new Error('Tab "' + sh.getName() + '" row 1 must be: ' + headers.join(' | '));
     }
   }
+  sh.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+}
+
+/** Writes one cell, found by header name, as plain text. */
+function setCellByHeader_(sh, row, header, value) {
+  var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
+  var col = headers.indexOf(header) + 1;
+  if (col < 1) throw new Error('Tab "' + sh.getName() + '" has no "' + header + '" column.');
+  var range = sh.getRange(row, col);
+  range.setNumberFormat('@');
+  range.setValues([[safeCell_(value)]]);
 }

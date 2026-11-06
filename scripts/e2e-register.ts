@@ -77,7 +77,7 @@ async function fillToReview(page: Page, p: Person, mock = '', waitMinTime = true
   const t0 = Date.now();
   await page.goto(`${BASE}/register?event=${p.eventId}${mock ? `&mock=${mock}` : '&mock='}`, { waitUntil: 'networkidle0' });
   await page.waitForSelector('[data-testid=event-summary]');
-  await page.waitForFunction(() => !document.querySelector('[data-testid=seats-left] .skeleton'), { timeout: 15000 });
+  await page.waitForFunction(() => !document.querySelector('[data-testid=event-summary] .skeleton'), { timeout: 15000 });
   const formReady = Date.now(); // ≈ when the form mounted (the server's min-time clock starts there)
   const overflow: boolean[] = [await noHorizontalScroll(page)];
   await page.click('[data-testid=next]');
@@ -298,7 +298,6 @@ async function main() {
 
   const forced: [string, string, (r: Awaited<ReturnType<typeof submit>>) => boolean, string][] = [
     ['duplicate', 'en', (r) => r.kind === 'error' && r.code === 'DUPLICATE' && /^KR26-POM-\d{4}$/.test(r.regId), 'DUPLICATE with real regId'],
-    ['full', 'en', (r) => r.kind === 'error' && r.code === 'FULL', 'FULL'],
     ['closed', 'kn', (r) => r.kind === 'error' && r.code === 'CLOSED' && r.text.includes('ತೆರೆದಿಲ್ಲ'), 'CLOSED (not open), Kannada message'],
     ['deadline', 'en', (r) => r.kind === 'error' && r.code === 'CLOSED' && r.text.includes('deadline'), 'CLOSED (deadline) message'],
     ['server', 'en', (r) => r.kind === 'error' && r.code === 'SERVER', 'SERVER with Retry'],
@@ -349,18 +348,15 @@ async function main() {
     'kn',
     async (page) => {
       await page.goto(`${BASE}/register?event=s-essay&mock=statusdown`, { waitUntil: 'networkidle0' });
-      await page.waitForFunction(() => !document.querySelector('[data-testid=seats-left] .skeleton'), { timeout: 15000 });
+      await page.waitForFunction(() => !document.querySelector('[data-testid=event-summary] .skeleton'), { timeout: 15000 });
       const text = await page.$eval('main', (e) => e.textContent ?? '');
-      const note = text.includes('ಲೈವ್ ಸ್ಥಾನ ಸಂಖ್ಯೆ');
-      const beforeOpen = Date.now() < Date.parse('2026-11-08T00:00:00+05:30');
+      const note = text.includes('ಲೈವ್ ತೆರೆದ/ಮುಚ್ಚಿದ ಸ್ಥಿತಿ');
       const nextDisabled = await page.$eval('[data-testid=next]', (b) => (b as HTMLButtonElement).disabled);
-      if (beforeOpen) {
-        expect(text.includes('ಶೀಘ್ರದಲ್ಲೇ ತೆರೆಯಲಿದೆ') && nextDisabled, 'before 8 Nov the fallback shows "Opens soon" and blocks Next');
-      } else {
-        expect(!nextDisabled, 'after 8 Nov the fallback allows registration');
-      }
-      expect(note, '"live seat count unavailable" note');
-      return `status GET failed → fallback to events.json + clock: "live seat count unavailable" shown; today is before 8 Nov so state = Opens soon, Next disabled: ${nextDisabled}`;
+      // Registration is open from the start, so without live data the fallback (events.json + clock) must allow it.
+      const beforeDeadline = Date.now() < Date.parse('2026-11-18T23:59:00+05:30');
+      expect(note, '"live open/closed status unavailable" note');
+      expect(nextDisabled === !beforeDeadline, `fallback: Next disabled=${nextDisabled}, before deadline=${beforeDeadline}`);
+      return `status GET failed → fallback to events.json + clock: "live open/closed status unavailable" shown; ${beforeDeadline ? 'before the deadline so registration stays open (Next enabled)' : 'deadline passed so Next is disabled'}`;
     },
     /ERR_EMPTY_RESPONSE|Failed to load resource/,
   );

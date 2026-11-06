@@ -37,16 +37,6 @@ export function EventSummary({ event, resolved, loading }: Props) {
             <dd className="m-0 text-ivory-50">{v}</dd>
           </div>
         ))}
-        <dt className="text-ivory-300">{t('register.summary.seats')}</dt>
-        <dd className="m-0 text-ivory-50" data-testid="seats-left">
-          {loading ? (
-            <span className="skeleton inline-block h-4 w-16 align-middle" aria-hidden="true" />
-          ) : resolved?.seatsLeft != null ? (
-            t('register.summary.seatsOf', { left: formatNumber(resolved.seatsLeft, lang), total: formatNumber(resolved.seats, lang) })
-          ) : (
-            <span className="text-ivory-300">{t('state.liveUnavailable')}</span>
-          )}
-        </dd>
       </dl>
     </div>
   );

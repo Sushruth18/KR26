@@ -1,12 +1,12 @@
 /**
  * Dev-only forced mock outcome. Set from the floating dev panel or by opening any page with
- * ?mock=<state> (e.g. /register?event=s-essay&mock=full). ?mock= with no value clears it.
+ * ?mock=<state> (e.g. /register?event=s-essay&mock=closed). ?mock= with no value clears it.
  * In production builds these functions are never called (guarded by import.meta.env.DEV).
  */
 import { getItem, removeItem, setItem } from './storage';
 
 export const MOCK_KEY = 'kr26.mock';
-export const MOCK_STATES = ['duplicate', 'full', 'closed', 'deadline', 'validation', 'server', 'network', 'slow', 'statusdown'] as const;
+export const MOCK_STATES = ['duplicate', 'closed', 'deadline', 'validation', 'server', 'network', 'slow', 'statusdown'] as const;
 export type MockState = (typeof MOCK_STATES)[number];
 
 export function getMockState(): MockState | null {

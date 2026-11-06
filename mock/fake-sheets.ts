@@ -70,10 +70,23 @@ export class FakeSheet {
   formats: string[][] = [];
   throwOnAccess = false;
 
+  /** Rows in the grid, like a new Sheets tab (1000). Grows if more rows are written. */
+  private maxRows = 1000;
+
   constructor(private name: string) {}
 
   getName() {
     return this.name;
+  }
+
+  /** Renaming a tab, as a coordinator does by double-clicking it. */
+  setName(n: string) {
+    this.name = n;
+    return this;
+  }
+
+  getMaxRows() {
+    return Math.max(this.maxRows, this.cells.length);
   }
 
   checkThrow() {
@@ -139,14 +152,24 @@ export class FakeSheet {
 }
 
 export class FakeSpreadsheet {
-  sheets = new Map<string, FakeSheet>();
+  /** All tabs, in order. Looked up by their CURRENT name, so a renamed tab is found under its new name only. */
+  sheets: FakeSheet[] = [];
   getSheetByName(n: string) {
-    return this.sheets.get(n) ?? null;
+    return this.sheets.find((s) => s.getName() === n) ?? null;
   }
+  getSheets() {
+    return [...this.sheets];
+  }
+  /** Like Sheets: inserting a tab whose name is already taken throws. */
   insertSheet(n: string) {
+    if (this.getSheetByName(n)) throw new Error(`A sheet with the name "${n}" already exists. Please enter another name.`);
     const s = new FakeSheet(n);
-    this.sheets.set(n, s);
+    this.sheets.push(s);
     return s;
+  }
+  /** Test helper: every cell of every tab, for "nothing changed" comparisons. */
+  snapshot() {
+    return JSON.stringify(this.sheets.map((s) => [s.getName(), s.cells, s.formats]));
   }
 }
 

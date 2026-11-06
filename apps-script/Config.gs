@@ -90,7 +90,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 100,
+      "sheetName": "ESY – Essay Writing",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "s-poem": {
@@ -110,7 +110,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 100,
+      "sheetName": "POM – Poem",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "s-painting": {
@@ -130,7 +130,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 100,
+      "sheetName": "PNT – Painting",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "s-debate": {
@@ -150,7 +150,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 100,
+      "sheetName": "DEB – Debate",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "s-quiz": {
@@ -170,7 +170,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 30,
+      "sheetName": "QIZ – Quiz",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "s-group-dance": {
@@ -190,7 +190,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 30,
+      "sheetName": "GDN – Group Dance",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "s-treasure-hunt": {
@@ -210,7 +210,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 30,
+      "sheetName": "TRH – Treasure Hunt",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "s-group-singing": {
@@ -230,7 +230,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 30,
+      "sheetName": "GSG – Group Singing",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "s-rangoli": {
@@ -250,7 +250,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 30,
+      "sheetName": "RGL – Rangoli",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "f-debate": {
@@ -270,7 +270,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 100,
+      "sheetName": "FDB – Faculty Debate",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "f-group-dance": {
@@ -290,7 +290,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 30,
+      "sheetName": "FGD – Faculty Group Dance",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "f-group-singing": {
@@ -310,7 +310,7 @@ var CONFIG = {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
-      "seats": 30,
+      "sheetName": "FGS – Faculty Group Singing",
       "deadline": "2026-11-18T23:59:00+05:30"
     }
   }
