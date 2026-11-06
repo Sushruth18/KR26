@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { ZodTypeAny } from 'zod';
 import type { LogoAsset, LogoKey } from '../src/lib/logos';
@@ -105,6 +105,13 @@ if (site) {
     const want = [0, 2, 4].map((i) => parseInt(hex!.slice(i, i + 2), 16)).join(' ');
     if (!rgb) errors.push(`tokens.css: --${name}-rgb missing`);
     else if (rgb.slice(1).join(' ') !== want) errors.push(`tokens.css: --${name}-rgb is "${rgb.slice(1).join(' ')}", expected "${want}"`);
+  }
+}
+
+// WhatsApp invite links are coordinator-only data (Events tab → whatsapp_url): they must never be committed to the repo.
+for (const f of readdirSync(dataDir).filter((n) => n.endsWith('.json'))) {
+  if (/chat\.whatsapp\.com|whatsapp\.com\/channel/i.test(readFileSync(resolve(dataDir, f), 'utf8'))) {
+    errors.push(`${f}: contains a WhatsApp link — those belong in the Sheet's Events tab (whatsapp_url), not in the repo`);
   }
 }
 

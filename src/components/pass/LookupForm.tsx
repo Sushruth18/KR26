@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import { lookup } from '../../lib/api';
 import { normId, normPhone, isValidPhone } from '../../lib/validation';
+import { cleanWhatsappUrl } from '../../lib/whatsapp';
 import type { PassData } from '../../lib/passStore';
 import { Button } from '../ui/Button';
 
@@ -24,7 +25,12 @@ export function LookupForm({ onFound }: { onFound: (passes: PassData[]) => void 
     const res = await lookup(nid, np);
     if (res.ok) {
       setState({ kind: 'idle' });
-      onFound(res.passes.map((p) => ({ regId: p.regId, eventId: p.event, name: p.name, members: [], teamName: '' })));
+      onFound(
+        res.passes.map((p) => {
+          const whatsappUrl = cleanWhatsappUrl(p.whatsappUrl);
+          return { regId: p.regId, eventId: p.event, name: p.name, members: [], teamName: '', ...(whatsappUrl ? { whatsappUrl } : {}) };
+        }),
+      );
       return;
     }
     const key = ['NOT_FOUND', 'RATE_LIMITED', 'VALIDATION'].includes(res.code)

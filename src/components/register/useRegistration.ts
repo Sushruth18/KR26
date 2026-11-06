@@ -10,6 +10,7 @@ import { getEvent, site } from '../../lib/data';
 import { register as apiRegister, type ApiError } from '../../lib/api';
 import { emptyMember, emptyRegistration, registrationSchema, toPayload, type RegistrationValues } from '../../lib/validation';
 import { savePass, type PassData } from '../../lib/passStore';
+import { cleanWhatsappUrl } from '../../lib/whatsapp';
 import { useLang } from '../../hooks/useLang';
 import { clearDraft, loadDraft, saveDraft } from './useRegistrationDraft';
 import { STEP_FIELDS, stepOfField, stepsFor, type StepId } from './steps';
@@ -91,12 +92,14 @@ export function useRegistration(paramEvent: string | null) {
           const res = await apiRegister(toPayload(values, event, Date.now() - init.startedAt, lang));
           busy.current = false;
           if (res.ok) {
+            const whatsappUrl = cleanWhatsappUrl(res.whatsappUrl); // re-checked: it becomes an href
             const pass: PassData = {
               regId: res.regId,
               eventId: event.id,
               name: res.name,
               members: event.teamSize.max > 1 ? values.members.map((m) => m.name.trim()) : [],
               teamName: event.teamSize.max > 1 ? values.teamName.trim() : '',
+              ...(whatsappUrl ? { whatsappUrl } : {}),
             };
             savePass(pass);
             clearDraft();

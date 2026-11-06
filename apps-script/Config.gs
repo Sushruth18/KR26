@@ -8,11 +8,12 @@
 
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
-var CONFIG_SCHEMA = 2;
-var CONFIG_VERSION = 'e9b500b5';
+var CONFIG_SCHEMA = 3;
+var CONFIG_VERSION = 'aa337bed';
 
 var CONFIG = {
   "minFormMs": 3000,
+  "contactEmail": "",
   "departments": [
     "CSE",
     "ISE",
@@ -71,6 +72,10 @@ var CONFIG = {
     "departmentOther": {
       "min": 2,
       "max": 40
+    },
+    "whatsapp": {
+      "group": "^https://chat\\.whatsapp\\.com/[A-Za-z0-9]{10,40}$",
+      "channel": "^https://whatsapp\\.com/channel/[A-Za-z0-9_-]{10,60}$"
     }
   },
   "day1Date": "2026-11-20",

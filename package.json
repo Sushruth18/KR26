@@ -16,6 +16,7 @@
     "test:server": "tsx scripts/test-apps-script.ts",
     "e2e": "tsx scripts/e2e-register.ts",
     "e2e:competitions": "tsx scripts/e2e-competitions.ts",
+    "e2e:pass": "tsx scripts/e2e-pass.ts",
     "race": "tsx scripts/race-test.ts",
     "shot": "tsx scripts/shot.ts",
     "e2e:home": "tsx scripts/e2e-home.ts",

@@ -47,11 +47,13 @@ export interface StatusResponse {
   /** Hash of the Config.gs the deployed script runs (compare with `npm run gas:config`); console/debugging only. */
   configVersion?: string;
 }
-export type RegisterResponse = { ok: true; regId: string; event: string; name: string } | ApiError;
+/** whatsappUrl: the event's WhatsApp group/channel invite — only when the coordinators have set a valid one. */
+export type RegisterResponse = { ok: true; regId: string; event: string; name: string; whatsappUrl?: string } | ApiError;
 export interface LookupPass {
   regId: string;
   event: string;
   name: string;
+  whatsappUrl?: string;
 }
 export type LookupResponse = { ok: true; passes: LookupPass[] } | ApiError;
 

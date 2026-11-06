@@ -201,6 +201,20 @@
     background: var(--maroon-900);
   }
 
+  /* "Join the WhatsApp group": deep green so white text keeps > 6:1 contrast */
+  .btn-whatsapp {
+    background: #0e6b4d;
+    color: #ffffff;
+    border-color: var(--success);
+  }
+  .btn-whatsapp:hover {
+    background: #12805b;
+    border-color: #6fd9a3;
+  }
+  .btn-whatsapp:active:not(:disabled) {
+    background: #0a5239;
+  }
+
   .btn-ghost {
     background: transparent;
     color: var(--ivory-50);

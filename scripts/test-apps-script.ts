@@ -4,8 +4,9 @@
  */
 import assert from 'node:assert/strict';
 import { createGasRuntime, createOpenRuntime, type GasRuntime } from '../mock/gas-runtime';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { buildGasConfigSource, computeConfigVersion, GAS_CONFIG_SCHEMA } from './gas-config';
+import { cleanWhatsappUrl } from '../src/lib/whatsapp';
 import { isValidId, normEmail, normId, normPhone, normText } from '../src/lib/validation';
 
 let passed = 0;
@@ -65,7 +66,7 @@ console.log('\nSetup & status');
 t('setupSheet creates the Events tab and one tab per event — all 12 — and NO shared Registrations tab', () => {
   const rt = createGasRuntime();
   setup(rt);
-  assert.equal(rt.events().getRange(1, 1, 1, 6).getDisplayValues()[0]?.join('|'), 'id|code|name_en|sheet_name|deadline_iso|is_open');
+  assert.equal(rt.events().getRange(1, 1, 1, 7).getDisplayValues()[0]?.join('|'), 'id|code|name_en|sheet_name|deadline_iso|is_open|whatsapp_url');
   assert.equal(rt.events().getLastRow(), 13);
   assert.equal(ids(rt).length, 12);
   const names = rt.ss.getSheets().map((x) => x.getName());
@@ -174,7 +175,7 @@ t('setupSheet upgrades an older Events tab (seats column, no sheet_name): adds s
   evs.getRange(2, 1, 1, 6).setValues([['s-essay', 'ESY', 'Essay Writing', '100', '2026-11-18T23:59:00+05:30', 'FALSE']]);
   setup(rt);
   const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
-  assert.deepEqual(headers, ['id', 'code', 'name_en', 'seats', 'deadline_iso', 'is_open', 'sheet_name']);
+  assert.deepEqual(headers, ['id', 'code', 'name_en', 'seats', 'deadline_iso', 'is_open', 'sheet_name', 'whatsapp_url']);
   assert.equal(rt.eventField('s-essay', 'sheet_name'), 'ESY – Essay Writing');
   assert.equal(rt.eventField('s-essay', 'is_open'), 'FALSE'); // existing value kept
   assert.equal(rt.eventField('s-poem', 'is_open'), 'TRUE');
@@ -971,14 +972,14 @@ t('setupSheet throws instead of "Setup complete" when the Events tab ends up wit
 t('setupSheet with a stale schema (Config.gs from another version) → CONFIG_MISMATCH error, nothing created', () => {
   const rt = createGasRuntime();
   rt.ctx.CONFIG_SCHEMA = GAS_CONFIG_SCHEMA - 1;
-  assert.throws(() => setup(rt), /Config\.gs is schema 1 but Code\.gs expects schema 2/);
+  assert.throws(() => setup(rt), new Error(`Config.gs is schema ${GAS_CONFIG_SCHEMA - 1} but Code.gs expects schema ${GAS_CONFIG_SCHEMA} — paste the latest Code.gs AND Config.gs together.`));
   assert.equal(sheetCount(rt), 0);
 });
 t('checkConfig() logs version, schema and event count — and fails on an empty Config', () => {
   const rt = createGasRuntime();
   const logs = captureLogs(rt);
   (rt.ctx.checkConfig as () => void)();
-  assert.match(logs[0] ?? '', /^Config\.gs OK — version [0-9a-f]{8}, schema 2, 12 events: s-essay/);
+  assert.match(logs[0] ?? '', new RegExp(`^Config\\.gs OK — version [0-9a-f]{8}, schema ${GAS_CONFIG_SCHEMA}, 12 events: s-essay`));
   cfgOf(rt).events = {};
   assert.throws(() => (rt.ctx.checkConfig as () => void)(), /no events/);
 });
@@ -1014,6 +1015,281 @@ t('a stale status cache cannot hide a broken Config.gs', () => {
   st(rt); // fills the cache
   rt.ctx.CONFIG_SCHEMA = 1;
   assert.deepEqual(rt.get({ action: 'status' }), { ok: false, code: 'SERVER', reason: 'CONFIG_MISMATCH' });
+});
+
+console.log('\nWhatsApp group links (Events tab → whatsapp_url)');
+const WA = 'https://chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv';
+const WA2 = 'https://chat.whatsapp.com/ZyXwVuTsRqPoNmLkJiHgFe';
+const WA_CHANNEL = 'https://whatsapp.com/channel/0029VaAbCdEfGhIjKlMnOpQr';
+const setWa = (rt: GasRuntime, id: string, v: string) => rt.setEventField(id, 'whatsapp_url', v);
+type RegOk = { ok: true; regId: string; event: string; name: string; whatsappUrl?: string };
+type LookupOk = { ok: true; passes: { regId: string; event: string; name: string; whatsappUrl?: string }[] };
+
+t('a new Events tab has the whatsapp_url column (last), empty for all 12 events and plain text', () => {
+  const rt = createGasRuntime();
+  setup(rt);
+  const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
+  assert.equal(headers[headers.length - 1], 'whatsapp_url');
+  for (const id of ids(rt)) assert.equal(rt.eventField(id, 'whatsapp_url'), '', id);
+  const col = headers.indexOf('whatsapp_url') + 1;
+  for (const row of [2, 13, 50]) assert.equal(rt.events().formats[row - 1]?.[col - 1], '@', `row ${row} is plain text`);
+});
+t('setupSheet adds a missing whatsapp_url column to an existing Events tab without touching any value, and a re-run changes nothing', () => {
+  const rt = createGasRuntime();
+  const evs = rt.ss.insertSheet('Events');
+  evs.getRange(1, 1, 1, 6).setValues([['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open']]);
+  evs.getRange(2, 1, 1, 6).setValues([['s-essay', 'ESY', 'Essay Writing', 'ESY – Essay Writing', '2026-11-18T23:59:00+05:30', 'FALSE']]);
+  evs.getRange(3, 1, 1, 6).setValues([['s-poem', 'POM', 'Poem', 'My renamed poem tab', '2026-11-17T10:00:00+05:30', 'TRUE']]);
+  const logs = captureLogs(rt);
+  setup(rt);
+  const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
+  assert.deepEqual(headers, ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open', 'whatsapp_url']);
+  assert.equal(rt.eventField('s-essay', 'is_open'), 'FALSE', 'coordinator close kept');
+  assert.equal(rt.eventField('s-poem', 'sheet_name'), 'My renamed poem tab');
+  assert.equal(rt.eventField('s-poem', 'deadline_iso'), '2026-11-17T10:00:00+05:30');
+  assert.equal(rt.eventField('s-essay', 'whatsapp_url'), '');
+  assert.ok(logs.some((l) => /Setup complete/.test(l)));
+  const before = rt.ss.snapshot();
+  setup(rt);
+  assert.equal(rt.ss.snapshot(), before);
+});
+t('setupSheet never fills in or overwrites a whatsapp_url a coordinator pasted', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  setup(rt);
+  setup(rt);
+  assert.equal(rt.eventField('s-essay', 'whatsapp_url'), WA);
+  assert.equal(rt.eventField('s-poem', 'whatsapp_url'), '');
+});
+t('an Events tab without the (optional) whatsapp_url column still works: register and lookup answer without a link', () => {
+  const rt = createOpenRuntime();
+  const evs = rt.events();
+  const col = (evs.getRange(1, 1, 1, evs.getLastColumn()).getDisplayValues()[0] ?? []).indexOf('whatsapp_url') + 1;
+  evs.getRange(1, col).setValues([['notes']]); // column renamed: now there is no whatsapp_url
+  const r = reg(rt);
+  assert.deepEqual(r, { ok: true, regId: 'KR26-ESY-0001', event: 's-essay', name: 'Ananya Rao' });
+  assert.equal((rt.post(lookupBody) as unknown as LookupOk).passes[0]?.whatsappUrl, undefined);
+});
+
+console.log('\nWhatsApp link validation (server = site)');
+const VALID: [string, string][] = [
+  [WA, WA],
+  [`  ${WA}  `, WA],
+  [`${WA}?mode=ems_copy_t`, WA],
+  [`${WA}/`, WA],
+  [`${WA}#join`, WA],
+  [WA_CHANNEL, WA_CHANNEL],
+  [`${WA_CHANNEL}?mode=r_c`, WA_CHANNEL],
+];
+const INVALID = [
+  '',
+  '   ',
+  'http://chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv',
+  'https://chat.whatsapp.com/',
+  'https://chat.whatsapp.com/short',
+  'https://chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv/extra',
+  'https://chat.whatsapp.com/AbCdEfGhIjKl MnOpQrStUv',
+  'https://chat.whatsapp.com/AbCdEfGhIjKlMn../x',
+  'https://chat.whatsapp.com.evil.example/AbCdEfGhIjKlMnOpQrStUv',
+  'https://evil.example/https://chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv',
+  'https://user@chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv',
+  'https://chat.whatsapp.com:8080/AbCdEfGhIjKlMnOpQrStUv',
+  'https://www.chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv',
+  'https://wa.me/919845012345',
+  'https://api.whatsapp.com/send?phone=919845012345',
+  'https://whatsapp.com/channel/',
+  'https://whatsapp.com/channel/short',
+  'javascript:alert(1)',
+  'data:text/html,<script>alert(1)</script>',
+  `${WA} ${WA2}`,
+  `https://chat.whatsapp.com/<script>alert(1)</script>`,
+  'chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv',
+  'HTTPS://CHAT.WHATSAPP.COM/AbCdEfGhIjKlMnOpQrStUv',
+  '12345',
+];
+t('valid links are accepted and cleaned (trim, ?query, #fragment, trailing slash removed) — Code.gs and the site agree', () => {
+  const server = createOpenRuntime().ctx.cleanWhatsappUrl_ as (v: unknown) => string;
+  for (const [raw, want] of VALID) {
+    assert.equal(server(raw), want, `server ${JSON.stringify(raw)}`);
+    assert.equal(cleanWhatsappUrl(raw), want, `client ${JSON.stringify(raw)}`);
+  }
+});
+t('anything else is rejected — Code.gs and the site agree', () => {
+  const server = createOpenRuntime().ctx.cleanWhatsappUrl_ as (v: unknown) => string;
+  for (const raw of INVALID) {
+    assert.equal(server(raw), '', `server ${JSON.stringify(raw)}`);
+    assert.equal(cleanWhatsappUrl(raw), null, `client ${JSON.stringify(raw)}`);
+  }
+  for (const odd of [null, undefined, 42, {}, []]) assert.equal(cleanWhatsappUrl(odd), null);
+});
+
+console.log('\nWhatsApp link — who gets to see it');
+t('status NEVER contains the link (valid, invalid, or channel), not even as a key — also from the cache', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  setWa(rt, 's-poem', 'https://example.org/not-whatsapp');
+  setWa(rt, 's-quiz', WA_CHANNEL);
+  const fresh = st(rt);
+  const cached = rt.get({ action: 'status' }) as unknown as typeof fresh;
+  for (const s of [fresh, cached]) {
+    assert.doesNotMatch(JSON.stringify(s), /whatsapp|AbCdEf|0029Va|example\.org/i);
+    assert.deepEqual(Object.keys(s.events['s-essay'] ?? {}).sort(), ['deadline', 'isOpen', 'registeredCount']);
+  }
+});
+t('a successful register answer carries the link of THAT event only', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  setWa(rt, 's-poem', WA2);
+  const r = reg(rt) as unknown as RegOk;
+  assert.deepEqual(r, { ok: true, regId: 'KR26-ESY-0001', event: 's-essay', name: 'Ananya Rao', whatsappUrl: WA });
+  const p = reg(rt, { eventId: 's-poem' }) as unknown as RegOk;
+  assert.equal(p.whatsappUrl, WA2);
+  const none = reg(rt, { eventId: 's-painting' }) as unknown as RegOk;
+  assert.equal(none.ok, true);
+  assert.ok(!('whatsappUrl' in none), 'no link set → no key at all');
+});
+t('a link pasted with a ?mode=… suffix is returned cleaned; a channel link is accepted', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', `${WA}?mode=ems_copy_t`);
+  setWa(rt, 's-poem', WA_CHANNEL);
+  assert.equal((reg(rt) as unknown as RegOk).whatsappUrl, WA);
+  assert.equal((reg(rt, { eventId: 's-poem' }) as unknown as RegOk).whatsappUrl, WA_CHANNEL);
+});
+t('errors never carry the link: DUPLICATE, CLOSED (switched off and deadline), VALIDATION', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  reg(rt);
+  const dup = reg(rt);
+  assert.deepEqual(dup, { ok: false, code: 'DUPLICATE', regId: 'KR26-ESY-0001' });
+  setWa(rt, 's-poem', WA2);
+  rt.setEventField('s-poem', 'is_open', 'FALSE');
+  const closed = reg(rt, { eventId: 's-poem' });
+  assert.deepEqual(closed, { ok: false, code: 'CLOSED', reason: 'NOT_OPEN' });
+  rt.setEventField('s-poem', 'is_open', 'TRUE');
+  rt.setEventField('s-poem', 'deadline_iso', '2020-01-01T00:00:00+05:30');
+  assert.deepEqual(reg(rt, { eventId: 's-poem' }), { ok: false, code: 'CLOSED', reason: 'DEADLINE' });
+  assert.doesNotMatch(JSON.stringify(reg(rt, { phone: '1' })), /whatsapp/i);
+});
+t('an invalid cell is ignored: registration still works, no link key, and the warning names the event but not the value', () => {
+  const rt = createOpenRuntime();
+  const logs = captureLogs(rt);
+  setWa(rt, 's-essay', 'https://evil.example/join-me-secret-token');
+  const r = reg(rt) as unknown as RegOk;
+  assert.equal(r.ok, true);
+  assert.ok(!('whatsappUrl' in r));
+  assert.ok(logs.some((l) => /^WARN Ignoring the whatsapp_url of event "s-essay"/.test(l)), logs.join(' | '));
+  assert.ok(!logs.some((l) => /evil\.example|secret-token/.test(l)), 'the pasted value is not logged');
+  assert.equal(rt.mail.sent.length, 1, 'the confirmation email still goes out');
+  assert.doesNotMatch(`${rt.mail.sent[0]?.body}${rt.mail.sent[0]?.htmlBody}`, /whatsapp|evil/i);
+});
+t('an empty or whitespace-only cell is "no link": no key, no warning', () => {
+  const rt = createOpenRuntime();
+  const logs = captureLogs(rt);
+  setWa(rt, 's-essay', '   ');
+  assert.ok(!('whatsappUrl' in reg(rt)));
+  assert.ok(!logs.some((l) => /whatsapp_url/.test(l)));
+});
+t('lookup returns the link together with each pass (individual and team member), only for events that have one', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  setWa(rt, 's-quiz', WA_CHANNEL);
+  reg(rt);
+  reg(rt, { eventId: 's-poem' });
+  rt.post(quiz); // Ravi K (1BY23CS011 / 9845011111) is a team member
+  const mine = rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }) as unknown as LookupOk;
+  assert.deepEqual(mine.passes.map((p) => [p.event, p.whatsappUrl ?? null]), [['s-essay', WA], ['s-poem', null]]);
+  const ravi = rt.post({ action: 'lookup', id: '1BY23CS011', phone: '9845011111' }) as unknown as LookupOk;
+  assert.deepEqual(ravi.passes, [{ regId: 'KR26-QIZ-0001', event: 's-quiz', name: 'Ravi K', whatsappUrl: WA_CHANNEL }]);
+});
+t('lookup with the wrong phone leaks nothing: NOT_FOUND only', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  reg(rt);
+  const r = rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845099999' });
+  assert.deepEqual(r, { ok: false, code: 'NOT_FOUND' });
+  assert.doesNotMatch(JSON.stringify(r), /whatsapp/i);
+});
+t('lookup only looks at (and warns about) the link of an event where the person really has a pass', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  setWa(rt, 's-essay', WA);
+  setWa(rt, 's-debate', 'not a link'); // someone else\'s event
+  const logs = captureLogs(rt);
+  rt.post(lookupBody);
+  assert.ok(!logs.some((l) => /whatsapp_url/.test(l)), logs.join(' | '));
+});
+t('the link is never written to a registration tab, and no repo data file or Config.gs contains one', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  reg(rt);
+  for (const id of ids(rt)) assert.doesNotMatch(JSON.stringify(rt.tab(id).cells), /whatsapp/i, id);
+  const files = ['apps-script/Config.gs', ...readdirSync('src/data').filter((f) => f.endsWith('.json')).map((f) => `src/data/${f}`)];
+  for (const f of files) assert.doesNotMatch(readFileSync(f, 'utf8'), /chat\.whatsapp\.com|whatsapp\.com\/channel/, f);
+});
+
+console.log('\nConfirmation email: WhatsApp button, HTML body, reply-to');
+const mailOf = (rt: GasRuntime) => rt.mail.sent[rt.mail.sent.length - 1]!;
+const count = (hay: string, needle: string) => hay.split(needle).length - 1;
+t('with a link: both language blocks of the plain text carry "Join the WhatsApp group" and the link', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  reg(rt);
+  const m = mailOf(rt);
+  const [knBlock = '', enBlock = ''] = m.body.split('\n---\n');
+  assert.ok(knBlock.includes(`ವಾಟ್ಸಾಪ್ ಗುಂಪಿಗೆ ಸೇರಿ: ${WA}`), 'Kannada line');
+  assert.ok(enBlock.includes(`Join the WhatsApp group: ${WA}`), 'English line');
+  assert.equal(count(m.body, WA), 2);
+  assert.match(m.body, /KR26-ESY-0001/);
+});
+t('with a link: the HTML body has a real button (<a> with the link) in both blocks, and is sent next to the text body', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  reg(rt);
+  const m = mailOf(rt);
+  assert.ok(m.htmlBody && m.body, 'both bodies');
+  assert.equal(count(m.htmlBody ?? '', `<a href="${WA}"`), 2, 'one button per language');
+  assert.ok((m.htmlBody ?? '').includes('>Join the WhatsApp group</a>') && (m.htmlBody ?? '').includes('>ವಾಟ್ಸಾಪ್ ಗುಂಪಿಗೆ ಸೇರಿ</a>'));
+  assert.match(m.htmlBody ?? '', /KR26-ESY-0001/);
+  assert.equal(m.to, 'ananya@example.com');
+  assert.equal(m.name, 'Honnudi Kannada Sangha');
+});
+t('without a link the email is as before (no WhatsApp wording anywhere) and still has an HTML body', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  const m = mailOf(rt);
+  assert.doesNotMatch(`${m.body}${m.htmlBody}`, /whatsapp|ವಾಟ್ಸಾಪ್/i);
+  assert.match(m.body, /ನೋಂದಣಿ ಐಡಿ: KR26-ESY-0001/);
+  assert.match(m.htmlBody ?? '', /KR26-ESY-0001/);
+});
+t('HTML body escapes what the registrant typed (team name "Tom & Co"), the text body keeps it as typed', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-quiz', WA);
+  rt.post({ ...quiz, teamName: 'Tom & Co' });
+  const m = mailOf(rt);
+  assert.ok(m.body.includes('Tom & Co'));
+  assert.ok((m.htmlBody ?? '').includes('Tom &amp; Co'));
+  assert.ok(!(m.htmlBody ?? '').includes('Tom & Co'));
+  assert.equal(count(m.htmlBody ?? '', `<a href="${WA}"`), 2);
+});
+t('replyTo is set only when site.json has a contact email (empty today → none); a bad value is ignored', () => {
+  const rt = createOpenRuntime();
+  assert.equal((rt.ctx.CONFIG as { contactEmail: string }).contactEmail, '', 'site.json has no contact email — none is invented');
+  reg(rt);
+  assert.ok(!('replyTo' in mailOf(rt)));
+  (rt.ctx.CONFIG as { contactEmail: string }).contactEmail = 'kannada.sangha@example.org';
+  reg(rt, { id: '1BY23CS002' });
+  assert.equal(mailOf(rt).replyTo, 'kannada.sangha@example.org');
+  (rt.ctx.CONFIG as { contactEmail: string }).contactEmail = 'not an email';
+  reg(rt, { id: '1BY23CS003' });
+  assert.ok(!('replyTo' in mailOf(rt)));
+});
+t('a mail failure (quota/outage) with a link set still registers and still returns the link', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  rt.mail.fail = true;
+  const r = reg(rt) as unknown as RegOk;
+  assert.equal(r.ok, true);
+  assert.equal(r.whatsappUrl, WA);
 });
 
 console.log('\nClient/server parity');

@@ -165,8 +165,9 @@ async function cropStats(png: Buffer, region: { left: number; top: number; width
  * each logo's area in the 2× PNG must hold image detail, not flat card background.
  */
 async function logosInPng(page: Page, png: Buffer) {
-  const boxes = await page.$$eval('[data-testid=pass-logos] img', (imgs) => {
-    const card = document.querySelector('[data-testid=pass-card]')!.getBoundingClientRect();
+  // The PNG is made from the fixed-size off-screen export copy of the card, so measure that one.
+  const boxes = await page.$$eval('[data-testid=pass-logos-export] img', (imgs) => {
+    const card = document.querySelector('[data-testid=pass-card-export]')!.getBoundingClientRect();
     return imgs.map((el) => {
       const img = el as HTMLImageElement;
       const b = img.getBoundingClientRect();
@@ -256,8 +257,8 @@ async function main() {
     expect(png.bytes.subarray(1, 4).toString() === 'PNG', 'file is a PNG');
     const w = png.bytes.readUInt32BE(16);
     const h = png.bytes.readUInt32BE(20);
-    const cardW = await page.$eval('[data-testid=pass-card]', (e) => e.getBoundingClientRect().width);
-    expect(Math.abs(w - cardW * 2) <= 2, `PNG width ${w} should be 2× card width ${cardW}`);
+    const cardW = await page.$eval('[data-testid=pass-card-export]', (e) => e.getBoundingClientRect().width);
+    expect(cardW === 380 && w === 760, `PNG width ${w} should be 2× the fixed 380px export card (${cardW})`);
 
     const ics = await captureDownload(page, '[data-testid=download-ics]');
     writeFileSync(resolve(OUT, ics.name), ics.bytes);

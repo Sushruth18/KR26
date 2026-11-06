@@ -1,4 +1,5 @@
 import { getItem, setItem } from './storage';
+import { cleanWhatsappUrl } from './whatsapp';
 
 export interface PassData {
   regId: string;
@@ -7,6 +8,8 @@ export interface PassData {
   /** Other team members' names (registrant excluded). Empty for individual events or looked-up passes. */
   members: string[];
   teamName: string;
+  /** The event's WhatsApp group/channel link, when the server sent one. Shown as a button; never drawn into the PNG. */
+  whatsappUrl?: string;
 }
 
 const KEY = 'kr26.lastPass';
@@ -21,7 +24,15 @@ export function loadPass(): PassData | null {
   try {
     const p = JSON.parse(raw) as Partial<PassData>;
     if (typeof p.regId !== 'string' || typeof p.eventId !== 'string' || typeof p.name !== 'string') return null;
-    return { regId: p.regId, eventId: p.eventId, name: p.name, members: Array.isArray(p.members) ? p.members : [], teamName: p.teamName ?? '' };
+    const whatsappUrl = cleanWhatsappUrl(p.whatsappUrl) ?? undefined;
+    return {
+      regId: p.regId,
+      eventId: p.eventId,
+      name: p.name,
+      members: Array.isArray(p.members) ? p.members : [],
+      teamName: p.teamName ?? '',
+      ...(whatsappUrl ? { whatsappUrl } : {}),
+    };
   } catch {
     return null;
   }

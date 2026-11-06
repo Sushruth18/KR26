@@ -157,6 +157,8 @@
     "download": "Download pass",
     "downloading": "Preparing…",
     "downloadError": "Download failed. Try again, or take a screenshot.",
+    "whatsapp": "Join the WhatsApp group",
+    "whatsappHint": "Opens WhatsApp in a new tab.",
     "calendar": "Add to calendar",
     "back": "Back to competitions",
     "icsSuffix": "Karnataka Rajyotsava 2026",

@@ -5,14 +5,18 @@
  * website's data — never edit Config.gs by hand). Setup steps: apps-script/README.md.
  *
  * Layout of the spreadsheet
- *   Events tab        one row per competition: id | code | name_en | sheet_name | deadline_iso | is_open
+ *   Events tab        one row per competition: id | code | name_en | sheet_name | deadline_iso | is_open | whatsapp_url
+ *                     (whatsapp_url is optional and private: it is only ever returned to someone who just registered
+ *                     for that event, or who looked their pass up — never by ?action=status.)
  *   one tab per event named by that row's sheet_name (e.g. "ESY – Essay Writing"), holding only that
  *                     event's registrations. There is no shared "Registrations" tab.
  *
  * Endpoints
  *   GET  ?action=status                         -> { ok, events: { [id]: { isOpen, deadline, registeredCount } }, serverTime, configVersion }
- *   POST { action: "register", ...fields }      -> { ok:true, regId, event, name } | { ok:false, code, reason?, field?, regId? }
- *   POST { action: "lookup", id, phone }        -> { ok:true, passes:[{ regId, event, name }] } | { ok:false, code }
+ *   POST { action: "register", ...fields }      -> { ok:true, regId, event, name, whatsappUrl? } | { ok:false, code, reason?, field?, regId? }
+ *   POST { action: "lookup", id, phone }        -> { ok:true, passes:[{ regId, event, name, whatsappUrl? }] } | { ok:false, code }
+ * whatsappUrl is present only when the event's whatsapp_url cell holds a valid https://chat.whatsapp.com/<code> (or
+ * https://whatsapp.com/channel/<code>) link; any other value is ignored and logged (never returned).
  * The browser sends POST bodies as Content-Type text/plain so no CORS preflight is needed.
  *
  * Registration is open unless the event's is_open cell is not TRUE or its deadline has passed. There is no
@@ -37,7 +41,8 @@
 
 var SHEET_EVENTS = 'Events';
 var SHEET_OLD_REGS = 'Registrations'; // retired shared tab — never read or written; setupSheet only mentions it in the log
-var EVENT_HEADERS = ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open'];
+// whatsapp_url is optional: coordinators paste a group/channel invite link there (setupSheet adds the empty column).
+var EVENT_HEADERS = ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open', 'whatsapp_url'];
 // Columns of every event tab (no event_id: the tab is the event).
 var REG_HEADERS = [
   'timestamp', 'reg_id', 'category', 'name', 'usn_or_empid', 'department', 'semester',
@@ -46,7 +51,7 @@ var REG_HEADERS = [
 var LOCK_WAIT_MS = 20000;
 // Config.gs (generated) must declare CONFIG_SCHEMA with this exact number, or every request answers CONFIG_MISMATCH.
 // Keep equal to GAS_CONFIG_SCHEMA in scripts/gas-config.ts (npm run gas:config fails if they differ).
-var EXPECTED_CONFIG_SCHEMA = 2;
+var EXPECTED_CONFIG_SCHEMA = 3;
 var STATUS_CACHE_KEY = 'status_v3';
 var STATUS_CACHE_S = 10;
 var LOOKUP_MAX_FAILS = 5;
@@ -288,10 +293,38 @@ function readEvents_() {
     out[id] = {
       sheetName: String(r.sheet_name || '').trim(),
       deadline: Date.parse(String(r.deadline_iso).trim()), // NaN if a coordinator broke the format
-      isOpen: String(r.is_open).trim().toUpperCase() === 'TRUE'
+      isOpen: String(r.is_open).trim().toUpperCase() === 'TRUE',
+      whatsappRaw: String(r.whatsapp_url || '').trim() // private: only read through whatsappFor_(), never put in a response as is
     };
   });
   return out;
+}
+
+/**
+ * A pasted WhatsApp link, cleaned: trimmed, ?query / #fragment / trailing "/" removed, and accepted only if it is
+ * https://chat.whatsapp.com/<code> or https://whatsapp.com/channel/<code> (rules in Config.gs, shared with the site).
+ * Returns '' for anything else.
+ */
+function cleanWhatsappUrl_(v) {
+  var s = String(v == null ? '' : v).trim();
+  if (!s) return '';
+  s = s.split(/[?#]/)[0].replace(/\/$/, '');
+  return matches_(CONFIG.rules.whatsapp.group, s) || matches_(CONFIG.rules.whatsapp.channel, s) ? s : '';
+}
+
+/**
+ * The valid WhatsApp link of an event, or ''. A cell with something else in it is ignored and logged (event id only,
+ * not the value); the link never goes anywhere except register / lookup answers and confirmation emails.
+ */
+function whatsappFor_(events, eventId) {
+  var raw = events[eventId] ? events[eventId].whatsappRaw : '';
+  if (!raw) return '';
+  var clean = cleanWhatsappUrl_(raw);
+  if (!clean) {
+    console.warn('Ignoring the whatsapp_url of event "' + eventId + '": it must look like https://chat.whatsapp.com/<code> ' +
+      '(or https://whatsapp.com/channel/<code>). Fix the cell in the Events tab.');
+  }
+  return clean;
 }
 
 /**
@@ -445,6 +478,7 @@ function register_(b) {
   }
 
   var result;
+  var whatsappUrl = '';
   try {
     // Everything from reading the event's rows to writing the new row happens while holding the lock,
     // so two simultaneous registrations can never get the same reg_id or both pass the duplicate check.
@@ -479,11 +513,13 @@ function register_(b) {
     SpreadsheetApp.flush();
     CacheService.getScriptCache().remove(STATUS_CACHE_KEY);
     result = { ok: true, regId: regId, event: p.eventId, name: p.name };
+    whatsappUrl = whatsappFor_(events, p.eventId);
+    if (whatsappUrl) result.whatsappUrl = whatsappUrl; // the registrant's own event only
   } finally {
     lock.releaseLock();
   }
 
-  sendConfirmation_(p, ev, result.regId); // outside the lock; never fails the registration
+  sendConfirmation_(p, ev, result.regId, whatsappUrl); // outside the lock; never fails the registration
   return result;
 }
 
@@ -508,9 +544,16 @@ function lookup_(b) {
   Object.keys(CONFIG.events).forEach(function (eventId) {
     var tab = eventTabOrNull_(eventId, events);
     if (!tab) return;
+    var link = null; // looked up (and a bad cell logged) only if this event actually has a pass for this person
+    var passFor = function (regId, name) {
+      if (link === null) link = whatsappFor_(events, eventId);
+      var pass = { regId: regId, event: eventId, name: name };
+      if (link) pass.whatsappUrl = link; // only to someone who proved ID + phone
+      return pass;
+    };
     readTable_(tab).forEach(function (r) {
       if (normId_(r.usn_or_empid) === id && normPhone_(r.phone) === phone) {
-        passes.push({ regId: r.reg_id, event: eventId, name: r.name });
+        passes.push(passFor(r.reg_id, r.name));
         return;
       }
       if (!r.members_json) return;
@@ -522,7 +565,7 @@ function lookup_(b) {
       }
       for (var i = 0; i < members.length; i++) {
         if (normId_(members[i].id) === id && normPhone_(members[i].phone) === phone) {
-          passes.push({ regId: r.reg_id, event: eventId, name: members[i].name });
+          passes.push(passFor(r.reg_id, members[i].name));
           return;
         }
       }
@@ -545,47 +588,86 @@ function knDigits_(s) {
   return String(s).replace(/\d/g, function (x) { return d[Number(x)]; });
 }
 
-function sendConfirmation_(p, ev, regId) {
+function esc_(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/**
+ * The confirmation email: { subject, text, html }. Kannada block, then English block, same content in both bodies.
+ * The "Join the WhatsApp group" line / button appears only when whatsappUrl is a valid link (the caller passes ''
+ * otherwise), so a missing link never breaks or changes anything else. Everything dynamic is HTML-escaped; the link
+ * has already been validated by cleanWhatsappUrl_.
+ */
+function buildEmail_(p, ev, regId, whatsappUrl) {
+  var tba = 'TODO-CONFIRM';
+  var day = Number(CONFIG.day1Date.slice(8, 10));
+  var day2 = Number(CONFIG.day2Date.slice(8, 10));
+  var timeEn = ev.time === tba ? 'Time to be announced' : ev.time + ' IST';
+  var timeKn = ev.time === tba ? 'ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ' : knDigits_(ev.time);
+  var venueEn = ev.venue.en === tba ? 'Venue to be announced' : ev.venue.en;
+  var venueKn = ev.venue.kn === tba ? 'ಸ್ಥಳ ಶೀಘ್ರದಲ್ಲೇ' : ev.venue.kn;
+
+  var knLines = [
+    'ನಮಸ್ಕಾರ ' + p.name + ',',
+    'ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ ' + knDigits_(2026) + ' — "' + ev.name.kn + '" ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮ ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ.',
+    'ನೋಂದಣಿ ಐಡಿ: ' + regId,
+    'ದಿನ ೧ · ' + knDigits_(day) + ' ನವೆಂಬರ್ · ' + timeKn + ' · ' + venueKn,
+    'ಸ್ಥಳದಲ್ಲಿ ಈ ಐಡಿ / ಪಾಸ್ ತೋರಿಸಿ. ' + knDigits_(day2) + ' ನವೆಂಬರ್‌ನ ದಸರಾ ಮೆರವಣಿಗೆಗೂ ಬನ್ನಿ!'
+  ];
+  var enLines = [
+    'Hello ' + p.name + ',',
+    'Your registration for "' + ev.name.en + '" at Karnataka Rajyotsava 2026 is confirmed.',
+    'Registration ID: ' + regId,
+    'Day 1 · ' + day + ' November 2026 · ' + timeEn + ' · ' + venueEn
+  ];
+  if (p.members.length) {
+    enLines.push('Team / ತಂಡ: ' + p.teamName + ' — ' + [p.name].concat(p.members.map(function (m) { return m.name; })).join(', '));
+  }
+  enLines.push('Show this ID / your pass at the venue. Join us for the Dasara procession on ' + day2 + ' November too!');
+
+  var knJoin = 'ವಾಟ್ಸಾಪ್ ಗುಂಪಿಗೆ ಸೇರಿ';
+  var enJoin = 'Join the WhatsApp group';
+  var signoff = '— Honnudi Kannada Sangha, BMSIT&M';
+
+  var text = knLines.concat(whatsappUrl ? [knJoin + ': ' + whatsappUrl] : [], ['', '---', ''], enLines,
+    whatsappUrl ? [enJoin + ': ' + whatsappUrl] : [], ['', signoff]).join('\n');
+
+  function paras(lines) {
+    return lines.map(function (l) { return '<p style="margin:0 0 10px">' + esc_(l) + '</p>'; }).join('');
+  }
+  function button(label) {
+    if (!whatsappUrl) return '';
+    return '<p style="margin:16px 0 6px"><a href="' + esc_(whatsappUrl) + '" style="display:inline-block;background:#0E6B4D;' +
+      'color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:8px">' + esc_(label) + '</a></p>' +
+      '<p style="margin:0 0 10px;font-size:12px;color:#555555">' + esc_(whatsappUrl) + '</p>';
+  }
+  var html = '<div style="font-family:Arial,\'Noto Sans Kannada\',sans-serif;font-size:15px;line-height:1.6;color:#222222;max-width:560px">' +
+    paras(knLines) + button(knJoin) +
+    '<hr style="border:none;border-top:1px solid #dddddd;margin:18px 0">' +
+    paras(enLines) + button(enJoin) +
+    '<p style="margin:16px 0 0;color:#555555">' + esc_(signoff) + '</p></div>';
+
+  return { subject: 'KR 2026 · ' + ev.name.en + ' · ' + regId, text: text, html: html };
+}
+
+function sendConfirmation_(p, ev, regId, whatsappUrl) {
   try {
     if (MailApp.getRemainingDailyQuota() < 1) {
       console.warn('Mail quota exhausted; no confirmation for ' + regId);
       return;
     }
-    var tba = 'TODO-CONFIRM';
-    var day = Number(CONFIG.day1Date.slice(8, 10));
-    var day2 = Number(CONFIG.day2Date.slice(8, 10));
-    var timeEn = ev.time === tba ? 'Time to be announced' : ev.time + ' IST';
-    var timeKn = ev.time === tba ? 'ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ' : knDigits_(ev.time);
-    var venueEn = ev.venue.en === tba ? 'Venue to be announced' : ev.venue.en;
-    var venueKn = ev.venue.kn === tba ? 'ಸ್ಥಳ ಶೀಘ್ರದಲ್ಲೇ' : ev.venue.kn;
-    var team = p.members.length
-      ? '\nTeam / ತಂಡ: ' + p.teamName + ' — ' + [p.name].concat(p.members.map(function (m) { return m.name; })).join(', ')
-      : '';
-    var body = [
-      'ನಮಸ್ಕಾರ ' + p.name + ',',
-      '',
-      'ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ ' + knDigits_(2026) + ' — "' + ev.name.kn + '" ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮ ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ.',
-      'ನೋಂದಣಿ ಐಡಿ: ' + regId,
-      'ದಿನ ೧ · ' + knDigits_(day) + ' ನವೆಂಬರ್ · ' + timeKn + ' · ' + venueKn,
-      'ಸ್ಥಳದಲ್ಲಿ ಈ ಐಡಿ / ಪಾಸ್ ತೋರಿಸಿ. ' + knDigits_(day2) + ' ನವೆಂಬರ್‌ನ ದಸರಾ ಮೆರವಣಿಗೆಗೂ ಬನ್ನಿ!',
-      '',
-      '---',
-      '',
-      'Hello ' + p.name + ',',
-      '',
-      'Your registration for "' + ev.name.en + '" at Karnataka Rajyotsava 2026 is confirmed.',
-      'Registration ID: ' + regId,
-      'Day 1 · ' + day + ' November 2026 · ' + timeEn + ' · ' + venueEn + team,
-      'Show this ID / your pass at the venue. Join us for the Dasara procession on ' + day2 + ' November too!',
-      '',
-      '— Honnudi Kannada Sangha, BMSIT&M'
-    ].join('\n');
-    MailApp.sendEmail({
+    var mail = buildEmail_(p, ev, regId, whatsappUrl || '');
+    var msg = {
       to: p.email,
-      subject: 'KR 2026 · ' + ev.name.en + ' · ' + regId,
-      body: body,
+      subject: mail.subject,
+      body: mail.text, // plain-text fallback
+      htmlBody: mail.html,
       name: 'Honnudi Kannada Sangha'
-    });
+    };
+    // Replies go to the organisers' contact address from site.json, if one has been set (never invented).
+    var contact = typeof CONFIG.contactEmail === 'string' ? CONFIG.contactEmail.trim() : '';
+    if (contact && matches_(CONFIG.rules.email.pattern, contact)) msg.replyTo = contact;
+    MailApp.sendEmail(msg);
   } catch (err) {
     console.error('Confirmation email failed for ' + regId + ': ' + err);
   }
@@ -692,6 +774,7 @@ function ensureEventsHeaders_(sh) {
   if (sh.getLastRow() < 1 || sh.getLastColumn() < 1) {
     sh.getRange(1, 1, 1, EVENT_HEADERS.length).setValues([EVENT_HEADERS]);
     sh.getRange(1, 1, 1, EVENT_HEADERS.length).setFontWeight('bold');
+    plainTextBelow_(sh, EVENT_HEADERS.indexOf('whatsapp_url') + 1);
     return;
   }
   var current = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
@@ -700,8 +783,14 @@ function ensureEventsHeaders_(sh) {
     var col = current.length + 1;
     sh.getRange(1, col).setValues([[h]]);
     sh.getRange(1, col).setFontWeight('bold');
+    plainTextBelow_(sh, col); // format only — existing cells keep their values
     current.push(h);
   });
+}
+
+/** Makes the cells under a header plain text, so a pasted link is stored as typed. Changes the format only, never a value. */
+function plainTextBelow_(sh, col) {
+  if (sh.getMaxRows() > 1) sh.getRange(2, col, sh.getMaxRows() - 1, 1).setNumberFormat('@');
 }
 
 /** Event tab: create the header row on a brand-new tab; on an existing tab the header row must already match. */

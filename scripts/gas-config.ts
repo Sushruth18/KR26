@@ -12,7 +12,7 @@ import { RULES } from '../src/lib/rules.ts';
  * Format of Config.gs that apps-script/Code.gs understands (its EXPECTED_CONFIG_SCHEMA must equal this — checked by
  * `npm run gas:config` and `npm run test:server`). Bump BOTH when Code.gs starts reading new/renamed CONFIG fields.
  */
-export const GAS_CONFIG_SCHEMA = 2;
+export const GAS_CONFIG_SCHEMA = 3;
 
 /** Short content hash of the whole config (events, rules, departments, semesters, dates…): a stale paste shows a different value. */
 export function computeConfigVersion(config: unknown): string {
@@ -36,6 +36,8 @@ export function buildGasConfigSource(root = process.cwd()): string {
 
   const config = {
     minFormMs: Math.round(site.minFormSeconds * 1000),
+    /** Reply-To of confirmation emails; empty = none. Comes from site.json, never invented. */
+    contactEmail: site.contactEmail,
     departments: site.departments,
     semesters: site.semesters,
     rules: RULES,

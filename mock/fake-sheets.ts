@@ -219,6 +219,9 @@ export interface SentMail {
   to: string;
   subject: string;
   body: string;
+  htmlBody?: string;
+  name?: string;
+  replyTo?: string;
 }
 
 export class FakeMail {

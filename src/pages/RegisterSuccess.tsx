@@ -4,17 +4,22 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle2 } from 'lucide-react';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { PageHeader } from '../components/ui/PageHeader';
-import { PassCard } from '../components/pass/PassCard';
+import { PassCard, PASS_EXPORT_WIDTH } from '../components/pass/PassCard';
 import { PassActions } from '../components/pass/PassActions';
 import { LookupForm } from '../components/pass/LookupForm';
 import { isPassData, loadPass, savePass, type PassData } from '../lib/passStore';
 
 function PassBlock({ pass }: { pass: PassData }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
   return (
-    <div>
-      <PassCard ref={ref} pass={pass} />
-      <PassActions pass={pass} cardRef={ref} />
+    // min-w-0: a grid item may otherwise grow to its widest unbreakable child and push the card off the screen.
+    <div className="min-w-0">
+      <PassCard pass={pass} />
+      {/* The PNG is made from this fixed-size, off-screen copy, so its size never depends on the screen. */}
+      <div aria-hidden="true" className="pointer-events-none fixed top-0" style={{ left: -10000, width: PASS_EXPORT_WIDTH }}>
+        <PassCard ref={exportRef} pass={pass} fixed />
+      </div>
+      <PassActions pass={pass} exportRef={exportRef} />
     </div>
   );
 }
@@ -57,7 +62,7 @@ export default function RegisterSuccess() {
         {passes.length === 0 ? (
           <LookupForm onFound={onFound} />
         ) : (
-          <div className="grid gap-12 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
             {passes.map((p) => (
               <PassBlock key={p.regId} pass={p} />
             ))}

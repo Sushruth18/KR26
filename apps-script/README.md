@@ -57,7 +57,7 @@ You should now have exactly two files: `Code.gs` and `Config.gs`.
    - If it instead fails with **`Config.gs has no events — paste the latest Config.gs`** or **`Config.gs is schema … but Code.gs expects …`**, the `Config.gs` file in the Apps Script project is empty, old, or from another version of the site. Nothing was changed in the spreadsheet. Paste the latest `Config.gs` (step 2.4), save, and run `setupSheet` again.
    - To check which Config the project is using without changing anything, run **`checkConfig`**.
 5. Switch back to the spreadsheet tab. You now have **13 tabs** at the bottom:
-   - **Events**: one row per competition, with columns `id | code | name_en | sheet_name | deadline_iso | is_open`.
+   - **Events**: one row per competition, with columns `id | code | name_en | sheet_name | deadline_iso | is_open | whatsapp_url` (the last one starts empty: see step 7, "WhatsApp group links").
    - **12 event tabs**, one per competition, named like **`ESY – Essay Writing`**, **`DEB – Debate`**, **`FGS – Faculty Group Singing`**. Each has a bold, frozen header row and holds **only that competition's registrations**. There is no shared "Registrations" tab.
 6. You can delete the empty **Sheet1** tab: right-click it → **Delete**.
 
@@ -106,6 +106,16 @@ Everything is controlled from the **Events** tab. The website reads it live, abo
 
 On the website a closed event shows a "Closed" label and a disabled Register button.
 
+### WhatsApp group links (optional)
+
+Each event can have a WhatsApp group (or channel) that registrants are invited to join. **Where to put the link:** in the **Events** tab, in the **`whatsapp_url`** column (the last column, header in row 1), on the row of that competition. Paste the invite link as it comes from WhatsApp, for example `https://chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv`. A channel link `https://whatsapp.com/channel/<code>` also works. Nothing needs to be redeployed.
+
+- The link is shown **only to people who registered for that event**: on their pass page (a green **"Join the WhatsApp group"** button below the pass, also after they find the pass again with their ID + phone) and in their confirmation email (a button in the HTML email and a plain line in the text version, in Kannada and English). It is **not** printed on the downloaded pass image, and it is **never** published through the status the website reads, so it can't be seen by someone who hasn't registered.
+- Leave the cell **empty** for events without a group: nothing about WhatsApp is shown for them.
+- Only `https://chat.whatsapp.com/<code>` and `https://whatsapp.com/channel/<code>` links are accepted. A trailing `?mode=…` that WhatsApp adds when you copy a link is removed automatically. **Anything else is ignored** (the event is treated as having no link, and the script log in Apps Script → **Executions** says `Ignoring the whatsapp_url of event "<id>"`). Check the log if a link you pasted doesn't show up.
+- `setupSheet` adds the `whatsapp_url` column to an existing Events tab if it is missing (existing values are not touched) and never fills in or overwrites a link you pasted.
+- If the website's contact email is set (`src/data/site.json → contactEmail`, then paste the regenerated `Config.gs`), replies to the confirmation email go there. Today it is empty, so no Reply-To is set.
+
 ### Where the registrations are
 
 Each competition has its **own tab** (for example **`ESY – Essay Writing`**) with these columns:
@@ -138,7 +148,7 @@ If you rename the tab but not the cell (or the other way round), registrations f
 
 ## 8. Confirmation emails and the daily limit
 
-- Each successful registration emails the registrant (in Kannada and English) from the club account.
+- Each successful registration emails the registrant (in Kannada and English) from the club account. The email has an HTML version (with a "Join the WhatsApp group" button when the event has a valid link) and a plain-text version for apps that don't show HTML.
 - **Gmail has a daily sending limit**: about **100 emails/day** for a normal Gmail account (more for Google Workspace accounts). On a busy day the limit may run out. Registration **still succeeds**; only the email is skipped. The student still sees their pass on screen and can download it.
 - To check how many emails are left today: Apps Script → function drop-down → **`checkEmailQuota`** → **▶ Run** → read the Execution log.
 
@@ -174,6 +184,7 @@ Event IDs come from the website's data. If a new competition is added there, run
 | `?action=status` shows a Google sign-in page | Deployment access must be **Anyone** (step 5.3). |
 | You changed the code but nothing changed on the site | You saved but didn't deploy a **New version** (step 9). |
 | Status/registration answers reason `CONFIG_MISMATCH` or `CONFIG_EMPTY`, or `setupSheet` says "Config.gs has no events" | The `Config.gs` in the Apps Script project is old, empty or missing. Paste the latest `Config.gs` **and** `Code.gs`, save, and deploy a **New version** (step 9). Run `checkConfig` to confirm. |
+| A pasted WhatsApp link doesn't appear on the pass or in the email | Check the Execution log for `Ignoring the whatsapp_url of event …`. The cell must hold only a `https://chat.whatsapp.com/<code>` (or `https://whatsapp.com/channel/<code>`) link, no extra text. Existing registrants see it after they reload / look up their pass; emails already sent don't change. |
 | Execution log says `Missing tab "Events"` (reason `EVENTS_TAB_MISSING`) | The Events tab was renamed or deleted. Rename it back, or run `setupSheet` again. |
 | Execution log says `tab "…" not found` (reason `EVENT_TAB_MISSING:<eventId>`) | An event tab was renamed or deleted. Rename it back, or fix that event's `sheet_name` cell in the Events tab, or run `setupSheet` to recreate it. Registrations for that event fail (and nothing is written) until then. |
 | Execution log says `has no "…" column in row 1` (reason `EVENTS_COLUMN_MISSING:<column>` or `EVENT_TAB_COLUMN_MISSING:<eventId>:<column>`) | A header cell in the Events tab or in an event tab was edited. Restore the exact header text. |

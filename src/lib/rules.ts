@@ -15,6 +15,15 @@ export const RULES = {
   teamName: { pattern: "^[A-Za-z0-9\\u0C80-\\u0CFF\\u200C\\u200D.&' -]+$", min: 2, max: 40 },
   /** Free-text department when "Other" is chosen; uses the name pattern. */
   departmentOther: { min: 2, max: 40 },
+  /**
+   * WhatsApp links a coordinator may paste into the Events tab (whatsapp_url). Matched after the link has been
+   * trimmed and its ?query / #fragment / trailing "/" removed. Anything else is ignored by the server and never
+   * sent to a browser; the browser re-checks what it receives before using it as a link.
+   */
+  whatsapp: {
+    group: '^https://chat\\.whatsapp\\.com/[A-Za-z0-9]{10,40}$',
+    channel: '^https://whatsapp\\.com/channel/[A-Za-z0-9_-]{10,60}$',
+  },
 } as const;
 
 export const OTHER_DEPARTMENT = 'Other';
