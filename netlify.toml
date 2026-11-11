@@ -24,3 +24,9 @@
   for = "/brand/web/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Artist photo copies from `npm run brand:images` — content-hashed names too.
+[[headers]]
+  for = "/artist/web/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

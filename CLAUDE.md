@@ -12,7 +12,7 @@ When something here conflicts with your defaults, this file wins. When something
 - **Theme:** **Mysuru Dasara procession (Jamboo Savari)** — the site is designed as the procession itself: palace lights switching on at night, the golden Ambari on the elephant, tableaux floats, folk troupes, torchlight.
 - **Two-day festival, BMSIT&M campus:**
   - **Day 1 — Competitions:** **20 November 2026** (Friday). All 12 competitions (students + faculty) happen this day.
-  - **Day 2 — Karnataka Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — bike rally, inauguration & Dasara procession, performances, jamming.
+  - **Day 2 — Karnataka Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — rally, inauguration & Dasara procession, club performances, fashion show, music concert & DJ.
   - All dates (both days, countdown targets, registration window, per-event `deadline`) come from `src/data/site.json` / `events.json` — never hard-code a date in a component.
 - **Registration:** **open from now** (no opening date, no seat limits); closes **18 Nov 2026, 23:59 IST** (one day of buffer before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
 - **Source of event data:** `Kannada_Rajyotsava_26_Budget_Proposal.docx` (schedule + prize breakdown) — §5.3 and §6 below are taken from it.
@@ -170,32 +170,33 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 - **Chief guest(s)** in Darbar-hall arch frames with gold pillars. Single clean image — no reflected/duplicated image. (TODO-CONFIRM guest names, titles, photos; if unconfirmed, show a tasteful "ಶೀಘ್ರದಲ್ಲೇ ಘೋಷಣೆ / Announcing soon" frame.)
 - 4 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · time (Day 2: 9:00 AM – 5:45 PM) · venue (BMSIT&M campus) · cash prize pool (₹39,000 + mementos).
 - **Day tabs** above the timeline: **ದಿನ ೧ · ೨೦ ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು** / **ದಿನ ೨ · ೨೧ ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ** (Day 1 · Competitions / Day 2 · Rajyotsava). Default to Day 2 except on 20 Nov, when Day 1 is default. Synced to `?day=1|2`.
-- **Procession-route timeline**: a winding SVG road; each stop is a schedule item (time, title, venue, duration). Vertical on mobile, winding horizontal/zigzag on desktop. Generated from `src/data/schedule.json` (entries carry a `day` field). Highlight the "Inauguration & Procession" stop as the Day 2 centrepiece (Ambari icon) — it IS the Dasara theme.
+- **Procession-route timeline**: a winding SVG road; each stop is a schedule item (**start time**, title, venue — no end times or durations anywhere in the timeline). Vertical on mobile, winding horizontal/zigzag on desktop. Generated from `src/data/schedule.json` (entries carry a `day` field). Highlight the "Inauguration & Procession" stop as the Day 2 centrepiece (Ambari icon) — it IS the Dasara theme.
   - **Day 1** is generated from `events.json` (all competitions, sorted by time, each stop links to its competition card and Register button). Events with unknown time sit in an "ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ / Time to be announced" group at the end.
-- **"Now / Next" indicator** on each day: the current stop glows and a small Ambari marker sits on it (computed from the client clock in IST).
-- Seed Day 2 of `schedule.json` from the budget proposal (`day: 2`, date 2026-11-21; times are IST, 24h in data, formatted per language):
+- **"Now / Next" indicator** on each day: the current stop glows and a small Ambari marker sits on it (computed from the client clock in IST). A stop is "current" from its start until the next stop starts; the last stop runs until `site.json → eventEnd` (17:45).
+- Day 2 of `schedule.json` is the **schedule confirmed by the college** (it replaces the budget-proposal version; `day: 2`, date 2026-11-21; times are IST, 24h in data, formatted per language; start times only):
 
-| Start | End | Kannada | English | Venue | Duration |
-|---|---|---|---|---|---|
-| 09:00 | 10:00 | ಬೈಕ್ ರ‍್ಯಾಲಿ (ಮೋಟಾರ್ ಹೆಡ್ಸ್) | Bike Rally (Motor Heads) | ಪ್ರವೇಶ ದ್ವಾರ / Entrance | 1 h |
-| 10:00 | 12:05 | ಉದ್ಘಾಟನೆ ಮತ್ತು ಮೆರವಣಿಗೆ | Inauguration & Procession | ಮುಖ್ಯ ವೇದಿಕೆ / Main Stage | 2 h 05 m |
-| 12:05 | 12:30 | ನೃತ್ಯ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) | Dance Competition (Students & Faculty) | Main Stage | 25 m |
-| 12:30 | 12:45 | ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) | Music Competition (Students & Faculty) | Main Stage | 15 m |
-| 12:45 | 13:15 | ಸಂಗೀತ ಕ್ಲಬ್ ಪ್ರದರ್ಶನ | Music Club Performance | Main Stage | 30 m |
-| 13:15 | 13:35 | ನೃತ್ಯ ಕ್ಲಬ್ ಪ್ರದರ್ಶನ | Dance Club Performance | Main Stage | 20 m |
-| 13:35 | 14:00 | ಫ್ಯಾಷನ್ ಶೋ | Fashion Show | Main Stage | 25 m |
-| 14:00 | 14:15 | ಚಲನಚಿತ್ರ ಪ್ರಚಾರ | Movie Promotion | Main Stage | 15 m |
-| 14:30 | 17:45 | ಜಾಮಿಂಗ್ (DAP) | Jamming (DAP) | Main Stage | 3 h 15 m |
+| Start | Kannada (draft — TODO-CONFIRM) | English | Venue |
+|---|---|---|---|
+| 09:00 | ರ‍್ಯಾಲಿ | Rally | ಬಿಲ್‌ಬೋರ್ಡ್ / Bill Board |
+| 10:00 | ಉದ್ಘಾಟನೆ ಮತ್ತು ಮೆರವಣಿಗೆ | Inauguration & Procession (highlight, Ambari; "with Veeragase & Tamate troupes") | ಮುಖ್ಯ ವೇದಿಕೆ / Main Stage |
+| 12:05 | ನೃತ್ಯ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) | Dance Competition (Students & Faculty) | Main Stage |
+| 12:30 | ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) | Music Competition (Students & Faculty) | Main Stage |
+| 12:45 | ರಂಗಸ್ಥಳ ಪ್ರದರ್ಶನ | Rangasthala Performance (drama club) | Main Stage |
+| 13:00 | ರುಶಾಂಗ್ ಪ್ರದರ್ಶನ | Rushaang Performance (music club) | Main Stage |
+| 13:30 | ತಾಂಡವ ಪ್ರದರ್ಶನ | Tandava Performance (dance club) | Main Stage |
+| 13:50 | ಫ್ಯಾಷನ್ ಶೋ | Fashion Show | Main Stage |
+| 14:30 | ಸಂಗೀತ ಕಚೇರಿ ಮತ್ತು ಡಿಜೆ | Music Concert & DJ (headline stop, with the artist from `artist.json`) | Main Stage |
 
-  Notes: 14:15–14:30 is a gap in the source — render it as a "ವಿರಾಮ / Break" stop. The proposal budgets
-  **Veeragase & Tamate** troupes and a chief guest — show them inside the Procession stop description
-  ("ವೀರಗಾಸೆ ಮತ್ತು ತಮಟೆ ಜೊತೆಗೆ" / "with Veeragase & Tamate troupes"). Kannada titles are a first draft — TODO-CONFIRM wording.
-  "Movie Promotion" — TODO-CONFIRM film name.
-  ⚠️ TODO-CONFIRM: the proposal lists "Dance Competition" and "Music Competition (Students and Faculty)" on the
+  Notes: there is no Break stop and no gap logic. Club names keep their own spelling (Rangasthala, Rushaang,
+  Tandava) in both languages, transliterated into Kannada script. Kannada titles are a first draft — TODO-CONFIRM wording.
+  Programme names the college dropped must not appear anywhere on the site (text, alt, aria, data, built output);
+  `npm run check:banned` (list in `scripts/banned-terms.ts`) enforces it.
+  ⚠️ TODO-CONFIRM: the programme lists "Dance Competition" and "Music Competition (Students & Faculty)" on the
   Day 2 main stage at 12:05 and 12:30, but competitions are held on Day 1. Until confirmed, keep these two slots
-  in Day 2 labelled exactly as in the proposal (they may be winners' / finalists' performances), and do NOT
+  in Day 2 labelled exactly as listed (they may be winners' / finalists' performances), and do NOT
   link them to registration. Add a **prize distribution** stop to Day 2 only once its time is confirmed.
-- **Special attractions** as hanging banners, taken from the 2026 proposal: **Dasara Procession** with Veeragase & Tamate folk troupes · **Bike Rally** by Motor Heads · **Fashion Show** (traditional Karnataka attire) · **Jamming with DAP** (headline act, 3+ hours) · Music & Dance club performances. TODO-CONFIRM what "DAP" stands for / the artist's display name before showing it publicly.
+- **Headline artist** section (separate from the chief-guest frames): "Remo & Team" (kn ರೆಮೊ ಮತ್ತು ತಂಡ — draft), photo `public/artist/remo.jpg` in its own Darbar arch frame with gold pillars, the name and the caption "Music Concert & DJ · 21 Nov · 2:30 PM" (date and time read from the headline schedule stop, formatted per language). Alt text is only the artist's name and the event. Name, photo, `focus` (object-position) and caption come from `src/data/artist.json` (`{ name:{kn,en}, photo, focus, caption:{kn,en} }`, validated at build); the photo is shown as supplied (no circle crop, no filter). The name also appears on the 14:30 stop and on the Music Concert & DJ banner.
+- **Special attractions** as hanging banners (`src/data/attractions.json`; times and club names are read from the schedule): **Dasara Procession** (Veeragase & Tamate folk troupes) · **Rally** · **Fashion Show** (traditional Karnataka attire) · **Music Concert & DJ** (headline, with the artist) · **Club performances**: Rangasthala (drama), Rushaang (music), Tandava (dance).
 - Embedded Google Map of BMSIT&M (lazy iframe, loads on scroll) + "Get directions" link.
 
 ### 5.4 Gallery `/gallery`
@@ -283,7 +284,9 @@ group dance `users`, treasure hunt `search`, group singing `music`, rangoli `flo
 Rangoli is new this year and fits the theme perfectly — give its card a kolam-pattern corner ornament.
 
 ### Also
-- `schedule.json` — `[{ day, start, end, title:{kn,en}, venue:{kn,en}, description?:{kn,en}, highlight?:boolean }]` (seed in §5.3)
+- `schedule.json` — `[{ day, start, title:{kn,en}, venue:{kn,en}, description?:{kn,en}, highlight?:boolean, headline?:boolean }]` (start times only, no `end`; table in §5.3)
+- `artist.json` — `{ name:{kn,en}, photo, focus, caption:{kn,en} }` (headline artist, §5.3); WebP copies come from `npm run brand:images`
+- `attractions.json` — `[{ id, icon, title:{kn,en}, text:{kn,en}, starts:["HH:MM"], headline? }]` (banner list; every `starts` value must be a schedule stop)
 - `guests.json` — `[{ name:{kn,en}, title:{kn,en}, photo }]`
 - `team.json` — `[{ group:{kn,en}, members:[{ name:{kn,en}, role:{kn,en}, photo, linkedin?, instagram? }] }]`
 - `gallery.json` — `{ photos:[{ year, src, alt:{kn,en}, caption? }], reels:[{ year, poster, video?|url?, title }] }`
@@ -383,7 +386,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 | 2 | Registration (priority) | `validation.ts`, `api.ts`, `apps-script/Code.gs` (+ `action=lookup`) + README, local mock endpoint, Register form, Pass page (PNG + .ics) | ✅ done — real-Sheet race test pending deploy (rev. 2: open from now, no seat limits, one tab per event) |
 | 3 | Competitions | TableauCard grid, status pills, live open/closed status, rules disclosure | ✅ done |
 | 4 | Art + Intro + Home | PalaceSilhouette, AmbariElephant, BrassPlaque, intro splash, hero, countdown, preview strip, deadline banner | ✅ done — kn LCP 0.2–0.3 s over budget in lab (see Home notes) |
-| 5 | Event Details | Day tabs, procession-route timeline, Now/Next, guests, attractions, map | ⏳ |
+| 5 | Event Details | Day tabs, procession-route timeline, Now/Next, guests, headline artist, attractions, map | ✅ done — Day 2 = college-confirmed schedule (see Event Details notes) |
 | 6 | Gallery + Team | Masonry, lightbox, reels, team troupes (empty states until content arrives) | ⏳ |
 | 7 | Polish & QA | Reduced-motion / low-end pass, a11y, Lighthouse, OG card, §12 checklist | ⏳ |
 
@@ -396,7 +399,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - **Departments** (draft, TODO-CONFIRM): CSE, ISE, AIML, ECE, EEE, ETE, Mech, Civil, MBA, MCA, Other (free text).
 - **Kannada time words:** ಬೆಳಿಗ್ಗೆ (<12), ಮಧ್ಯಾಹ್ನ (12–16), ಸಂಜೆ (16–19), ರಾತ್ರಿ (19+). Own digit mapper; Latin digits stay in reg IDs, phone and USN.
 - **Contact email, Instagram URL, "Made by"** are empty in `site.json` and hidden when empty — never invent them.
-- **Day 2 Dance/Music slots** stay as written in the proposal, with no registration link.
+- **Day 2 Dance/Music slots** stay as listed in the confirmed schedule, with no registration link.
 - **Map:** embed by searching the `site.json → mapQuery`; verify the pin before launch.
 - **No scraping** of the 2025 site; empty states until images are supplied.
 - **SEO:** one static OG card, no pre-rendering. **Perf:** render the hero under the splash; on conflict degrade animation on low-end devices before cutting content.
@@ -434,3 +437,10 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - **Pass**: stays at college + Honnudi. The 25-years and cultural logos are deliberately not on it — the card is already dense and `e2e` scenario 12 asserts exactly two logos in the exported PNG.
 - **Adding another logo**: add a key to `site.json → logos`, `schemas.ts`, `LogoKey` (`lib/logos.ts`), `WIDTHS` in `build-brand-images.ts` and the `ALT` map in `BrandLogo.tsx`, add the alt strings to both i18n files, then `npm run brand:images`. `validate-data` checks every key in `site.json → logos`.
 - **Test**: `npm run e2e:brand` (12 checks: kn/en × 320/360/1280) — Home row order / one line / centred / matching height / eager / alt / WebP / elephant in the first screen at ≤ 360 px; footer pair vertically centred, row centred, lazy, alt, footer height vs placeholder.
+
+### Event Details + Day 2 schedule + headline artist (Phase 5 — refines §5.3)
+- **Schedule** = the college-confirmed Day 2 programme (it replaced the budget-proposal version): 9 stops, **start times only** — no end time or duration is shown in the timeline; the Break stop and the 14:15 gap logic are gone. `validate-data` checks ascending unique starts, exactly one highlight and one headline stop, first stop = `eventStart`, last stop starts before `eventEnd`, and that every `attractions.json` start is a real stop. The `.ics` still needs a DTEND, so each Day 2 entry ends when the next one starts (the last at `eventEnd`).
+- **Page** (`pages/EventDetails.tsx`, parts in `components/event/`): chief guests (empty → "Announcing soon" frame) → headline artist → 4 plaques → day tabs + timeline → attractions → lazy map. `lib/schedule.ts` holds the pure Now/Next logic (`positionIn`, `day2Position`, `day1Position`, `defaultDay`). The route is one S-curve SVG per stop (stretched to the stop's height, same tangent at both ends, so stops join into one road); phones get a vertical road, ≥ 768 px a zigzag. Use `?now=<ISO>` (dev) to see Now/Next.
+- **Artist photo**: `npm run brand:images` also writes `public/artist/web/` + `src/data/artist.generated.json` (480/960 px WebP, **capped at the master's width**, so the current 447 px source yields one 447 px file; a larger master gets both sizes). `validate-data` fails if the master changed without regenerating or a copy is wider than the master. To use a better photo: replace `public/artist/remo.jpg`, re-run the script, commit.
+- **Banned programme names**: `scripts/banned-terms.ts` is used by `validate-data` (data files) and `npm run check:banned` (all of `dist/`, `src/data`, `src/i18n`, `public/`, `index.html`; run after `npm run build`). `e2e:event` also checks the rendered text, alt, aria and title attributes.
+- **Tests**: `npm run test:schedule` (schedule content, Now/Next boundaries, default day, `.ics`), `npm run e2e:event` (27 checks: kn/en × 320/360/768/1280 layout, timeline content per language, Now/Next at 7 clock times, artist section/alt/caption/image size, tabs and `?day=`, Day 1 stops, lazy map, reduced motion, banned terms), `npm run check:banned`. `e2e:register` checks one `.ics` entry per Day 2 stop with the same start and name.

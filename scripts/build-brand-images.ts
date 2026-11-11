@@ -7,13 +7,20 @@
  * The masters are never modified. Run this again whenever a master changes — validate-data (prebuild)
  * fails the build if a master no longer matches the generated copies. Not part of the build itself,
  * so the deploy never depends on sharp.
+ *
+ * It also makes the headline-artist photo's WebP copies (artist.json → photo → public/artist/web/,
+ * src/data/artist.generated.json): 480 and 960 px wide, but never larger than the master — a copy is
+ * never upscaled, so a ~450 px master yields one file at its own width. A higher-resolution master
+ * gets both sizes automatically.
  */
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, extname, resolve } from 'node:path';
 import sharp from 'sharp';
 import site from '../src/data/site.json' with { type: 'json' };
+import artist from '../src/data/artist.json' with { type: 'json' };
 import type { LogoAsset, LogoKey } from '../src/lib/logos';
+import type { ArtistAsset } from '../src/lib/artist';
 
 /**
  * Output widths in px. They cover every displayed size at 1×–3× screens: college ≤ 64 CSS px wide
@@ -62,3 +69,37 @@ for (const key of Object.keys(WIDTHS) as LogoKey[]) {
 
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 console.log('Wrote public/brand/web/ and src/data/logos.generated.json');
+
+// ---------- headline artist photo ----------
+const ARTIST_WIDTHS = [480, 960];
+const artistOut = resolve(root, 'public/artist/web');
+rmSync(artistOut, { recursive: true, force: true });
+mkdirSync(artistOut, { recursive: true });
+const artistAbs = resolve(root, 'public', artist.photo.replace(/^\//, ''));
+if (!existsSync(artistAbs)) throw new Error(`artist.json → photo: ${artist.photo} not found in public/`);
+const artistMaster = readFileSync(artistAbs);
+const aMeta = await sharp(artistMaster).metadata();
+if (!aMeta.width || !aMeta.height) throw new Error(`${artist.photo}: cannot read image size`);
+const aStem = basename(artist.photo, extname(artist.photo));
+// Cap every target at the master's own width and drop duplicates: no upscaling.
+const aWidths = [...new Set(ARTIST_WIDTHS.map((w) => Math.min(w, aMeta.width!)))];
+const aVariants: ArtistAsset['variants'] = [];
+for (const w of aWidths) {
+  const buf = await sharp(artistMaster)
+    .resize({ width: w, withoutEnlargement: true, kernel: 'lanczos3' })
+    .webp({ quality: 85, effort: 6 }) // no filters, no crop: the photo as supplied
+    .toBuffer();
+  const file = `${aStem}-${w}w.${sha1(buf).slice(0, 8)}.webp`;
+  writeFileSync(resolve(artistOut, file), buf);
+  aVariants.push({ w, src: `/artist/web/${file}` });
+  console.log(`  ${file}  ${(buf.length / 1024).toFixed(1)} KB`);
+}
+const artistManifest: ArtistAsset = {
+  source: artist.photo,
+  sha1: sha1(artistMaster),
+  width: aMeta.width,
+  height: aMeta.height,
+  variants: aVariants,
+};
+writeFileSync(resolve(root, 'src/data/artist.generated.json'), JSON.stringify(artistManifest, null, 2) + '\n', 'utf8');
+console.log('Wrote public/artist/web/ and src/data/artist.generated.json');

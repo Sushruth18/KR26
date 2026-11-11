@@ -1,0 +1,12 @@
+{
+  "source": "/artist/remo.jpg",
+  "sha1": "0ab49c50a732ad32286bc61576a281dad1a41ba8",
+  "width": 447,
+  "height": 447,
+  "variants": [
+    {
+      "w": 447,
+      "src": "/artist/web/remo-447w.9aad04dc.webp"
+    }
+  ]
+}

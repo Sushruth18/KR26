@@ -1,8 +1,8 @@
 /**
- * Minimal RFC 5545 calendar file: the competition (all-day when its time is still TBA) and the
- * Day 2 procession. Lines are CRLF-terminated and folded at 75 octets without splitting UTF-8 characters.
+ * Minimal RFC 5545 calendar file: the competition (all-day when its time is still TBA) and one entry per
+ * Day 2 programme stop (same names and start times as the Event Details timeline). Lines are CRLF-terminated and folded at 75 octets without splitting UTF-8 characters.
  */
-import type { CompetitionEvent, SiteConfig } from './schemas';
+import type { CompetitionEvent, ScheduleItem, SiteConfig } from './schemas';
 import { isTodo, type Lang } from './format';
 
 const CRLF = '\r\n';
@@ -46,10 +46,14 @@ interface IcsInput {
   event: CompetitionEvent;
   site: SiteConfig;
   lang: Lang;
-  labels: { suffix: string; day2Title: string; description: string; location: string };
+  /** Day 2 stops in start order (schedule.json). */
+  stops: ScheduleItem[];
+  /** The headline artist's display name, added to the headline stop's description. */
+  artistName: string;
+  labels: { suffix: string; day2Description: string; description: string; location: string };
 }
 
-export function buildIcs({ regId, event, site, lang, labels }: IcsInput): string {
+export function buildIcs({ regId, event, site, lang, stops, artistName, labels }: IcsInput): string {
   const stamp = utc(Date.now());
   const venue = isTodo(event.venue[lang]) ? labels.location : `${event.venue[lang]}, ${labels.location}`;
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Honnudi Kannada Sangha//KR 2026//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
@@ -68,16 +72,24 @@ export function buildIcs({ regId, event, site, lang, labels }: IcsInput): string
     'END:VEVENT',
   );
 
-  lines.push(
-    'BEGIN:VEVENT',
-    `UID:${regId}-day2@kr2k26-bmsit`,
-    `DTSTAMP:${stamp}`,
-    `DTSTART:${utc(Date.parse(site.eventStart))}`,
-    `DTEND:${utc(Date.parse(site.eventEnd))}`,
-    `SUMMARY:${escapeText(labels.day2Title)}`,
-    `LOCATION:${escapeText(labels.location)}`,
-    'END:VEVENT',
-    'END:VCALENDAR',
-  );
+  // Day 2: one entry per stop. A stop lasts until the next one starts (the last until eventEnd), which is
+  // what the calendar needs for DTEND — the website itself shows start times only.
+  const at = (hhmm: string) => Date.parse(`${site.day2Date}T${hhmm}:00+05:30`);
+  stops.forEach((stop, i) => {
+    const end = stops[i + 1] ? at(stops[i + 1]!.start) : Date.parse(site.eventEnd);
+    const parts = [stop.description?.[lang], stop.headline ? artistName : '', labels.day2Description].filter(Boolean);
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:${regId}-day2-${stop.start.replace(':', '')}@kr2k26-bmsit`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART:${utc(at(stop.start))}`,
+      `DTEND:${utc(end)}`,
+      `SUMMARY:${escapeText(stop.title[lang])}`,
+      `LOCATION:${escapeText(`${stop.venue[lang]}, ${labels.location}`)}`,
+      `DESCRIPTION:${escapeText(parts.join(' — '))}`,
+      'END:VEVENT',
+    );
+  });
+  lines.push('END:VCALENDAR');
   return lines.map(foldLine).join(CRLF) + CRLF;
 }

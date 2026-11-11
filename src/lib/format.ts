@@ -77,12 +77,15 @@ export function formatNumber(n: number, lang: Lang, opts: { pad?: number } = {})
 export interface DateFormatOptions {
   year?: boolean;
   weekday?: boolean;
+  /** English: three-letter month ("21 Nov"). Kannada has no abbreviation and is unchanged. */
+  short?: boolean;
 }
 
 /** kn: "೨೧ ನವೆಂಬರ್ ೨೦೨೬" · en: "21 November 2026". Accepts "YYYY-MM-DD" or an ISO instant (read in IST). */
 export function formatDate(input: string | Date, lang: Lang, opts: DateFormatOptions = {}): string {
   const p = typeof input === 'string' ? toParts(input) : istParts(input);
-  const month = MONTHS[lang][p.month - 1] ?? '';
+  const full = MONTHS[lang][p.month - 1] ?? '';
+  const month = opts.short && lang === 'en' ? full.slice(0, 3) : full;
   let out = `${digits(p.day, lang)} ${month}`;
   if (opts.year) out += ` ${digits(p.year, lang)}`;
   if (opts.weekday) out = `${WEEKDAYS[lang][p.weekday] ?? ''}, ${out}`;

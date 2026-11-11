@@ -1,0 +1,38 @@
+[
+  {
+    "id": "procession",
+    "icon": "flag",
+    "title": { "kn": "ದಸರಾ ಮೆರವಣಿಗೆ", "en": "Dasara Procession" },
+    "text": { "kn": "ವೀರಗಾಸೆ ಮತ್ತು ತಮಟೆ ಜಾನಪದ ತಂಡಗಳೊಂದಿಗೆ", "en": "with Veeragase & Tamate folk troupes" },
+    "starts": ["10:00"]
+  },
+  {
+    "id": "rally",
+    "icon": "navigation",
+    "title": { "kn": "ರ‍್ಯಾಲಿ", "en": "Rally" },
+    "text": { "kn": "ಉತ್ಸವಕ್ಕೆ ಚಾಲನೆ ನೀಡುವ ರ‍್ಯಾಲಿ", "en": "The rally that kicks off the festival" },
+    "starts": ["09:00"]
+  },
+  {
+    "id": "fashion",
+    "icon": "shirt",
+    "title": { "kn": "ಫ್ಯಾಷನ್ ಶೋ", "en": "Fashion Show" },
+    "text": { "kn": "ಸಾಂಪ್ರದಾಯಿಕ ಕರ್ನಾಟಕ ಉಡುಗೆಗಳಲ್ಲಿ", "en": "In traditional Karnataka attire" },
+    "starts": ["13:50"]
+  },
+  {
+    "id": "concert",
+    "icon": "music",
+    "title": { "kn": "ಸಂಗೀತ ಕಚೇರಿ ಮತ್ತು ಡಿಜೆ", "en": "Music Concert & DJ" },
+    "text": { "kn": "ದಿನದ ಮುಖ್ಯ ಆಕರ್ಷಣೆ", "en": "The headline act of the day" },
+    "starts": ["14:30"],
+    "headline": true
+  },
+  {
+    "id": "clubs",
+    "icon": "drama",
+    "title": { "kn": "ಕ್ಲಬ್ ಪ್ರದರ್ಶನಗಳು", "en": "Club performances" },
+    "text": { "kn": "ನಾಟಕ, ಸಂಗೀತ ಮತ್ತು ನೃತ್ಯ", "en": "Drama, music and dance" },
+    "starts": ["12:45", "13:00", "13:30"]
+  }
+]

@@ -35,18 +35,49 @@ export const eventSchema = z.object({
 export const eventsSchema = z.array(eventSchema);
 export type CompetitionEvent = z.infer<typeof eventSchema>;
 
-export const scheduleItemSchema = z.object({
-  day: z.union([z.literal(1), z.literal(2)]),
-  start: hhmm,
-  end: hhmm,
-  title: bilingual,
-  venue: bilingual,
-  description: bilingual.optional(),
-  highlight: z.boolean().optional(),
-  kind: z.enum(['break']).optional(),
-});
+/** One stop of the Day 2 timeline. Start times only — the site shows no end times or durations. */
+export const scheduleItemSchema = z
+  .object({
+    day: z.union([z.literal(1), z.literal(2)]),
+    start: hhmm,
+    title: bilingual,
+    venue: bilingual,
+    description: bilingual.optional(),
+    /** The centrepiece stop (Inauguration & Procession) — drawn with the Ambari. */
+    highlight: z.boolean().optional(),
+    /** The headline-act stop: shows the artist from artist.json. */
+    headline: z.boolean().optional(),
+  })
+  .strict();
 export const scheduleSchema = z.array(scheduleItemSchema);
 export type ScheduleItem = z.infer<typeof scheduleItemSchema>;
+
+/** "Special attractions" banners. `starts` are start times of schedule stops (validated to exist). */
+export const attractionsSchema = z.array(
+  z
+    .object({
+      id: z.string().regex(/^[a-z0-9-]+$/),
+      icon: z.string(),
+      title: bilingual,
+      text: bilingual,
+      starts: z.array(hhmm).min(1),
+      headline: z.boolean().optional(),
+    })
+    .strict(),
+);
+export type Attraction = z.infer<typeof attractionsSchema>[number];
+
+/** The headline artist. `caption` is the event label; the date and time are read from the headline schedule stop. */
+export const artistSchema = z
+  .object({
+    name: bilingual,
+    photo: z.string().regex(/^\/[^?#]+\.(jpe?g|png|webp)$/i, 'a path under public/, e.g. /artist/remo.jpg'),
+    /** CSS object-position, so the face is not cut when the frame crops the photo. */
+    focus: z.string().regex(/^\d{1,3}% \d{1,3}%$/),
+    caption: bilingual,
+  })
+  .strict();
+export type Artist = z.infer<typeof artistSchema>;
 
 export const guestsSchema = z.array(z.object({ name: bilingual, title: bilingual, photo: z.string() }));
 export type Guest = z.infer<typeof guestsSchema>[number];

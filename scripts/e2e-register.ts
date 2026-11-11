@@ -9,7 +9,11 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
 import sharp from 'sharp';
+import scheduleData from '../src/data/schedule.json' with { type: 'json' };
+import siteData from '../src/data/site.json' with { type: 'json' };
 
+
+const day2 = scheduleData.filter((x) => x.day === 2);
 const BASE = process.env.E2E_BASE ?? 'http://localhost:5173';
 const OUT = resolve(process.env.E2E_OUT ?? 'e2e-output');
 const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -267,13 +271,21 @@ async function main() {
     expect(!/[^\r]\n/.test(text), 'all line breaks are CRLF');
     expect(lines.every((l) => Buffer.byteLength(l, 'utf8') <= 75), 'every line ≤ 75 octets (folded)');
     expect(text.includes('DTSTART;VALUE=DATE:20261120') && text.includes('DTEND;VALUE=DATE:20261121'), 'Day 1 all-day (time TBA)');
-    expect(text.includes('DTSTART:20261121T033000Z') && text.includes('DTEND:20261121T121500Z'), 'Day 2 09:00–17:45 IST in UTC');
-    expect((text.match(/BEGIN:VEVENT/g) ?? []).length === 2, 'two VEVENTs');
+    // Day 2: one VEVENT per schedule stop, same start time and kn name as the Event Details timeline.
+    const utcOf = (hhmm: string) => new Date(`${siteData.day2Date}T${hhmm}:00+05:30`).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const unfolded = text.replace(/\r\n /g, '');
+    day2.forEach((stop, i) => {
+      const end = day2[i + 1] ? utcOf(day2[i + 1]!.start) : utcOf(siteData.eventEnd.slice(11, 16));
+      expect(unfolded.includes(`DTSTART:${utcOf(stop.start)}\r\nDTEND:${end}`), `Day 2 ${stop.start} stop starts ${utcOf(stop.start)} and ends ${end}`);
+      expect(unfolded.includes(`SUMMARY:${stop.title.kn.replace(/,/g, '\\,')}\r\n`), `Day 2 ${stop.start} stop is named "${stop.title.kn}"`);
+    });
+    expect((text.match(/BEGIN:VEVENT/g) ?? []).length === 1 + day2.length, `${1 + day2.length} VEVENTs (Day 1 + ${day2.length} Day 2 stops)`);
+    expect(!/DAP|Motor Head|Movie Promotion|Break/.test(unfolded) && !/(?:^|[^A-Za-z])DAP(?:[^A-Za-z]|$)/.test(unfolded), 'no banned programme names in the .ics');
 
     await page.reload({ waitUntil: 'networkidle0' });
     const afterReload = await page.$eval('[data-testid=pass-reg-id]', (e) => e.textContent?.trim());
     expect(afterReload === 'KR26-ESY-0001', 'pass survives a page refresh (sessionStorage)');
-    return `regId ${r.regId}; filled in ${fill.fillMs} ms; no horizontal scroll: ${fill.overflowFree}; PNG ${w}×${h} (2× ${cardW}px card); .ics ${lines.length - 1} lines, CRLF, folded, all-day Day 1 + timed Day 2; pass persists after refresh`;
+    return `regId ${r.regId}; filled in ${fill.fillMs} ms; no horizontal scroll: ${fill.overflowFree}; PNG ${w}×${h} (2× ${cardW}px card); .ics ${lines.length - 1} lines, CRLF, folded, all-day Day 1 + one timed entry per Day 2 stop; pass persists after refresh`;
   });
 
   await scenario(browser, '02-success-team-en', 'en', async (page) => {

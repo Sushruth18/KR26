@@ -4,7 +4,11 @@ import { resolve } from 'node:path';
 import type { ZodTypeAny } from 'zod';
 import type { LogoAsset, LogoKey } from '../src/lib/logos';
 import { sheetNameFor } from './gas-config';
+import { BANNED } from './banned-terms';
+import type { ArtistAsset } from '../src/lib/artist';
 import {
+  artistSchema,
+  attractionsSchema,
   eventsSchema,
   gallerySchema,
   guestsSchema,
@@ -32,6 +36,8 @@ function load<S extends ZodTypeAny>(file: string, schema: S): ReturnType<S['pars
 const site = load('site.json', siteSchema);
 const events = load('events.json', eventsSchema) as CompetitionEvent[] | null;
 const schedule = load('schedule.json', scheduleSchema);
+const artist = load('artist.json', artistSchema);
+const attractions = load('attractions.json', attractionsSchema);
 load('guests.json', guestsSchema);
 load('team.json', teamSchema);
 load('gallery.json', gallerySchema);
@@ -123,9 +129,57 @@ if (process.env.NETLIFY === 'true' && !process.env.VITE_REGISTRATION_ENDPOINT?.t
 }
 
 if (schedule) {
-  for (const s of schedule) {
-    if (s.end <= s.start) errors.push(`schedule.json: ${s.title.en} ends before it starts`);
+  const starts = schedule.map((s) => s.start);
+  if (starts.some((s, i) => i > 0 && s <= starts[i - 1]!)) {
+    errors.push('schedule.json: stops must be in strictly ascending start order, with no two at the same time');
   }
+  if (schedule.some((s) => s.day !== 2)) errors.push('schedule.json: only Day 2 is listed here (Day 1 is built from events.json)');
+  if (schedule.filter((s) => s.highlight).length !== 1) errors.push('schedule.json: exactly one stop must be the highlight (Inauguration & Procession)');
+  if (schedule.filter((s) => s.headline).length !== 1) errors.push('schedule.json: exactly one stop must be the headline act');
+  if (site) {
+    const toIst = (hhmm: string) => `${site.day2Date}T${hhmm}:00+05:30`;
+    if (schedule[0] && Date.parse(toIst(schedule[0].start)) !== Date.parse(site.eventStart)) {
+      errors.push(`schedule.json: the first stop (${schedule[0].start}) must start at site.json eventStart`);
+    }
+    // The last stop runs until eventEnd (Now/Next), so it must start before it.
+    const last = schedule[schedule.length - 1];
+    if (last && Date.parse(toIst(last.start)) >= Date.parse(site.eventEnd)) {
+      errors.push('schedule.json: the last stop must start before site.json eventEnd');
+    }
+  }
+  if (attractions) {
+    for (const a of attractions) {
+      for (const start of a.starts) {
+        if (!schedule.some((s) => s.start === start)) errors.push(`attractions.json: ${a.id} points at ${start}, which is not a schedule stop`);
+      }
+    }
+  }
+}
+
+// Headline artist photo: the WebP copies must be made from the current master.
+if (artist) {
+  const abs = resolve(process.cwd(), 'public', artist.photo.replace(/^\//, ''));
+  const regen = 'run "npm run brand:images" and commit the result';
+  if (!existsSync(abs)) {
+    errors.push(`artist.json: photo "${artist.photo}" is not in public/`);
+  } else {
+    const entry = JSON.parse(readFileSync(resolve(dataDir, 'artist.generated.json'), 'utf8')) as ArtistAsset;
+    const sha1 = createHash('sha1').update(readFileSync(abs)).digest('hex');
+    if (entry.source !== artist.photo || entry.sha1 !== sha1) {
+      errors.push(`artist.generated.json: ${artist.photo} changed since its WebP copies were made — ${regen}`);
+    } else {
+      for (const v of entry.variants) {
+        if (!existsSync(resolve(process.cwd(), 'public', v.src.replace(/^\//, '')))) errors.push(`artist.generated.json: ${v.src} is missing — ${regen}`);
+        if (v.w > entry.width) errors.push(`artist.generated.json: ${v.src} is wider than the master (${entry.width}px) — copies must never be upscaled`);
+      }
+    }
+  }
+}
+
+// Names the college has asked us to keep off the site (also checked against the built output by `npm run check:banned`).
+for (const f of readdirSync(dataDir).filter((n) => n.endsWith('.json'))) {
+  const hit = BANNED.find((b) => b.test(readFileSync(resolve(dataDir, f), 'utf8')));
+  if (hit) errors.push(`${f}: contains a banned term (${hit})`);
 }
 
 if (errors.length) {

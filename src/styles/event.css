@@ -1,0 +1,401 @@
+/* Event Details page: Darbar frames, day tabs, procession-route timeline, hanging banners, map. Imported by index.css. */
+
+@layer components {
+  /* ---------- Darbar-hall arch frame: two gold pillars carrying a gold arch ---------- */
+  .darbar {
+    position: relative;
+    display: flex;
+    width: min(100%, 17.5rem);
+    margin-inline: auto;
+    flex-direction: column;
+    align-items: center;
+  }
+  .darbar-hall {
+    position: relative;
+    display: grid;
+    width: 100%;
+    grid-template-columns: 22px minmax(0, 1fr) 22px;
+    align-items: stretch;
+  }
+  .darbar-pillar {
+    position: relative;
+    margin-top: 40px; /* the arch springs from the pillar tops */
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(90deg, #8a5a10, #ffd27a 38%, #f5b841 55%, #8a5a10);
+    box-shadow: inset 0 0 0 1px rgb(255 244 220 / 0.18);
+  }
+  /* Capital and base blocks */
+  .darbar-pillar::before,
+  .darbar-pillar::after {
+    content: '';
+    position: absolute;
+    left: -4px;
+    right: -4px;
+    height: 10px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #ffe6a6, #c98a1b);
+  }
+  .darbar-pillar::before {
+    top: -4px;
+  }
+  .darbar-pillar::after {
+    bottom: 0;
+  }
+  .darbar-arch {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    min-width: 0;
+    overflow: hidden;
+    border: 3px solid var(--gold-400);
+    border-bottom-width: 0;
+    border-radius: 999px 999px 0 0;
+    background: var(--night-800);
+    box-shadow:
+      0 0 0 1px rgb(201 138 27 / 0.7),
+      0 0 22px rgb(245 184 65 / 0.28);
+  }
+  .darbar-arch img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* Floor under the pillars */
+  .darbar-floor {
+    width: 100%;
+    height: 12px;
+    border-radius: 0 0 6px 6px;
+    background: linear-gradient(180deg, #c98a1b, #7b520f);
+  }
+  .darbar-empty {
+    display: grid;
+    height: 100%;
+    place-content: center;
+    gap: 0.5rem;
+    padding: 2.5rem 1rem 1rem;
+    text-align: center;
+    color: var(--gold-300);
+    background:
+      radial-gradient(ellipse 70% 40% at 50% 0, rgb(139 30 45 / 0.5), transparent 70%),
+      var(--night-800);
+  }
+
+  /* ---------- Day tabs ---------- */
+  .daytabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    width: 100%;
+    max-width: 34rem;
+    margin-inline: auto;
+    padding: 5px;
+    border: 1px solid rgb(201 138 27 / 0.55);
+    border-radius: 18px;
+    background: var(--night-900);
+  }
+  .daytab {
+    display: flex;
+    min-height: 64px;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--ivory-300);
+    text-align: center;
+    line-height: 1.35;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      transform 0.15s var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .daytab:hover {
+    color: var(--ivory-50);
+    background: rgb(255 210 122 / 0.08);
+  }
+  .daytab:active {
+    transform: scale(0.98);
+  }
+  .daytab[aria-pressed='true'] {
+    color: var(--night-950);
+    background: linear-gradient(180deg, var(--gold-300), var(--gold-400));
+    box-shadow: 0 0 14px rgb(255 210 122 / 0.3);
+  }
+  .daytab:focus-visible {
+    border-radius: 14px;
+  }
+
+  /* ---------- Procession route ---------- */
+  .route {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .route-stop {
+    position: relative;
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    padding-block: 0.6rem;
+  }
+  /* The road: one S-curve per stop, stretched to the stop's height. Every segment starts and ends on the
+     centre line with the same tangent, so consecutive stops join into one winding road. */
+  .route-road {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 56px;
+    pointer-events: none;
+  }
+  .route-road svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .route-node {
+    position: absolute;
+    top: 50%;
+    left: 28px;
+    z-index: 1;
+    display: grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--night-950);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff4dc, var(--gold-400) 60%);
+    box-shadow: 0 0 0 2px var(--gold-600);
+  }
+  .route-stop[data-highlight='true'] .route-node {
+    width: 30px;
+    height: 30px;
+    box-shadow:
+      0 0 0 2px var(--gold-300),
+      0 0 14px rgb(255 210 122 / 0.6);
+  }
+  /* The Ambari marker sits on the current stop. */
+  .route-stop[data-state='current'] .route-node {
+    width: 52px;
+    height: 52px;
+    border-color: var(--gold-300);
+    background: var(--night-900);
+    box-shadow:
+      0 0 0 2px var(--gold-400),
+      0 0 18px rgb(255 210 122 / 0.7);
+  }
+  .route-node .ambari {
+    width: 40px;
+    height: 40px;
+  }
+  .route-stop[data-state='past'] {
+    opacity: 0.62;
+  }
+
+  .route-card {
+    position: relative;
+    grid-column: 2;
+    min-width: 0;
+    padding: 0.9rem 1rem 1rem;
+    border: 1px solid rgb(201 138 27 / 0.45);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgb(21 19 46 / 0.96), rgb(11 10 31 / 0.96));
+  }
+  /* Notch pointing at the road */
+  .route-card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -7px;
+    width: 12px;
+    height: 12px;
+    transform: translateY(-50%) rotate(45deg);
+    border-left: 1px solid rgb(201 138 27 / 0.45);
+    border-bottom: 1px solid rgb(201 138 27 / 0.45);
+    background: rgb(21 19 46);
+  }
+  .route-stop[data-state='current'] .route-card,
+  .route-stop[data-state='next'] .route-card {
+    border-color: var(--gold-400);
+  }
+  .route-stop[data-state='current'] .route-card {
+    box-shadow:
+      0 0 0 1px rgb(245 184 65 / 0.5),
+      0 0 22px rgb(245 184 65 / 0.3);
+  }
+  .route-stop[data-highlight='true'] .route-card {
+    border-color: var(--gold-400);
+    background:
+      radial-gradient(ellipse 80% 60% at 100% 0, rgb(139 30 45 / 0.5), transparent 70%),
+      linear-gradient(180deg, rgb(21 19 46 / 0.96), rgb(11 10 31 / 0.96));
+    box-shadow: 0 0 0 1px rgb(245 184 65 / 0.35);
+  }
+  .route-time {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    line-height: 1.4;
+    color: var(--gold-300);
+  }
+  .route-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.1rem 0.6rem;
+    border: 1px solid rgb(245 184 65 / 0.7);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--gold-300);
+    background: rgb(245 184 65 / 0.12);
+  }
+  .route-pill[data-kind='now'] {
+    color: var(--night-950);
+    background: var(--gold-300);
+    border-color: var(--gold-300);
+  }
+  .route-pill[data-kind='headline'] {
+    color: var(--ivory-50);
+    background: var(--maroon-700);
+    border-color: var(--gold-600);
+  }
+  .route-group {
+    margin: 1.5rem 0 0.25rem;
+    padding-left: 56px;
+  }
+
+  @media (min-width: 768px) {
+    /* Zigzag: cards alternate sides of a central road. */
+    .route-stop {
+      grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
+    }
+    .route-road {
+      inset: 0 auto 0 calc(50% - 28px);
+    }
+    .route-node {
+      left: 50%;
+    }
+    .route-card {
+      grid-column: 1;
+      grid-row: 1;
+      margin-right: 0.75rem;
+      text-align: right;
+    }
+    .route-stop:nth-child(even) .route-card {
+      grid-column: 3;
+      margin-right: 0;
+      margin-left: 0.75rem;
+      text-align: left;
+    }
+    .route-card::before {
+      left: auto;
+      right: -7px;
+      transform: translateY(-50%) rotate(-135deg);
+    }
+    .route-stop:nth-child(even) .route-card::before {
+      left: -7px;
+      right: auto;
+      transform: translateY(-50%) rotate(45deg);
+    }
+    .route-card .route-meta {
+      justify-content: flex-end;
+    }
+    .route-stop:nth-child(even) .route-card .route-meta {
+      justify-content: flex-start;
+    }
+    .route-group {
+      padding-left: 0;
+      text-align: center;
+    }
+  }
+
+  /* ---------- Hanging banners ---------- */
+  .banners {
+    position: relative;
+    display: grid;
+    gap: 2.25rem 1rem;
+    padding-top: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  }
+  /* The rope */
+  .banners::before {
+    content: '';
+    position: absolute;
+    inset: 0.55rem 0 auto;
+    height: 3px;
+    border-radius: 3px;
+    background: repeating-linear-gradient(90deg, var(--gold-600) 0 10px, #7b520f 10px 14px);
+  }
+  .banner-wrap {
+    position: relative;
+    display: flex;
+    min-width: 0;
+  }
+  /* The hanging cords */
+  .banner-wrap::before,
+  .banner-wrap::after {
+    content: '';
+    position: absolute;
+    top: -1.1rem;
+    width: 2px;
+    height: 1.2rem;
+    background: var(--gold-600);
+  }
+  .banner-wrap::before {
+    left: 22%;
+  }
+  .banner-wrap::after {
+    right: 22%;
+  }
+  .banner {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    padding: 1.6rem 1rem 2.6rem;
+    text-align: center;
+    border: 1px solid var(--gold-600);
+    border-top-width: 3px;
+    border-radius: 3px 3px 0 0;
+    background:
+      radial-gradient(ellipse 90% 50% at 50% 0, rgb(232 119 46 / 0.28), transparent 70%),
+      linear-gradient(180deg, var(--maroon-700), var(--maroon-900));
+    /* Swallow-tail hem */
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), 50% 100%, 0 calc(100% - 22px));
+  }
+  .banner[data-headline='true'] {
+    background:
+      radial-gradient(ellipse 90% 50% at 50% 0, rgb(255 210 122 / 0.32), transparent 70%),
+      linear-gradient(180deg, #a52638, var(--maroon-900));
+  }
+
+  /* ---------- Map ---------- */
+  .map-frame {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid rgb(201 138 27 / 0.55);
+    border-radius: 14px;
+    background: var(--night-800);
+  }
+  @media (min-width: 768px) {
+    .map-frame {
+      aspect-ratio: 16 / 7;
+    }
+  }
+  .map-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+}

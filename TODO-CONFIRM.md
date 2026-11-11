@@ -21,11 +21,20 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 
 ## Event details
 - [ ] Chief guest names, titles, photos (`guests.json` is empty → "Announcing soon" frame)
-- [ ] Kannada titles in `schedule.json` are a first draft — confirm wording
-- [ ] "Movie Promotion" — film name
-- [ ] "DAP" — what it stands for / the artist's display name before showing it publicly
-- [ ] Day 2 "Dance Competition" / "Music Competition (Students & Faculty)" slots (12:05, 12:30): proposal lists them on Day 2 although competitions are on Day 1 — kept as written, no registration link
+- [ ] Day 2 Dance / Music Competition (Students & Faculty) slots (12:05, 12:30): listed on Day 2 although competitions are on Day 1 — kept as listed, no registration link
 - [ ] Prize-distribution stop for Day 2 — add once its time is confirmed
+
+## Headline artist (`src/data/artist.json`, `public/artist/remo.jpg`)
+- [ ] Spelling of the name: "Remo & Team" (kn "ರೆಮೊ ಮತ್ತು ತಂಡ" — draft, for a Kannada speaker to check)
+- [ ] Permission to use the photo and the name publicly
+- [ ] A higher-resolution photo — the current one is 447 px wide, so it is shown without upscaling and looks soft on 2×/3× phones. Replace `public/artist/remo.jpg`, then run `npm run brand:images`
+
+## Kannada wording for the Day 2 programme (drafts — a Kannada speaker should check)
+- [ ] Stop titles (`src/data/schedule.json`): ರ‍್ಯಾಲಿ (Rally) · ಬಿಲ್‌ಬೋರ್ಡ್ (venue, Bill Board) · ಉದ್ಘಾಟನೆ ಮತ್ತು ಮೆರವಣಿಗೆ · ನೃತ್ಯ ಸ್ಪರ್ಧೆ / ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) · ರಂಗಸ್ಥಳ ಪ್ರದರ್ಶನ · ರುಶಾಂಗ್ ಪ್ರದರ್ಶನ · ತಾಂಡವ ಪ್ರದರ್ಶನ · ಫ್ಯಾಷನ್ ಶೋ · ಸಂಗೀತ ಕಚೇರಿ ಮತ್ತು ಡಿಜೆ
+- [ ] Club names keep their own spelling in both languages; the Kannada-script forms ರಂಗಸ್ಥಳ / ರುಶಾಂಗ್ / ತಾಂಡವ are transliterations — confirm "ರುಶಾಂಗ್" in particular
+- [ ] Club descriptions "ನಾಟಕ ಕ್ಲಬ್ / ಸಂಗೀತ ಕ್ಲಬ್ / ನೃತ್ಯ ಕ್ಲಬ್" (Drama / Music / Dance club) and the attraction banner texts (`src/data/attractions.json`)
+- [ ] Event Details page strings (`kn.json → eventPage.*`): "ಪ್ರಮುಖ ಕಲಾವಿದರು" (Headline artist), "ಮುಖ್ಯ ಆಕರ್ಷಣೆ" (Headline act), "ಈಗ ನಡೆಯುತ್ತಿದೆ" (Now), "ಮುಂದೆ" (Up next), tab and intro lines, plaque captions, the venue caption "ಅವಲಹಳ್ಳಿ, ಯಲಹಂಕ, ಬೆಂಗಳೂರು"; calendar-file description "ದಿನ ೨"
+- [ ] Day 2 time plaque shows "9:00 AM – 5:45 PM" (from `eventStart`/`eventEnd`); the timeline itself shows start times only — say if the plaque should also drop the end time
 
 ## Content
 - [ ] 2026 team (`team.json` is empty); 2025 team is reference only
@@ -61,5 +70,5 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 - [ ] **"BMSITM" vs "BMSIT&M"** — see Home page copy above (logo lettering vs everywhere else)
 - [ ] Kannada wording written by me, to be checked by a Kannada speaker: the confirmation email's "View your pass" lines ("ನಿಮ್ಮ ಪಾಸ್ ವೀಕ್ಷಿಸಿ", "ನೋಂದಣಿಯಲ್ಲಿ ನೀಡಿದ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ — ಐಡಿ ಮೊದಲೇ ತುಂಬಿರುತ್ತದೆ.") and the pass lookup text (`kn.json → pass.lookup.*`)
 
-## Pages not built yet (Phases 5–6)
-- [ ] `/event` (Event Details), `/gallery`, `/team` are still "coming soon" placeholders. They are linked from the navbar, so either build them or hide the links before sharing widely
+## Pages not built yet (Phase 6)
+- [ ] `/gallery` and `/team` are still "coming soon" placeholders. They are linked from the navbar, so either build them or hide the links before sharing widely

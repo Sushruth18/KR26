@@ -1,6 +1,7 @@
 /* Imported first (CSS @import rule); their @layer blocks are slotted into Tailwind's layers below. */
 @import './art.css';
 @import './home.css';
+@import './event.css';
 
 @tailwind base;
 @tailwind components;

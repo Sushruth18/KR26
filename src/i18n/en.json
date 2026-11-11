@@ -162,7 +162,7 @@
     "calendar": "Add to calendar",
     "back": "Back to competitions",
     "icsSuffix": "Karnataka Rajyotsava 2026",
-    "icsDay2": "Karnataka Rajyotsava 2026 — Dasara Procession",
+    "icsDay2": "Karnataka Rajyotsava 2026 — Day 2",
     "icsDescription": "Registration ID: {{regId}}. Show your pass at the venue.",
     "icsLocation": "BMSIT&M, Avalahalli, Yelahanka, Bengaluru",
     "lookup": {
@@ -200,6 +200,58 @@
       "completed": "This competition is over — see you at the next one!"
     },
     "liveRetry": "Check again"
+  },
+  "eventPage": {
+    "guests": {
+      "title": "Chief guests",
+      "soon": "Announcing soon",
+      "soonText": "Our chief guests will be announced shortly."
+    },
+    "artist": {
+      "title": "Headline artist",
+      "alt": "{{name}} — {{event}}",
+      "caption": "{{event}} · {{date}} · {{time}}"
+    },
+    "plaques": {
+      "datesCaption": "Competitions · Main event",
+      "timeLabel": "Day 2",
+      "timeCaption": "Day 2 programme",
+      "venueValue": "BMSIT&M",
+      "venueUnit": "campus",
+      "venueCaption": "Avalahalli, Yelahanka, Bengaluru",
+      "prizeUnit": "+ mementos",
+      "prizeCaption": "Cash prizes · mementos for faculty events"
+    },
+    "tabs": {
+      "label": "Choose a day",
+      "day": "Day {{n}}",
+      "day1": "Competitions",
+      "day2": "Rajyotsava"
+    },
+    "timeline": {
+      "day1Label": "Day 1 competitions, in order of start time",
+      "day2Label": "Day 2 programme, in order of start time",
+      "day1Intro": "All {{count}} competitions take place on this day. Pick yours and register.",
+      "day2Intro": "The whole Rajyotsava programme is open to everyone — no registration needed for Day 2.",
+      "tbaGroup": "Time to be announced",
+      "now": "Now",
+      "next": "Up next",
+      "headline": "Headline act",
+      "details": "Details",
+      "register": "Register",
+      "registerFor": "Register for {{name}}",
+      "venue": "Venue"
+    },
+    "attractions": {
+      "title": "Special attractions",
+      "headline": "Headline"
+    },
+    "venue": {
+      "title": "Find us",
+      "mapTitle": "Map showing BMS Institute of Technology & Management",
+      "directions": "Get directions",
+      "loading": "Loading map…"
+    }
   },
   "pages": {
     "home": {
