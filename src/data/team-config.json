@@ -1,0 +1,112 @@
+{
+  "_comment": "Display order of the troupes on /team: reorder the objects in `groups` and that is the page order. Groups with no members are hidden. `label.kn` values are DRAFTS for a Kannada speaker to check (see TODO-CONFIRM-team.md). `icon` picks the folk icon in src/components/team/TeamGroupIcon.tsx. In the first group, members are shown in the order of `roles` (Heads before Co-Heads); every other group shows its members in the order of src/data/team.json. `excludeIds`: ids of people removed from team.json on purpose — the importer never adds them back.",
+  "excludeIds": [],
+  "groups": [
+    {
+      "id": "head",
+      "label": {
+        "kn": "ಮುಖ್ಯಸ್ಥರು ಮತ್ತು ಸಹ-ಮುಖ್ಯಸ್ಥರು",
+        "en": "Head & Co-Head"
+      },
+      "icon": "chatri",
+      "roles": {
+        "head": {
+          "kn": "ಮುಖ್ಯಸ್ಥ",
+          "en": "Head"
+        },
+        "cohead": {
+          "kn": "ಸಹ-ಮುಖ್ಯಸ್ಥ",
+          "en": "Co-Head"
+        }
+      }
+    },
+    {
+      "id": "events-logistics",
+      "label": {
+        "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
+        "en": "Events & Logistics"
+      },
+      "icon": "ratha"
+    },
+    {
+      "id": "marketing",
+      "label": {
+        "kn": "ಪ್ರಚಾರ ಮತ್ತು ಮಾರುಕಟ್ಟೆ",
+        "en": "Marketing"
+      },
+      "icon": "kombu"
+    },
+    {
+      "id": "media",
+      "label": {
+        "kn": "ಮಾಧ್ಯಮ",
+        "en": "Media"
+      },
+      "icon": "lens"
+    },
+    {
+      "id": "design-decor",
+      "label": {
+        "kn": "ವಿನ್ಯಾಸ ಮತ್ತು ಅಲಂಕಾರ",
+        "en": "Design & Décor"
+      },
+      "icon": "rangoli"
+    },
+    {
+      "id": "finance-documentation",
+      "label": {
+        "kn": "ಹಣಕಾಸು ಮತ್ತು ದಾಖಲಾತಿ",
+        "en": "Finance & Documentation"
+      },
+      "icon": "scroll"
+    },
+    {
+      "id": "hospitality-reception",
+      "label": {
+        "kn": "ಆತಿಥ್ಯ ಮತ್ತು ಸ್ವಾಗತ",
+        "en": "Hospitality & Reception"
+      },
+      "icon": "kalasha"
+    },
+    {
+      "id": "stalls-shops",
+      "label": {
+        "kn": "ಮಳಿಗೆಗಳು ಮತ್ತು ಅಂಗಡಿಗಳು",
+        "en": "Stalls & Shops"
+      },
+      "icon": "stall"
+    },
+    {
+      "id": "stage-security",
+      "label": {
+        "kn": "ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ",
+        "en": "Stage & Security"
+      },
+      "icon": "shield"
+    },
+    {
+      "id": "anchoring",
+      "label": {
+        "kn": "ನಿರೂಪಣೆ",
+        "en": "Anchoring"
+      },
+      "icon": "conch"
+    },
+    {
+      "id": "drama",
+      "label": {
+        "kn": "ನಾಟಕ",
+        "en": "Drama"
+      },
+      "icon": "mask"
+    },
+    {
+      "id": "technical",
+      "label": {
+        "kn": "ತಾಂತ್ರಿಕ",
+        "en": "Technical"
+      },
+      "icon": "gear"
+    }
+  ]
+}

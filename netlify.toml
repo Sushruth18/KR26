@@ -24,3 +24,9 @@
   for = "/brand/web/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Team photos from `npm run team:import` — content-hashed names, so they never go stale.
+[[headers]]
+  for = "/team/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

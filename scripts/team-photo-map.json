@@ -1,0 +1,38 @@
+{
+  "_comment": "Per-person photo decisions for npm run team:import. `file` = a unique piece of the photo file name BEFORE the \" - \" (e.g. \"WA0064\") — use it when the importer lists a photo as ambiguous. `focus` = where the 4:5 crop should be centred ({ \"x\": 0.5, \"y\": 0.35 }, fractions of the photo) when the automatic crop cuts a head. Keys are member ids from team.json.",
+  "people": {
+    "s-nishitha": {
+      "focus": {
+        "x": 0.5,
+        "y": 0.6
+      }
+    },
+    "spandana-b-s": {
+      "focus": {
+        "x": 0.47,
+        "y": 0.56
+      },
+      "zoom": 1.3
+    },
+    "rohit-sundar": {
+      "focus": {
+        "x": 0.5,
+        "y": 0.52
+      },
+      "zoom": 1.8
+    },
+    "gagan-h-s": {
+      "focus": {
+        "x": 0.4,
+        "y": 0.45
+      },
+      "zoom": 2.2
+    },
+    "g-rushika": {
+      "focus": {
+        "x": 0.42,
+        "y": 0.5
+      }
+    }
+  }
+}

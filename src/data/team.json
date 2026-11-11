@@ -1,1 +1,477 @@
-[]
+[
+  {
+    "id": "head",
+    "members": [
+      {
+        "id": "ashutosh",
+        "name": {
+          "kn": "Ashutosh",
+          "en": "Ashutosh"
+        },
+        "role": {
+          "kn": "ಸಹ-ಮುಖ್ಯಸ್ಥ",
+          "en": "Co-Head"
+        },
+        "photo": "ashutosh"
+      },
+      {
+        "id": "gagan-h-s",
+        "name": {
+          "kn": "Gagan H S",
+          "en": "Gagan H S"
+        },
+        "role": {
+          "kn": "ಮುಖ್ಯಸ್ಥ",
+          "en": "Head"
+        },
+        "photo": "gagan-h-s"
+      }
+    ]
+  },
+  {
+    "id": "events-logistics",
+    "members": [
+      {
+        "id": "s-nishitha",
+        "name": {
+          "kn": "S Nishitha",
+          "en": "S Nishitha"
+        },
+        "role": {
+          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
+          "en": "Events & Logistics"
+        },
+        "photo": "s-nishitha"
+      },
+      {
+        "id": "aditya-biju-nair",
+        "name": {
+          "kn": "Aditya Biju Nair",
+          "en": "Aditya Biju Nair"
+        },
+        "role": {
+          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
+          "en": "Events & Logistics"
+        },
+        "photo": "aditya-biju-nair"
+      },
+      {
+        "id": "sushruth-kumar",
+        "name": {
+          "kn": "Sushruth Kumar",
+          "en": "Sushruth Kumar"
+        },
+        "role": {
+          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
+          "en": "Events & Logistics"
+        },
+        "photo": "sushruth-kumar"
+      },
+      {
+        "id": "g-rushika",
+        "name": {
+          "kn": "G Rushika",
+          "en": "G Rushika"
+        },
+        "role": {
+          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
+          "en": "Events & Logistics"
+        },
+        "photo": "g-rushika"
+      },
+      {
+        "id": "aditya-jamane",
+        "name": {
+          "kn": "Aditya Jamane",
+          "en": "Aditya Jamane"
+        },
+        "role": {
+          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
+          "en": "Events & Logistics"
+        },
+        "photo": "aditya-jamane"
+      }
+    ]
+  },
+  {
+    "id": "marketing",
+    "members": [
+      {
+        "id": "manjunath-biradar",
+        "name": {
+          "kn": "Manjunath Biradar",
+          "en": "Manjunath Biradar"
+        },
+        "role": {
+          "kn": "ಪ್ರಚಾರ ಮತ್ತು ಮಾರುಕಟ್ಟೆ",
+          "en": "Marketing"
+        },
+        "photo": "manjunath-biradar"
+      }
+    ]
+  },
+  {
+    "id": "media",
+    "members": [
+      {
+        "id": "pranjal-raj",
+        "name": {
+          "kn": "Pranjal Raj",
+          "en": "Pranjal Raj"
+        },
+        "role": {
+          "kn": "ಮಾಧ್ಯಮ",
+          "en": "Media"
+        },
+        "photo": "pranjal-raj"
+      },
+      {
+        "id": "thejas-nirmal",
+        "name": {
+          "kn": "Thejas Nirmal",
+          "en": "Thejas Nirmal"
+        },
+        "role": {
+          "kn": "ಮಾಧ್ಯಮ",
+          "en": "Media"
+        },
+        "photo": "thejas-nirmal"
+      },
+      {
+        "id": "raghavendra-r",
+        "name": {
+          "kn": "Raghavendra R",
+          "en": "Raghavendra R"
+        },
+        "role": {
+          "kn": "ಮಾಧ್ಯಮ",
+          "en": "Media"
+        },
+        "photo": "raghavendra-r"
+      },
+      {
+        "id": "arjun-livik-jp",
+        "name": {
+          "kn": "Arjun Livik JP",
+          "en": "Arjun Livik JP"
+        },
+        "role": {
+          "kn": "ಮಾಧ್ಯಮ",
+          "en": "Media"
+        },
+        "photo": ""
+      },
+      {
+        "id": "rohan-jojee-c",
+        "name": {
+          "kn": "Rohan Jojee C",
+          "en": "Rohan Jojee C"
+        },
+        "role": {
+          "kn": "ಮಾಧ್ಯಮ",
+          "en": "Media"
+        },
+        "photo": "rohan-jojee-c"
+      },
+      {
+        "id": "krishna-charan-p",
+        "name": {
+          "kn": "Krishna Charan P",
+          "en": "Krishna Charan P"
+        },
+        "role": {
+          "kn": "ಮಾಧ್ಯಮ",
+          "en": "Media"
+        },
+        "photo": ""
+      },
+      {
+        "id": "priyanka-navale",
+        "name": {
+          "kn": "Priyanka Navale",
+          "en": "Priyanka Navale"
+        },
+        "role": {
+          "kn": "ಮಾಧ್ಯಮ",
+          "en": "Media"
+        },
+        "photo": "priyanka-navale"
+      }
+    ]
+  },
+  {
+    "id": "design-decor",
+    "members": [
+      {
+        "id": "punith-p-gowda",
+        "name": {
+          "kn": "Punith P Gowda",
+          "en": "Punith P Gowda"
+        },
+        "role": {
+          "kn": "ವಿನ್ಯಾಸ ಮತ್ತು ಅಲಂಕಾರ",
+          "en": "Design & Décor"
+        },
+        "photo": "punith-p-gowda"
+      },
+      {
+        "id": "manish-kv",
+        "name": {
+          "kn": "Manish KV",
+          "en": "Manish KV"
+        },
+        "role": {
+          "kn": "ವಿನ್ಯಾಸ ಮತ್ತು ಅಲಂಕಾರ",
+          "en": "Design & Décor"
+        },
+        "photo": "manish-kv"
+      },
+      {
+        "id": "abhishek-s-hebbar",
+        "name": {
+          "kn": "Abhishek S Hebbar",
+          "en": "Abhishek S Hebbar"
+        },
+        "role": {
+          "kn": "ವಿನ್ಯಾಸ ಮತ್ತು ಅಲಂಕಾರ",
+          "en": "Design & Décor"
+        },
+        "photo": "abhishek-s-hebbar"
+      }
+    ]
+  },
+  {
+    "id": "finance-documentation",
+    "members": [
+      {
+        "id": "sowmya-n",
+        "name": {
+          "kn": "Sowmya N",
+          "en": "Sowmya N"
+        },
+        "role": {
+          "kn": "ಹಣಕಾಸು ಮತ್ತು ದಾಖಲಾತಿ",
+          "en": "Finance & Documentation"
+        },
+        "photo": "sowmya-n"
+      },
+      {
+        "id": "keerthana-s",
+        "name": {
+          "kn": "Keerthana S",
+          "en": "Keerthana S"
+        },
+        "role": {
+          "kn": "ಹಣಕಾಸು ಮತ್ತು ದಾಖಲಾತಿ",
+          "en": "Finance & Documentation"
+        },
+        "photo": ""
+      },
+      {
+        "id": "dhivii-suresh",
+        "name": {
+          "kn": "Dhivii Suresh",
+          "en": "Dhivii Suresh"
+        },
+        "role": {
+          "kn": "ಹಣಕಾಸು ಮತ್ತು ದಾಖಲಾತಿ",
+          "en": "Finance & Documentation"
+        },
+        "photo": "dhivii-suresh"
+      },
+      {
+        "id": "asha-s",
+        "name": {
+          "kn": "Asha S",
+          "en": "Asha S"
+        },
+        "role": {
+          "kn": "ಹಣಕಾಸು ಮತ್ತು ದಾಖಲಾತಿ",
+          "en": "Finance & Documentation"
+        },
+        "photo": ""
+      },
+      {
+        "id": "kethan-gowda-b-r",
+        "name": {
+          "kn": "Kethan Gowda B R",
+          "en": "Kethan Gowda B R"
+        },
+        "role": {
+          "kn": "ಹಣಕಾಸು ಮತ್ತು ದಾಖಲಾತಿ",
+          "en": "Finance & Documentation"
+        },
+        "photo": "kethan-gowda-b-r"
+      }
+    ]
+  },
+  {
+    "id": "hospitality-reception",
+    "members": [
+      {
+        "id": "spandana-b-s",
+        "name": {
+          "kn": "Spandana B S",
+          "en": "Spandana B S"
+        },
+        "role": {
+          "kn": "ಆತಿಥ್ಯ ಮತ್ತು ಸ್ವಾಗತ",
+          "en": "Hospitality & Reception"
+        },
+        "photo": "spandana-b-s"
+      },
+      {
+        "id": "mallikarjun-katagi",
+        "name": {
+          "kn": "Mallikarjun Katagi",
+          "en": "Mallikarjun Katagi"
+        },
+        "role": {
+          "kn": "ಆತಿಥ್ಯ ಮತ್ತು ಸ್ವಾಗತ",
+          "en": "Hospitality & Reception"
+        },
+        "photo": "mallikarjun-katagi"
+      }
+    ]
+  },
+  {
+    "id": "stalls-shops",
+    "members": [
+      {
+        "id": "vinyas-kt",
+        "name": {
+          "kn": "Vinyas KT",
+          "en": "Vinyas KT"
+        },
+        "role": {
+          "kn": "ಮಳಿಗೆಗಳು ಮತ್ತು ಅಂಗಡಿಗಳು",
+          "en": "Stalls & Shops"
+        },
+        "photo": "vinyas-kt"
+      },
+      {
+        "id": "deepashree-c",
+        "name": {
+          "kn": "Deepashree C",
+          "en": "Deepashree C"
+        },
+        "role": {
+          "kn": "ಮಳಿಗೆಗಳು ಮತ್ತು ಅಂಗಡಿಗಳು",
+          "en": "Stalls & Shops"
+        },
+        "photo": "deepashree-c"
+      },
+      {
+        "id": "tejas-gowda-l",
+        "name": {
+          "kn": "Tejas Gowda L",
+          "en": "Tejas Gowda L"
+        },
+        "role": {
+          "kn": "ಮಳಿಗೆಗಳು ಮತ್ತು ಅಂಗಡಿಗಳು",
+          "en": "Stalls & Shops"
+        },
+        "photo": "tejas-gowda-l"
+      },
+      {
+        "id": "nishan-babu",
+        "name": {
+          "kn": "Nishan Babu",
+          "en": "Nishan Babu"
+        },
+        "role": {
+          "kn": "ಮಳಿಗೆಗಳು ಮತ್ತು ಅಂಗಡಿಗಳು",
+          "en": "Stalls & Shops"
+        },
+        "photo": ""
+      }
+    ]
+  },
+  {
+    "id": "stage-security",
+    "members": [
+      {
+        "id": "rohit-sundar",
+        "name": {
+          "kn": "Rohit Sundar",
+          "en": "Rohit Sundar"
+        },
+        "role": {
+          "kn": "ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ",
+          "en": "Stage & Security"
+        },
+        "photo": "rohit-sundar"
+      },
+      {
+        "id": "swaroop-b-h",
+        "name": {
+          "kn": "Swaroop B H",
+          "en": "Swaroop B H"
+        },
+        "role": {
+          "kn": "ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ",
+          "en": "Stage & Security"
+        },
+        "photo": "swaroop-b-h"
+      },
+      {
+        "id": "dhanush-rajakumar",
+        "name": {
+          "kn": "Dhanush Rajakumar",
+          "en": "Dhanush Rajakumar"
+        },
+        "role": {
+          "kn": "ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ",
+          "en": "Stage & Security"
+        },
+        "photo": "dhanush-rajakumar"
+      },
+      {
+        "id": "sacheth-kumar-p-n",
+        "name": {
+          "kn": "Sacheth Kumar P N",
+          "en": "Sacheth Kumar P N"
+        },
+        "role": {
+          "kn": "ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ",
+          "en": "Stage & Security"
+        },
+        "photo": "sacheth-kumar-p-n"
+      }
+    ]
+  },
+  {
+    "id": "anchoring",
+    "members": [
+      {
+        "id": "tejas-s",
+        "name": {
+          "kn": "Tejas S",
+          "en": "Tejas S"
+        },
+        "role": {
+          "kn": "ನಿರೂಪಣೆ",
+          "en": "Anchoring"
+        },
+        "photo": "tejas-s"
+      }
+    ]
+  },
+  {
+    "id": "drama",
+    "members": [
+      {
+        "id": "arya-k-hirematha",
+        "name": {
+          "kn": "Arya K Hirematha",
+          "en": "Arya K Hirematha"
+        },
+        "role": {
+          "kn": "ನಾಟಕ",
+          "en": "Drama"
+        },
+        "photo": "arya-k-hirematha"
+      }
+    ]
+  }
+]

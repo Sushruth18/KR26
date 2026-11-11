@@ -51,20 +51,18 @@ export type ScheduleItem = z.infer<typeof scheduleItemSchema>;
 export const guestsSchema = z.array(z.object({ name: bilingual, title: bilingual, photo: z.string() }));
 export type Guest = z.infer<typeof guestsSchema>[number];
 
-export const teamSchema = z.array(
-  z.object({
-    group: bilingual,
-    members: z.array(
-      z.object({
-        name: bilingual,
-        role: bilingual,
-        photo: z.string(),
-        linkedin: z.string().url().optional(),
-        instagram: z.string().url().optional(),
-      }),
-    ),
-  }),
-);
+/** A team member. `photo` is a key of src/data/team-photos.generated.json ("" = no photo yet → initials frame). */
+export const teamMemberSchema = z.object({
+  id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: bilingual,
+  role: bilingual,
+  photo: z.string(),
+  linkedin: z.string().url().optional(),
+  instagram: z.string().url().optional(),
+});
+/** One troupe: `id` is a group of src/data/team-config.json, which owns the label and the page order. */
+export const teamSchema = z.array(z.object({ id: z.string(), members: z.array(teamMemberSchema) }));
+export type TeamMember = z.infer<typeof teamMemberSchema>;
 export type TeamGroup = z.infer<typeof teamSchema>[number];
 
 export const gallerySchema = z.object({

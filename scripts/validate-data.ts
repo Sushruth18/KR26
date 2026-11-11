@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import type { ZodTypeAny } from 'zod';
 import type { LogoAsset, LogoKey } from '../src/lib/logos';
 import { sheetNameFor } from './gas-config';
+import { validateTeam } from './validate-team';
 import {
   eventsSchema,
   gallerySchema,
@@ -33,7 +34,7 @@ const site = load('site.json', siteSchema);
 const events = load('events.json', eventsSchema) as CompetitionEvent[] | null;
 const schedule = load('schedule.json', scheduleSchema);
 load('guests.json', guestsSchema);
-load('team.json', teamSchema);
+validateTeam(load('team.json', teamSchema), errors);
 load('gallery.json', gallerySchema);
 
 if (site && events) {

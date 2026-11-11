@@ -297,5 +297,14 @@
       "closes": "Closes {{when}}",
       "cta": "Register now"
     }
+  },
+  "team": {
+    "photoAlt": "Photo of {{name}}",
+    "linksOf": "Links for {{name}}",
+    "linkedinOf": "{{name}} on LinkedIn",
+    "instagramOf": "{{name}} on Instagram",
+    "count_one": "{{n}} member",
+    "count_other": "{{n}} members",
+    "empty": "Our team will be introduced here soon."
   }
 }

@@ -1,0 +1,37 @@
+{
+  "_comment": "Maps the free-text 'Your Role' answer of the team form to a group in team-config.json. Matching ignores case, accents, punctuation and '&'/'and'/'n'; a role is looked up whole first, then with qualifiers removed (head, co, coordinator, committee member for…), then split on commas, slashes and brackets; a small edit-distance fallback catches typos. Add an alias here to fix anything listed under 'needs review' in TODO-CONFIRM-team.md. `role` is only used by the first group (head | cohead); every other group shows its general label.",
+  "qualifiers": ["head", "of", "co", "cohead", "coordinator", "coordinators", "committee", "member", "members", "for", "the", "team", "lead", "in", "charge", "incharge"],
+  "rules": [
+    { "group": "head", "role": "head", "aliases": ["head", "overall head", "festival head", "main head"] },
+    { "group": "head", "role": "cohead", "aliases": ["co head", "cohead", "co-head", "co heads", "joint head", "vice head"] },
+    {
+      "group": "events-logistics",
+      "aliases": ["events and logistics", "event and logistics", "events logistics", "events", "event", "logistics", "music ncmc coordinator", "ncmc coordinator", "music ncmc"]
+    },
+    { "group": "marketing", "aliases": ["press media and publicity", "press and publicity", "press media publicity", "press", "publicity", "marketing", "promotion", "promotions"] },
+    {
+      "group": "media",
+      "aliases": ["media", "media and marketing", "marketing and media", "photography", "videography", "photography and videography", "photography videography", "photo and video", "graphic designer", "graphic designing", "graphics", "photographer", "videographer"]
+    },
+    {
+      "group": "design-decor",
+      "aliases": ["art and decor", "art decor", "art and decoration", "decor", "decoration", "decorations", "design and decor", "printing", "print", "prints"]
+    },
+    {
+      "group": "finance-documentation",
+      "aliases": ["finance", "finance and bill settlement accounts", "finance and bill settlement", "bill settlement", "accounts", "accounts and bill settlement", "finance and accounts", "documentation", "documentation and finance", "finance and documentation"]
+    },
+    {
+      "group": "hospitality-reception",
+      "aliases": ["reception", "hospitality", "reception hospitality", "hospitality reception", "reception and hospitality", "hospitality and reception", "welcome"]
+    },
+    { "group": "stalls-shops", "aliases": ["stalls", "stall", "stalls and shops", "shops", "shop"] },
+    {
+      "group": "stage-security",
+      "aliases": ["stage", "security", "stage and security", "stage security", "discipline", "deciplinary", "disciplinary", "decipline", "order and discipline", "order discipline", "discipline and order"]
+    },
+    { "group": "anchoring", "aliases": ["hosting", "hosting head", "anchoring", "anchor", "anchors", "emcee", "mc", "compere"] },
+    { "group": "drama", "aliases": ["cultural drama", "cultural", "drama", "theatre", "theater", "skit", "skits"] },
+    { "group": "technical", "aliases": ["technical", "tech", "technical team", "sound and lights", "lights and sound", "sound", "lights"] }
+  ]
+}
