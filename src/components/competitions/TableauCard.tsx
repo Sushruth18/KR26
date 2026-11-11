@@ -11,7 +11,7 @@ import { formatDeadline, formatNumber, isTodo } from '../../lib/format';
 import type { CompetitionEvent } from '../../lib/schemas';
 import { CornerOrnament } from '../ui/CornerOrnament';
 import { StatusPill } from '../ui/StatusPill';
-import { Coordinator } from './Coordinator';
+import { Coordinators } from './Coordinators';
 import { PrizeRow } from './PrizeRow';
 import { RegisterAction } from './RegisterAction';
 import { RulesDisclosure } from './RulesDisclosure';
@@ -83,8 +83,8 @@ export function TableauCard({ event, resolved, loading, index }: Props) {
         </div>
 
         <div className="mt-4 space-y-3">
-          <RulesDisclosure eventId={event.id} rules={event.rules[lang]} />
-          <Coordinator coordinator={event.coordinator} />
+          <RulesDisclosure eventId={event.id} />
+          <Coordinators eventId={event.id} people={event.coordinators} />
         </div>
 
         <div className="mt-auto pb-6 pt-5">

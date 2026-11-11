@@ -9,7 +9,7 @@
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
 var CONFIG_SCHEMA = 4;
-var CONFIG_VERSION = '302d7532';
+var CONFIG_VERSION = 'da9c17ad';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -172,8 +172,8 @@ var CONFIG = {
         "en": "Quiz"
       },
       "teamSize": {
-        "min": 2,
-        "max": 2
+        "min": 1,
+        "max": 1
       },
       "date": "2026-11-20",
       "time": "TODO-CONFIRM",
@@ -192,7 +192,7 @@ var CONFIG = {
         "en": "Group Dance"
       },
       "teamSize": {
-        "min": 6,
+        "min": 4,
         "max": 12
       },
       "date": "2026-11-20",
@@ -212,7 +212,7 @@ var CONFIG = {
         "en": "Treasure Hunt"
       },
       "teamSize": {
-        "min": 3,
+        "min": 4,
         "max": 4
       },
       "date": "2026-11-20",
@@ -232,8 +232,8 @@ var CONFIG = {
         "en": "Group Singing"
       },
       "teamSize": {
-        "min": 3,
-        "max": 8
+        "min": 6,
+        "max": 12
       },
       "date": "2026-11-20",
       "time": "TODO-CONFIRM",
@@ -252,8 +252,8 @@ var CONFIG = {
         "en": "Rangoli"
       },
       "teamSize": {
-        "min": 2,
-        "max": 4
+        "min": 5,
+        "max": 5
       },
       "date": "2026-11-20",
       "time": "TODO-CONFIRM",
@@ -293,7 +293,7 @@ var CONFIG = {
       },
       "teamSize": {
         "min": 4,
-        "max": 10
+        "max": 12
       },
       "date": "2026-11-20",
       "time": "TODO-CONFIRM",
@@ -312,8 +312,8 @@ var CONFIG = {
         "en": "Faculty Group Singing"
       },
       "teamSize": {
-        "min": 3,
-        "max": 8
+        "min": 6,
+        "max": 12
       },
       "date": "2026-11-20",
       "time": "TODO-CONFIRM",

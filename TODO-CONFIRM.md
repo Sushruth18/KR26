@@ -5,9 +5,32 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 ## Competitions (`src/data/events.json`) — all 12 events
 - [ ] Start **time** (shown as "Time to be announced" until set)
 - [ ] **Venue** (kn + en)
-- [ ] **Team size** (seeded from the budget proposal; confirm min/max)
-- [ ] **Rules** (kn + en)
-- [ ] **Coordinator** name + phone (`tel:` link hidden until set)
+- Coordinators (1–3 per event, each with its own `tel:` link) and rules are now filled in for every event except the rules item below.
+
+### Faculty Group Dance (`f-group-dance`)
+- [ ] **Rules** — the rules PDF has no faculty dance section; the card still says "Rules will be announced soon"
+- [ ] **Team size 4–12** — the student Group Dance change (PDF: Kannada says min 6, English min 4 → 4–12 used in both languages) was applied to the faculty dance as well (it was 4–10). Confirm it applies to faculty
+
+### Team sizes changed from the earlier draft (counts include the registrant)
+- [ ] **Student Group Singing 6–12** (was 3–8): it uses the same rules as the faculty singing, which say 6 to 12. Faculty Group Singing also went 3–8 → 6–12 from those rules
+- Student Group Dance 6–12 → 4–12 (see above) · Quiz 2 → individual (rules: "each participant must compete individually") · Treasure Hunt 3–4 → exactly 4 · Rangoli 2–4 → exactly 5 (both from the rules)
+
+### Rules — adaptations of the PDF (`RULES_AND_REGULATIONS_final.pdf`, pages 2–10) for review
+1. **Group Dance** rule 5: Kannada said min 6, English min 4 → 4 to 12 in both. Rule 6 ("team leaders should only fill the Google Sheet and others need not") → "The team leader registers the team on this website." / "ತಂಡದ ನಾಯಕರು ಈ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ತಂಡವನ್ನು ನೋಂದಾಯಿಸುತ್ತಾರೆ."
+2. **Quiz** rule 7: "Teams must report on time" → "Participants must report on time for their rounds." / "ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಸುತ್ತುಗಳಿಗೆ ಸಮಯಕ್ಕೆ ಸರಿಯಾಗಿ ವರದಿ ಮಾಡಬೇಕು." (quiz is individual)
+3. **Painting** rule 11 (theme a day prior) exists only in English → added to the Kannada as a draft: "ಚಿತ್ರಕಲೆ ಸ್ಪರ್ಧೆಯಲ್ಲಿ ಭಾಗವಹಿಸುವವರಿಗೆ ವಿಷಯವನ್ನು ಒಂದು ದಿನ ಮುಂಚಿತವಾಗಿ ತಿಳಿಸಲಾಗುವುದು."
+4. **General instructions** rule 1 (10:15) → "Be at the venue 15 minutes before your event's start time." / "ನಿಮ್ಮ ಸ್ಪರ್ಧೆ ಆರಂಭವಾಗುವ ಸಮಯಕ್ಕಿಂತ 15 ನಿಮಿಷಗಳ ಮೊದಲು ಸ್ಥಳದಲ್ಲಿರಿ."
+5. **Faculty Group Dance**: no section → placeholder kept (above)
+6. **Group Singing** (both events) rule 4 "The song should be folk or cultural based" exists only in English → added to the Kannada as a draft (same treatment as 3) so both languages list the same 9 rules: "ಹಾಡು ಜಾನಪದ ಅಥವಾ ಸಾಂಸ್ಕೃತಿಕ ಆಧಾರಿತವಾಗಿರಬೇಕು." Remove it if the Kannada list was meant to be shorter
+7. **Debate** rule 5: the English adds "Also there will be swapping of sides so be well prepared"; the Kannada lacked it → draft added: "ಪಕ್ಷಗಳ ಅದಲು-ಬದಲು ಕೂಡ ಇರುತ್ತದೆ, ಆದ್ದರಿಂದ ಚೆನ್ನಾಗಿ ಸಿದ್ಧರಾಗಿ ಬನ್ನಿ." The stray leading "And" / "ಮತ್ತು" was dropped in both
+8. **Faculty Debate** rule 4: "Students" → "Participants" / "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ" → "ಭಾಗವಹಿಸುವವರಿಗೆ" (same rules as the student debate otherwise)
+9. Clean-ups only (meaning unchanged): missing "1." restored (Poem, Essay, Treasure Hunt, Rangoli), split first letters ("E ach", "T he", "V ulgar", "J udging", "J udges"), duplicate "2." (Singing rule 3), stray "8" glitch (Singing rule 8), "ಕನ್ನಡ" inside the English Dance/Singing rules → "Kannada", small grammar fixes ("a proper and decent costumes" → "proper and decent costumes", "slangs" → "slang", "Poems Recitation composed" → "poems composed", "Violation any" → "Violation of any", "Whatsapp" → "WhatsApp", missing full stops/commas)
+
+### Differences between the Kannada and English PDF text — kept as written, please confirm
+- [ ] Debate rule 8, Poem rule 1, Essay rule 1: Kannada says "in **both** Kannada and English" (ಎರಡರಲ್ಲಿಯೂ), English says "in English **or** Kannada"
+- [ ] Painting rule 4 (Kannada): "ಪತ್ರಿಕೆಗಳನ್ನು" usually means newspapers — "ಹಾಳೆಗಳನ್ನು" (sheets) may be intended. Rule 8 ends "ಅಚ್ಚುಕಟ್ಟಾಗಿ" where Rangoli rule 4 says "ಅಚ್ಚುಕಟ್ಟು"
+- [ ] General instructions rule 2 says the venue will be announced in the WhatsApp groups, while the cards will also show the venue once it is set
+- [ ] Rules keep the PDF's Latin digits inside Kannada text (3+1, 500–800, 15); say if they should become Kannada numerals
 
 ## Site (`src/data/site.json`)
 - [ ] `competitionsStart` 09:00 / `competitionsEnd` 18:00 on 20 Nov
@@ -181,7 +204,7 @@ Fix by editing `name.kn` in `src/data/team.json`; a re-import never overwrites i
 
 ## Deployment
 - [x] Site live at https://kr2k26-bmsit.netlify.app (`siteUrl` in `site.json`); `VITE_REGISTRATION_ENDPOINT` set; Apps Script deployed and working (registration, per-event tabs, email, pass)
-- [ ] **Paste the new `Config.gs` (schema 4) together with `Code.gs`** into the Apps Script project and deploy a New version — needed for the "View your pass" email button and lookup by registration ID (see apps-script/README.md → "Updating the script")
+- [ ] **Paste the new `Config.gs` (schema 4, `CONFIG_VERSION da9c17ad` — new team sizes) together with `Code.gs`** into the Apps Script project and deploy a New version — needed for the new team sizes (the server rejects teams with the old limits until then), the "View your pass" email button and lookup by registration ID (see apps-script/README.md → "Updating the script"). Then check `?action=status` shows `"configVersion":"da9c17ad"`
 - [ ] Run `npm run race -- <Apps Script URL> <eventId> 10` against the live script, then delete the test rows (names "Race Test …", USNs `1BY99ZZ…`, emails `race*@example.com`) from that event's tab. Not run yet — it needs the URL in a local `.env` (`VITE_REGISTRATION_ENDPOINT=…`) or passed on the command line
 - [ ] **`whatsapp_url`** — paste each event's WhatsApp group/channel invite in the Sheet's Events tab (optional; nothing is shown for events without one)
 - [ ] Gmail daily email quota for confirmation mails (consumer accounts: ~100/day); run `checkEmailQuota` on busy days
@@ -197,6 +220,7 @@ Fix by editing `name.kn` in `src/data/team.json`; a re-import never overwrites i
 ## Rules to confirm
 - [ ] **Employee ID format** — draft rule is letters and digits only, at most 20 characters (`src/lib/rules.ts`). If BMSIT employee IDs contain `-` or `/`, faculty will be rejected: send me a few real examples
 - [ ] **"BMSITM" vs "BMSIT&M"** — see Home page copy above (logo lettering vs everywhere else)
+- [ ] Kannada wording for the team step (`kn.json → register.teamIntroExact`, `register.teamCountExact`, `register.teamCount`, `errors.teamSizeExact`): "ಈ ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮನ್ನೂ ಸೇರಿ ನಿಖರವಾಗಿ ೫ ಸದಸ್ಯರು ಬೇಕು…", "ತಂಡದ ಸದಸ್ಯರು: ೫ರಲ್ಲಿ ೫", "(ಕನಿಷ್ಠ ೪, ಗರಿಷ್ಠ ೧೨)"
 - [ ] Kannada wording written by me, to be checked by a Kannada speaker: the confirmation email's "View your pass" lines ("ನಿಮ್ಮ ಪಾಸ್ ವೀಕ್ಷಿಸಿ", "ನೋಂದಣಿಯಲ್ಲಿ ನೀಡಿದ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ — ಐಡಿ ಮೊದಲೇ ತುಂಬಿರುತ್ತದೆ.") and the pass lookup text (`kn.json → pass.lookup.*`)
 
 ## Pages not built yet (Phase 6)

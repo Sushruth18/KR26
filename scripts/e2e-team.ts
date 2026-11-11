@@ -518,7 +518,9 @@ async function main() {
     const walk = (dir: string): string[] => readdirSync(dir).flatMap((f) => (statSync(join(dir, f)).isDirectory() ? walk(join(dir, f)) : [join(dir, f)]));
     const files = walk(dist);
     const text = files.filter((f) => /\.(js|css|html|json|txt|xml|webmanifest|map|svg)$/i.test(f));
-    const generic = [/[\w.+-]+@(bmsit\.in|gmail\.com|yahoo\.\w+|outlook\.\w+)/i, /drive\.google\.com\/open\?id=/i, /\b1[A-Z]{2}\d{2}[A-Z]{2}\d{3,4}\b/, /\b[6-9]\d{9}\b/];
+    const generic = [/[\w.+-]+@(bmsit\.in|gmail\.com|yahoo\.\w+|outlook\.\w+)/i, /drive\.google\.com\/open\?id=/i, /\b1[A-Z]{2}\d{2}[A-Z]{2}\d{3,4}\b/];
+    // Competition coordinators' numbers are published on purpose (tel: links on the cards); any other mobile number is a leak.
+    const published = new Set((JSON.parse(readFileSync(resolve('src/data/events.json'), 'utf8')) as { coordinators: { phone: string }[] }[]).flatMap((e) => e.coordinators.map((c) => c.phone)));
     const secrets: string[] = [];
     const csv = process.env.TEAM_CSV;
     if (csv && existsSync(csv)) {
@@ -531,6 +533,8 @@ async function main() {
       const body = readFileSync(f, 'utf8');
       const lower = body.toLowerCase();
       for (const re of generic) if (re.test(body)) hits.push(`${f.replace(dist, '')}: ${re}`);
+      const phones = [...body.matchAll(/\b[6-9]\d{9}\b/g)].map((m) => m[0]).filter((p) => !published.has(p));
+      if (phones.length) hits.push(`${f.replace(dist, '')}: ${phones.length} mobile number(s) that are not coordinator numbers`);
       for (const s of new Set(secrets)) if (lower.includes(s.toLowerCase())) hits.push(`${f.replace(dist, '')}: value from the CSV`);
     }
     expect(hits.length === 0, `personal data in dist:\n        ${hits.slice(0, 8).join('\n        ')}`);

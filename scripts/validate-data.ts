@@ -16,7 +16,7 @@ import {
   scheduleSchema,
   siteSchema,
   teamSchema,
-  type CompetitionEvent,
+  type EventRecord,
 } from '../src/lib/schemas';
 
 const errors: string[] = [];
@@ -35,7 +35,7 @@ function load<S extends ZodTypeAny>(file: string, schema: S): ReturnType<S['pars
 }
 
 const site = load('site.json', siteSchema);
-const events = load('events.json', eventsSchema) as CompetitionEvent[] | null;
+const events = load('events.json', eventsSchema) as EventRecord[] | null;
 const schedule = load('schedule.json', scheduleSchema);
 const artist = load('artist.json', artistSchema);
 const attractions = load('attractions.json', attractionsSchema);
@@ -61,6 +61,15 @@ if (site && events) {
     }
     if (e.teamSize.min > e.teamSize.max) errors.push(`events.json: ${e.id} teamSize.min > max`);
     if (e.prizes.type === 'cash' && e.category === 'faculty') errors.push(`events.json: ${e.id} faculty events award mementos`);
+    // The two languages show the same numbered list, so rule n must exist in both.
+    if (e.rules.kn.length !== e.rules.en.length) {
+      errors.push(`events.json: ${e.id} has ${e.rules.kn.length} Kannada rules but ${e.rules.en.length} English rules`);
+    }
+    const phones = e.coordinators.map((c) => c.phone);
+    if (new Set(phones).size !== phones.length) errors.push(`events.json: ${e.id} lists the same coordinator phone twice`);
+  }
+  if (site.generalRules.kn.length !== site.generalRules.en.length) {
+    errors.push(`site.json: generalRules has ${site.generalRules.kn.length} Kannada and ${site.generalRules.en.length} English items`);
   }
   // Every event gets its own Sheet tab; the names must be valid and unique (sheetNameFor throws on a bad one).
   const tabs = new Set<string>();

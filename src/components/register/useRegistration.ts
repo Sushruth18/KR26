@@ -40,6 +40,8 @@ function initial(paramEvent: string | null) {
     values.members = fitMembers(values.members, fromParam);
     return { values, step: 0, startedAt: draft?.startedAt ?? Date.now() };
   }
+  // A draft saved before an event's team size changed gets the right number of member rows again.
+  values.members = fitMembers(values.members, values.eventId);
   return { values, step: draft?.step ?? 0, startedAt: draft?.startedAt ?? Date.now() };
 }
 

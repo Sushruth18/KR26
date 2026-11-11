@@ -26,16 +26,38 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಪ್ರಬಂಧವನ್ನು ಕನ್ನಡ ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಎರಡರಲ್ಲಿಯೂ ಬರೆಯಬೇಕು.",
+        "ವಿಷಯವನ್ನು ಆಯೋಜಕರು ನೀಡುತ್ತಾರೆ.",
+        "ಪದಗಳ ಮಿತಿ: 500–800 ಪದಗಳು.",
+        "ಪ್ರಬಂಧವು ಮೂಲ ಕೃತಿಯಾಗಿರಬೇಕು; ಕೃತಿಚೌರ್ಯವು ಅನರ್ಹತೆಗೆ ಕಾರಣವಾಗುತ್ತದೆ.",
+        "ಸಮಯದ ಮಿತಿ: 60–90 ನಿಮಿಷಗಳು.",
+        "ಸ್ಪರ್ಧೆಯ ಸಮಯದಲ್ಲಿ ಮೊಬೈಲ್ ಫೋನ್‌ಗಳು, ಉಲ್ಲೇಖ ಪುಸ್ತಕಗಳು ಅಥವಾ ಬಾಹ್ಯ ಸಾಮಗ್ರಿಗಳನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಹೆಸರು, ವರ್ಗ ಮತ್ತು USN ಅನ್ನು ಹಾಳೆಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಬರೆಯಬೇಕು.",
+        "ಮೌಲ್ಯಮಾಪನವು ವಿಷಯ, ರಚನೆ, ವ್ಯಾಕರಣ, ಸೃಜನಶೀಲತೆ ಮತ್ತು ಸ್ಪಷ್ಟತೆಯನ್ನು ಆಧರಿಸಿರುತ್ತದೆ.",
+        "ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "The essay must be written in English or Kannada.",
+        "The topic will be given by the organizers.",
+        "Word limit: 500–800 words.",
+        "The essay must be an original work; plagiarism will lead to disqualification.",
+        "Time limit: 60–90 minutes.",
+        "No mobile phones, reference books, or external material allowed during the competition.",
+        "Participants must write their Name, Class, and USN at the top of the sheet.",
+        "Evaluation will be based on content, structure, grammar, creativity, and clarity.",
+        "Judges’ decision will be final."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Dhimahi",
+        "phone": "9606726404"
+      },
+      {
+        "name": "Anagha Kulkarni",
+        "phone": "7892034755"
+      }
+    ],
     "completed": false
   },
   {
@@ -65,16 +87,30 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಕವಿತೆಯ ವಾಚನವು ಕನ್ನಡ ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಎರಡರಲ್ಲಿಯೂ ಇರಬೇಕು.",
+        "ಭಾಗವಹಿಸುವವರು ಸ್ವತಃ ರಚಿಸಿದ ಕವಿತೆಯ ವಾಚನವನ್ನು ಮಾತ್ರ ಓದಬೇಕು.",
+        "ಭಾಗವಹಿಸುವವರನ್ನು ಸಂಯೋಜನೆಯ ಸೃಜನಶೀಲತೆಯ ಮೇಲೆ ನಿರ್ಣಯಿಸಲಾಗುತ್ತದೆ.",
+        "ಕವಿತೆಯ ವಾಚನವು ಯಾವುದೇ ಆಡುಭಾಷೆ ಅಥವಾ ಅವಹೇಳನಕಾರಿ ಭಾಷೆಯನ್ನು ಹೊಂದಿರಬಾರದು.",
+        "ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ಚೀಟಿಗಳನ್ನು ಆರಿಸುವ ಮೂಲಕ ನೀಡಲಾಗುವುದು. ಭಾಗವಹಿಸುವವರು ನಿರ್ದಿಷ್ಟ ವಿಷಯದ ಬಗ್ಗೆ ಕವಿತೆಯನ್ನು ಬರೆದು ಪ್ರಸ್ತುತಪಡಿಸಬೇಕು."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "Poem Recitation should be in English or Kannada.",
+        "The participants have to read only poems composed by themselves.",
+        "The participants will be judged on the creativity of composition.",
+        "The Poem Recitation should not have any slang or derogatory language.",
+        "Topics will be given on the spot by picking chits. Participants must write a poem on the given topic and present it."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Pavan G K",
+        "phone": "8722942623"
+      },
+      {
+        "name": "Sai Mansi",
+        "phone": "7411101975"
+      }
+    ],
     "completed": false
   },
   {
@@ -104,16 +140,42 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ವಿಷಯವನ್ನು ಆಯೋಜಕರು ಒದಗಿಸುತ್ತಾರೆ.",
+        "ಕಲಾಕೃತಿಯು ಕನ್ನಡ ಸಂಸ್ಕೃತಿ / ಪರಂಪರೆ / ರಾಜ್ಯೋತ್ಸವ ವಿಷಯವನ್ನು ಪ್ರತಿಬಿಂಬಿಸಬೇಕು.",
+        "ಸಮಯದ ಮಿತಿ: 1–2 ಗಂಟೆಗಳು.",
+        "A3 ಗಾತ್ರದ ಪತ್ರಿಕೆಗಳನ್ನು ಒದಗಿಸಲಾಗುವುದು.",
+        "ಭಾಗವಹಿಸುವವರು ಜಲವರ್ಣಗಳು, ಪೋಸ್ಟರ್ ಬಣ್ಣಗಳು, ಕ್ರಯೋನ್‌ಗಳು ಅಥವಾ ಪೆನ್ಸಿಲ್‌ಗಳನ್ನು ಬಳಸಬಹುದು.",
+        "ಮುದ್ರಿತ ಚಿತ್ರಗಳು / ಟ್ರೇಸಿಂಗ್ / ನಕಲು ಮಾಡುವುದನ್ನು ಕಟ್ಟುನಿಟ್ಟಾಗಿ ನಿಷೇಧಿಸಲಾಗಿದೆ.",
+        "ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಹೆಸರು, ವರ್ಗ ಮತ್ತು USN ಅನ್ನು ಹಾಳೆಯ ಹಿಂಭಾಗದಲ್ಲಿ ಬರೆಯಬೇಕು.",
+        "ನಿರ್ಣಯಿಸುವ ಮಾನದಂಡಗಳು - ಸೃಜನಶೀಲತೆ, ಥೀಮ್ ಪ್ರಸ್ತುತತೆ, ಬಣ್ಣ ಬಳಕೆ ಮತ್ತು ಅಚ್ಚುಕಟ್ಟಾಗಿ.",
+        "ಅಸಭ್ಯ ಅಥವಾ ಆಕ್ರಮಣಕಾರಿ ವಿಷಯವನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ.",
+        "ಚಿತ್ರಕಲೆ ಸ್ಪರ್ಧೆಯಲ್ಲಿ ಭಾಗವಹಿಸುವವರಿಗೆ ವಿಷಯವನ್ನು ಒಂದು ದಿನ ಮುಂಚಿತವಾಗಿ ತಿಳಿಸಲಾಗುವುದು."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "The theme will be provided by the organizers.",
+        "The artwork must reflect Kannada culture / heritage / Rajyotsava theme.",
+        "Time limit: 1–2 hours.",
+        "A3 size papers will be provided.",
+        "Participants may use watercolors, poster colors, crayons, or pencils.",
+        "Printed images / tracing / copying is strictly prohibited.",
+        "Participants must write their Name, Class, and USN on the back side of the sheet.",
+        "Judging criteria – Creativity, theme relevance, color usage, and neatness.",
+        "Vulgar or offensive content is not allowed.",
+        "Judges’ decision will be final.",
+        "Participants of the painting event will receive the theme a day prior."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Sinchana",
+        "phone": "6364884702"
+      },
+      {
+        "name": "Geethika",
+        "phone": "9945972813"
+      }
+    ],
     "completed": false
   },
   {
@@ -143,16 +205,38 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಎಲ್ಲಾ ಭಾಗವಹಿಸುವವರು ಔಪಚಾರಿಕ ಉಡುಪಿನಲ್ಲಿ ಹಾಜರಿರಬೇಕು ಮತ್ತು ಬಹಳ ಸಭ್ಯವಾಗಿ ಧರಿಸಬೇಕು.",
+        "ಪರಸ್ಪರ ವಾದಗಳನ್ನು ತಪ್ಪಿಸಿ, ಭಾಗವಹಿಸುವವರು ಆರೋಗ್ಯಕರ ಚರ್ಚೆಯಲ್ಲಿ ತೊಡಗಿಸಿಕೊಳ್ಳಬೇಕು.",
+        "ಚರ್ಚೆಯ ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ನೀಡಲಾಗುವುದು ಮತ್ತು ಪ್ರತಿಯೊಬ್ಬ ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಆಲೋಚನೆಗಳನ್ನು ಪ್ರಸ್ತುತಪಡಿಸಲು ಸಮಾನ ಅವಕಾಶಗಳನ್ನು ಹೊಂದಿರುತ್ತಾರೆ.",
+        "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಈ ವಿಷಯದ ಬಗ್ಗೆ ಯೋಚಿಸಲು 10 ನಿಮಿಷಗಳ ಕಾಲಾವಕಾಶ ನೀಡಲಾಗುವುದು.",
+        "ಪರವಾಗಿ ಅಥವಾ ವಿರುದ್ಧವಾಗಿ ನ್ಯಾಯಾಧೀಶರು ಸ್ವತಃ ನಿರ್ಧರಿಸುತ್ತಾರೆ ಮತ್ತು ಭಾಗವಹಿಸುವವರು ಎರಡಕ್ಕೂ ಸಿದ್ಧರಾಗಿರಬೇಕು. ಪಕ್ಷಗಳ ಅದಲು-ಬದಲು ಕೂಡ ಇರುತ್ತದೆ, ಆದ್ದರಿಂದ ಚೆನ್ನಾಗಿ ಸಿದ್ಧರಾಗಿ ಬನ್ನಿ.",
+        "ಪ್ರಸ್ತುತಪಡಿಸಿದ ವಿಚಾರಗಳು ಮತ್ತು ಆಲೋಚನೆಗಳು ಬಹಳ ಸ್ಪಷ್ಟವಾಗಿರಬೇಕು ಮತ್ತು ಬಿಂದುವಾಗಿರಬೇಕು.",
+        "ಭಾಗವಹಿಸುವವರು ಚೆನ್ನಾಗಿ ವರ್ತಿಸಬೇಕು ಮತ್ತು ಸಭ್ಯ ಭಾಷೆಯನ್ನು ಬಳಸಬೇಕು.",
+        "ಚರ್ಚೆಯ ವಿಧಾನವು ಕನ್ನಡ ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಎರಡರಲ್ಲಿಯೂ ಇರುತ್ತದೆ.",
+        "ಭಾಗವಹಿಸುವವರು ಧರ್ಮ, ಜಾತಿ, ಭಾಷೆಯಂತಹ ವೈಯಕ್ತಿಕ ವಾದಗಳನ್ನು ಚರ್ಚೆಗೆ ತರಬಾರದು."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "All participants must be present in formal attire and dress very decently.",
+        "Participants must engage in a healthy discussion, avoiding mutual arguments.",
+        "Topics for discussion will be given on the spot, and every participant will have equal opportunities to present their thoughts.",
+        "Students will be given 10 mins to think on the topic.",
+        "For or against will be decided by the judges themselves, and participants should be ready for both. Also, there will be swapping of sides, so be well prepared.",
+        "Ideas and thoughts presented should be very clear and to the point.",
+        "Participants must be well-behaved and use decent language.",
+        "The mode of discussion will be in English or Kannada.",
+        "Participants shouldn't bring personal arguments such as religion, caste or language into the debate."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Rachita T",
+        "phone": "6360382874"
+      },
+      {
+        "name": "Saqlain",
+        "phone": "6364013788"
+      }
+    ],
     "completed": false
   },
   {
@@ -171,8 +255,8 @@
       "en": "TODO-CONFIRM"
     },
     "teamSize": {
-      "min": 2,
-      "max": 2
+      "min": 1,
+      "max": 1
     },
     "deadline": "2026-11-18T23:59:00+05:30",
     "prizes": {
@@ -182,16 +266,36 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಪ್ರತಿಯೊಬ್ಬ ಸ್ಪರ್ಧಿಯು ಪ್ರತ್ಯೇಕವಾಗಿ ಸ್ಪರ್ಧಿಸಬೇಕು.",
+        "ಪ್ರಶ್ನೆಗಳು ಕನ್ನಡ ಭಾಷೆ, ಸಂಸ್ಕೃತಿ, ಪರಂಪರೆ, ಇತಿಹಾಸ, ಭೌಗೋಳಿಕತೆ, ಕಲೆ ಮತ್ತು ಸಾಹಿತ್ಯವನ್ನು ಆಧರಿಸಿರುತ್ತವೆ.",
+        "ಸ್ಪರ್ಧೆಯು ಪೂರ್ವಭಾವಿ + ಅಂತಿಮ ಸುತ್ತುಗಳನ್ನು ಒಳಗೊಂಡಿರಬಹುದು.",
+        "ಪ್ರತಿ ಪ್ರಶ್ನೆಗೆ ಉತ್ತರಿಸಲು ಸಮಯದ ಮಿತಿ ಇರುತ್ತದೆ.",
+        "ಸರಿಯಾದ ಉತ್ತರಗಳಿಗೆ ಅಂಕಗಳನ್ನು ನೀಡಲಾಗುತ್ತದೆ; ನಕಾರಾತ್ಮಕ ಅಂಕಗಳು ಅನ್ವಯಿಸಬಹುದು (ಆಯೋಜಕರ ನಿಯಮಗಳ ಪ್ರಕಾರ).",
+        "ಮೊಬೈಲ್ ಫೋನ್‌ಗಳು, ಪುಸ್ತಕಗಳು, ಇಂಟರ್ನೆಟ್ ಅಥವಾ ಬಾಹ್ಯ ಸಹಾಯವನ್ನು ಬಳಸುವುದನ್ನು ಕಟ್ಟುನಿಟ್ಟಾಗಿ ನಿಷೇಧಿಸಲಾಗಿದೆ.",
+        "ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಸುತ್ತುಗಳಿಗೆ ಸಮಯಕ್ಕೆ ಸರಿಯಾಗಿ ವರದಿ ಮಾಡಬೇಕು.",
+        "ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "Each participant must compete individually.",
+        "Questions will be based on Kannada language, culture, heritage, history, geography, arts & literature.",
+        "The competition may consist of prelims + final rounds.",
+        "There will be a time limit for answering each question.",
+        "Marks will be awarded for correct answers; negative marking may apply (as per organizer rules).",
+        "Use of mobile phones, books, internet, or external help is strictly prohibited.",
+        "Participants must report on time for their rounds.",
+        "Judges’ decision will be final."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Sindhu",
+        "phone": "6362406440"
+      },
+      {
+        "name": "Megha Bhadrakali",
+        "phone": "7338242694"
+      }
+    ],
     "completed": false
   },
   {
@@ -210,7 +314,7 @@
       "en": "TODO-CONFIRM"
     },
     "teamSize": {
-      "min": 6,
+      "min": 4,
       "max": 12
     },
     "deadline": "2026-11-18T23:59:00+05:30",
@@ -221,16 +325,36 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಪ್ರತಿ ಪ್ರದರ್ಶನದ ಅವಧಿ 3+1 ನಿಮಿಷಗಳು.",
+        "ಆಯ್ದ ಹಾಡು ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರಬೇಕು.",
+        "ಯಾವುದೇ ನಿರ್ದಿಷ್ಟ ಧಾರ್ಮಿಕ ಹಾಡುಗಳನ್ನು ಪ್ರೋತ್ಸಾಹಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಭಾಗವಹಿಸುವವರು ಪ್ರಸ್ತುತಿಗೆ ಸೂಕ್ತವಾದ ಮತ್ತು ಯೋಗ್ಯವಾದ ವೇಷಭೂಷಣಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಬೇಕು.",
+        "ಗುಂಪಿನಲ್ಲಿ ಕನಿಷ್ಠ 4 ಮತ್ತು ಗರಿಷ್ಠ 12 ಭಾಗವಹಿಸುವವರು ಇರಬಹುದು.",
+        "ತಂಡದ ನಾಯಕರು ಈ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ತಂಡವನ್ನು ನೋಂದಾಯಿಸುತ್ತಾರೆ.",
+        "ಬೆಲ್ಲಿ ಡ್ಯಾನ್ಸ್ ಮತ್ತು ಟ್ಯಾಂಗೋಗೆ ಅವಕಾಶವಿಲ್ಲ.",
+        "ಭಾಗವಹಿಸುವವರು ಯೋಗ್ಯ ಮತ್ತು ಸೂಕ್ತವಾದ ವೇಷಭೂಷಣಗಳನ್ನು ಧರಿಸುವುದು ಕಡ್ಡಾಯವಾಗಿದೆ."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "Duration for each performance will be 3+1 mins.",
+        "Song selected should be in Kannada only.",
+        "No religious specific songs are encouraged.",
+        "Participants must choose proper and decent costumes for the presentation.",
+        "The group can contain a minimum of 4 and a maximum of 12 participants.",
+        "The team leader registers the team on this website.",
+        "Belly dance and tango are not allowed.",
+        "Participants are required to wear decent and appropriate costumes."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Prarthana",
+        "phone": "9535029823"
+      },
+      {
+        "name": "Manasi",
+        "phone": "7975477142"
+      }
+    ],
     "completed": false
   },
   {
@@ -249,7 +373,7 @@
       "en": "TODO-CONFIRM"
     },
     "teamSize": {
-      "min": 3,
+      "min": 4,
       "max": 4
     },
     "deadline": "2026-11-18T23:59:00+05:30",
@@ -260,16 +384,44 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಪ್ರತಿ ತಂಡವು 4 ಸದಸ್ಯರನ್ನು ಒಳಗೊಂಡಿರಬೇಕು.",
+        "ತಂಡದ ಸದಸ್ಯರು ಒಟ್ಟಿಗೆ ಇರಬೇಕು ಮತ್ತು ವಿಭಜಿಸಲು ಅವಕಾಶ ನೀಡಬಾರದು.",
+        "ಭಾಗವಹಿಸುವವರು ನೀಡಿರುವ ಕ್ರಮದಲ್ಲಿ ಸುಳಿವುಗಳನ್ನು ಅನುಸರಿಸಬೇಕು.",
+        "ಮುಂದಿನ ಸುಳಿವನ್ನು ಪಡೆಯಲು ಪ್ರತಿಯೊಂದು ಕಾರ್ಯವನ್ನು ಪೂರ್ಣಗೊಳಿಸಬೇಕು.",
+        "ಸುಳಿವು ವಸ್ತುಗಳನ್ನು ಹಾನಿಗೊಳಿಸಬಾರದು ಅಥವಾ ಅವುಗಳ ಸ್ಥಳದಿಂದ ತೆಗೆದುಹಾಕಬಾರದು.",
+        "ಫೋನ್‌ಗಳು ಅಥವಾ ಹೊರಗಿನ ಸಹಾಯವನ್ನು ಕಟ್ಟುನಿಟ್ಟಾಗಿ ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಭಾಗವಹಿಸುವವರು ಸುರಕ್ಷಿತವಾಗಿ ಓಡಬೇಕು - ಯಾವುದೇ ತಳ್ಳುವಿಕೆಯನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಭಾಗವಹಿಸುವವರು ಪ್ರತಿ ನಿಲ್ದಾಣದಲ್ಲಿ ಸ್ವಯಂಸೇವಕರ ಮಾತನ್ನು ಕೇಳಬೇಕು.",
+        "ಯಾವುದೇ ರೀತಿಯ ವಂಚನೆಯು ಅನರ್ಹತೆಗೆ ಕಾರಣವಾಗುತ್ತದೆ.",
+        "ಮೊದಲು ಮುಗಿಸಿದ ತಂಡವನ್ನು ವಿಜೇತರೆಂದು ಘೋಷಿಸಲಾಗುತ್ತದೆ."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "Each team must consist of 4 members.",
+        "Team members must stay together and are not allowed to split.",
+        "Participants must follow the clues in the given order.",
+        "Every task must be completed to receive the next clue.",
+        "Clue items must not be damaged or removed from their place.",
+        "Phones or outside help are strictly not allowed.",
+        "Participants must run safely — no pushing is permitted.",
+        "Participants must listen to the volunteers at every station.",
+        "Any form of cheating will lead to disqualification.",
+        "The first team to finish will be declared the winner."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Satish",
+        "phone": "9741395380"
+      },
+      {
+        "name": "Tejas P",
+        "phone": "9380053337"
+      },
+      {
+        "name": "Laxmi Vijaykumar Biradar",
+        "phone": "7204111499"
+      }
+    ],
     "completed": false
   },
   {
@@ -288,8 +440,8 @@
       "en": "TODO-CONFIRM"
     },
     "teamSize": {
-      "min": 3,
-      "max": 8
+      "min": 6,
+      "max": 12
     },
     "deadline": "2026-11-18T23:59:00+05:30",
     "prizes": {
@@ -299,16 +451,38 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಹಾಡು ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರಬೇಕು.",
+        "ಪ್ರತಿ ಪ್ರದರ್ಶನಕ್ಕೂ 3 ನಿಮಿಷಗಳು ನಿಗದಿಪಡಿಸಲಾಗಿದೆ.",
+        "ಭಾಗವಹಿಸುವವರು ಹಾಡುವಾಗ ಸಾಹಿತ್ಯವನ್ನು ಉಲ್ಲೇಖಿಸಲು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಹಾಡು ಜಾನಪದ ಅಥವಾ ಸಾಂಸ್ಕೃತಿಕ ಆಧಾರಿತವಾಗಿರಬೇಕು.",
+        "ಭಾಗವಹಿಸುವವರನ್ನು ಹಾಡಿನ ಆಯ್ಕೆ, ಧ್ವನಿ ಗುಣಮಟ್ಟ, ಸ್ಪಷ್ಟತೆ, ಲಯ ಮತ್ತು ಪ್ರೇಕ್ಷಕರಿಗೆ ಅವರ ಆಕರ್ಷಣೆಯ ಆಧಾರದ ಮೇಲೆ ನಿರ್ಣಯಿಸಲಾಗುತ್ತದೆ.",
+        "ಹಾಡಿನಲ್ಲಿ ಯಾವುದೇ ಆಡುಭಾಷೆ ಅಥವಾ ಅವಹೇಳನಕಾರಿ ಭಾಷೆ ಇರಬಾರದು.",
+        "ಧರ್ಮಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಹಾಡುಗಳನ್ನು ಪ್ರೋತ್ಸಾಹಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಗುಂಪಿನಲ್ಲಿ ಕನಿಷ್ಠ 6 ಮತ್ತು ಗರಿಷ್ಠ 12 ಭಾಗವಹಿಸುವವರು ಇರಬಹುದು.",
+        "ಭಾಗವಹಿಸುವವರು ಕರೋಕೆ ಟ್ರ್ಯಾಕ್‌ಗಳನ್ನು ಬಳಸಬಹುದು, ಆದರೆ ಕಾರ್ಯಕ್ರಮ ಪ್ರಾರಂಭವಾಗುವ ಮೊದಲು ಅವರು ತಮ್ಮ ಟ್ರ್ಯಾಕ್‌ಗಳನ್ನು ಆಯೋಜಕರಿಗೆ ಸಲ್ಲಿಸಬೇಕು (ಐಚ್ಛಿಕ)."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "Song should be in Kannada only.",
+        "Time allotted for each performance is 3 minutes.",
+        "Participants will not be allowed to refer to the lyrics while singing.",
+        "The song should be folk or cultural based.",
+        "The participants will be judged on the song selection, voice quality, clarity, rhythm and their appeal to the audience.",
+        "Song should not have any slang or derogatory language.",
+        "Religion specific songs are not encouraged.",
+        "The group can contain a minimum of 6 and a maximum of 12 participants.",
+        "Participants may use karaoke tracks, but they must submit their tracks to the organizers before the event begins (optional)."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Nikhath",
+        "phone": "7619292755"
+      },
+      {
+        "name": "Rushika",
+        "phone": "6360226449"
+      }
+    ],
     "completed": false
   },
   {
@@ -328,8 +502,8 @@
       "en": "TODO-CONFIRM"
     },
     "teamSize": {
-      "min": 2,
-      "max": 4
+      "min": 5,
+      "max": 5
     },
     "deadline": "2026-11-18T23:59:00+05:30",
     "prizes": {
@@ -339,16 +513,30 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಪ್ರತಿ ತಂಡವು 5 ಸದಸ್ಯರನ್ನು ಒಳಗೊಂಡಿರಬೇಕು.",
+        "ರಂಗೋಲಿಯು ಕನ್ನಡ ಸಂಸ್ಕೃತಿ / ಪರಂಪರೆ / ರಾಜ್ಯೋತ್ಸವ ವಿಷಯವನ್ನು ಪ್ರತಿಬಿಂಬಿಸಬೇಕು.",
+        "ಅಸಭ್ಯ ಅಥವಾ ಆಕ್ರಮಣಕಾರಿ ವಿಷಯವನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ನಿರ್ಣಯಿಸುವ ಮಾನದಂಡಗಳು - ಸೃಜನಶೀಲತೆ, ಥೀಮ್ ಪ್ರಸ್ತುತತೆ, ಬಣ್ಣ ಬಳಕೆ ಮತ್ತು ಅಚ್ಚುಕಟ್ಟು.",
+        "ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "Each team must consist of 5 members.",
+        "The rangoli must reflect Kannada culture / heritage / Rajyotsava theme.",
+        "Vulgar or offensive content is not allowed.",
+        "Judging criteria – Creativity, theme relevance, color usage, and neatness.",
+        "Judges’ decision will be final."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Bhavish R",
+        "phone": "9538877995"
+      },
+      {
+        "name": "Harshitha Nayak",
+        "phone": "9483770666"
+      }
+    ],
     "completed": false
   },
   {
@@ -376,16 +564,38 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಎಲ್ಲಾ ಭಾಗವಹಿಸುವವರು ಔಪಚಾರಿಕ ಉಡುಪಿನಲ್ಲಿ ಹಾಜರಿರಬೇಕು ಮತ್ತು ಬಹಳ ಸಭ್ಯವಾಗಿ ಧರಿಸಬೇಕು.",
+        "ಪರಸ್ಪರ ವಾದಗಳನ್ನು ತಪ್ಪಿಸಿ, ಭಾಗವಹಿಸುವವರು ಆರೋಗ್ಯಕರ ಚರ್ಚೆಯಲ್ಲಿ ತೊಡಗಿಸಿಕೊಳ್ಳಬೇಕು.",
+        "ಚರ್ಚೆಯ ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ನೀಡಲಾಗುವುದು ಮತ್ತು ಪ್ರತಿಯೊಬ್ಬ ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಆಲೋಚನೆಗಳನ್ನು ಪ್ರಸ್ತುತಪಡಿಸಲು ಸಮಾನ ಅವಕಾಶಗಳನ್ನು ಹೊಂದಿರುತ್ತಾರೆ.",
+        "ಭಾಗವಹಿಸುವವರಿಗೆ ಈ ವಿಷಯದ ಬಗ್ಗೆ ಯೋಚಿಸಲು 10 ನಿಮಿಷಗಳ ಕಾಲಾವಕಾಶ ನೀಡಲಾಗುವುದು.",
+        "ಪರವಾಗಿ ಅಥವಾ ವಿರುದ್ಧವಾಗಿ ನ್ಯಾಯಾಧೀಶರು ಸ್ವತಃ ನಿರ್ಧರಿಸುತ್ತಾರೆ ಮತ್ತು ಭಾಗವಹಿಸುವವರು ಎರಡಕ್ಕೂ ಸಿದ್ಧರಾಗಿರಬೇಕು. ಪಕ್ಷಗಳ ಅದಲು-ಬದಲು ಕೂಡ ಇರುತ್ತದೆ, ಆದ್ದರಿಂದ ಚೆನ್ನಾಗಿ ಸಿದ್ಧರಾಗಿ ಬನ್ನಿ.",
+        "ಪ್ರಸ್ತುತಪಡಿಸಿದ ವಿಚಾರಗಳು ಮತ್ತು ಆಲೋಚನೆಗಳು ಬಹಳ ಸ್ಪಷ್ಟವಾಗಿರಬೇಕು ಮತ್ತು ಬಿಂದುವಾಗಿರಬೇಕು.",
+        "ಭಾಗವಹಿಸುವವರು ಚೆನ್ನಾಗಿ ವರ್ತಿಸಬೇಕು ಮತ್ತು ಸಭ್ಯ ಭಾಷೆಯನ್ನು ಬಳಸಬೇಕು.",
+        "ಚರ್ಚೆಯ ವಿಧಾನವು ಕನ್ನಡ ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಎರಡರಲ್ಲಿಯೂ ಇರುತ್ತದೆ.",
+        "ಭಾಗವಹಿಸುವವರು ಧರ್ಮ, ಜಾತಿ, ಭಾಷೆಯಂತಹ ವೈಯಕ್ತಿಕ ವಾದಗಳನ್ನು ಚರ್ಚೆಗೆ ತರಬಾರದು."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "All participants must be present in formal attire and dress very decently.",
+        "Participants must engage in a healthy discussion, avoiding mutual arguments.",
+        "Topics for discussion will be given on the spot, and every participant will have equal opportunities to present their thoughts.",
+        "Participants will be given 10 mins to think on the topic.",
+        "For or against will be decided by the judges themselves, and participants should be ready for both. Also, there will be swapping of sides, so be well prepared.",
+        "Ideas and thoughts presented should be very clear and to the point.",
+        "Participants must be well-behaved and use decent language.",
+        "The mode of discussion will be in English or Kannada.",
+        "Participants shouldn't bring personal arguments such as religion, caste or language into the debate."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Basavaraj",
+        "phone": "9008574274"
+      },
+      {
+        "name": "Eeshwari",
+        "phone": "7348938446"
+      }
+    ],
     "completed": false
   },
   {
@@ -405,7 +615,7 @@
     },
     "teamSize": {
       "min": 4,
-      "max": 10
+      "max": 12
     },
     "deadline": "2026-11-18T23:59:00+05:30",
     "prizes": {
@@ -419,10 +629,16 @@
         "TODO-CONFIRM"
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Lakshmi Nagappa Kammara",
+        "phone": "7349579155"
+      },
+      {
+        "name": "Keerti",
+        "phone": "7338534414"
+      }
+    ],
     "completed": false
   },
   {
@@ -441,8 +657,8 @@
       "en": "TODO-CONFIRM"
     },
     "teamSize": {
-      "min": 3,
-      "max": 8
+      "min": 6,
+      "max": 12
     },
     "deadline": "2026-11-18T23:59:00+05:30",
     "prizes": {
@@ -450,16 +666,38 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಹಾಡು ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರಬೇಕು.",
+        "ಪ್ರತಿ ಪ್ರದರ್ಶನಕ್ಕೂ 3 ನಿಮಿಷಗಳು ನಿಗದಿಪಡಿಸಲಾಗಿದೆ.",
+        "ಭಾಗವಹಿಸುವವರು ಹಾಡುವಾಗ ಸಾಹಿತ್ಯವನ್ನು ಉಲ್ಲೇಖಿಸಲು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಹಾಡು ಜಾನಪದ ಅಥವಾ ಸಾಂಸ್ಕೃತಿಕ ಆಧಾರಿತವಾಗಿರಬೇಕು.",
+        "ಭಾಗವಹಿಸುವವರನ್ನು ಹಾಡಿನ ಆಯ್ಕೆ, ಧ್ವನಿ ಗುಣಮಟ್ಟ, ಸ್ಪಷ್ಟತೆ, ಲಯ ಮತ್ತು ಪ್ರೇಕ್ಷಕರಿಗೆ ಅವರ ಆಕರ್ಷಣೆಯ ಆಧಾರದ ಮೇಲೆ ನಿರ್ಣಯಿಸಲಾಗುತ್ತದೆ.",
+        "ಹಾಡಿನಲ್ಲಿ ಯಾವುದೇ ಆಡುಭಾಷೆ ಅಥವಾ ಅವಹೇಳನಕಾರಿ ಭಾಷೆ ಇರಬಾರದು.",
+        "ಧರ್ಮಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಹಾಡುಗಳನ್ನು ಪ್ರೋತ್ಸಾಹಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಗುಂಪಿನಲ್ಲಿ ಕನಿಷ್ಠ 6 ಮತ್ತು ಗರಿಷ್ಠ 12 ಭಾಗವಹಿಸುವವರು ಇರಬಹುದು.",
+        "ಭಾಗವಹಿಸುವವರು ಕರೋಕೆ ಟ್ರ್ಯಾಕ್‌ಗಳನ್ನು ಬಳಸಬಹುದು, ಆದರೆ ಕಾರ್ಯಕ್ರಮ ಪ್ರಾರಂಭವಾಗುವ ಮೊದಲು ಅವರು ತಮ್ಮ ಟ್ರ್ಯಾಕ್‌ಗಳನ್ನು ಆಯೋಜಕರಿಗೆ ಸಲ್ಲಿಸಬೇಕು (ಐಚ್ಛಿಕ)."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "Song should be in Kannada only.",
+        "Time allotted for each performance is 3 minutes.",
+        "Participants will not be allowed to refer to the lyrics while singing.",
+        "The song should be folk or cultural based.",
+        "The participants will be judged on the song selection, voice quality, clarity, rhythm and their appeal to the audience.",
+        "Song should not have any slang or derogatory language.",
+        "Religion specific songs are not encouraged.",
+        "The group can contain a minimum of 6 and a maximum of 12 participants.",
+        "Participants may use karaoke tracks, but they must submit their tracks to the organizers before the event begins (optional)."
       ]
     },
-    "coordinator": {
-      "name": "TODO-CONFIRM",
-      "phone": "TODO-CONFIRM"
-    },
+    "coordinators": [
+      {
+        "name": "Neha Kalmeshwar",
+        "phone": "8073740306"
+      },
+      {
+        "name": "Yashas D",
+        "phone": "9902824336"
+      }
+    ],
     "completed": false
   }
 ]

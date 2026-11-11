@@ -39,8 +39,8 @@ async function typeInto(page: Page, sel: string, text: string) {
   await page.type(sel, text);
 }
 
-/** Registers a quiz team (long Kannada-friendly names, a team line that wraps) and lands on the pass page. */
-async function registerTeam(page: Page, lang: 'kn' | 'en', eventId = 's-quiz') {
+/** Registers a Treasure Hunt team of 4 (long Kannada-friendly names, a team line that wraps) and lands on the pass page. */
+async function registerTeam(page: Page, lang: 'kn' | 'en', eventId = 's-treasure-hunt') {
   const n = ++counter;
   await page.goto(`${BASE}/register?event=${eventId}&mock=`, { waitUntil: 'networkidle0' });
   await page.waitForFunction(() => !document.querySelector('[data-testid=event-summary] .skeleton'), { timeout: 15000 });
@@ -60,10 +60,13 @@ async function registerTeam(page: Page, lang: 'kn' | 'en', eventId = 's-quiz') {
   await typeInto(page, '#f-email', `pass${n}@example.com`);
   await click('[data-testid=next]');
   await typeInto(page, '#f-teamName', lang === 'kn' ? 'ಸ್ವರ ಸಂಗಮ ತಂಡ' : 'The Procession Players');
-  if (!(await page.$('#f-members-0-name'))) await page.click('[data-testid=add-member]');
-  await typeInto(page, '#f-members-0-name', lang === 'kn' ? 'ದ್ವಾರಕೀಶ್ ಭಟ್ಟಾಚಾರ್ಯ' : 'Aishwarya Lakshminarayanan');
-  await typeInto(page, '#f-members-0-id', `1BY25CS${String(500 + n)}`);
-  await typeInto(page, '#f-members-0-phone', `98450${String(40000 + n)}`);
+  // Treasure Hunt is exactly 4 people: the three member rows are already there.
+  const names = lang === 'kn' ? ['ದ್ವಾರಕೀಶ್ ಭಟ್ಟಾಚಾರ್ಯ', 'ಲಕ್ಷ್ಮೀ ನಾರಾಯಣ', 'ಸೌಮ್ಯಾ ರಾವ್'] : ['Aishwarya Lakshminarayanan', 'Ravi K', 'Meera S'];
+  for (const [i, name] of names.entries()) {
+    await typeInto(page, `#f-members-${i}-name`, name);
+    await typeInto(page, `#f-members-${i}-id`, `1BY25M${i}${String(500 + n)}`);
+    await typeInto(page, `#f-members-${i}-phone`, `9845${i}${String(40000 + n)}`);
+  }
   await click('[data-testid=next]');
   await page.click('#f-consentRules');
   const wait = 3600 - (Date.now() - ready);
@@ -264,7 +267,7 @@ async function main() {
 
   // ---- WhatsApp group button ----
   const LINK = 'https://chat.whatsapp.com/AbCdEfGhIjKlMnOpQrStUv';
-  await fetch(`${BASE}/mock-api/__set?id=s-quiz&header=whatsapp_url&value=${encodeURIComponent(LINK)}`);
+  await fetch(`${BASE}/mock-api/__set?id=s-treasure-hunt&header=whatsapp_url&value=${encodeURIComponent(LINK)}`);
   const LABEL = { kn: 'ವಾಟ್ಸಾಪ್ ಗುಂಪಿಗೆ ಸೇರಿ', en: 'Join the WhatsApp group' } as const;
 
   const whatsappState = async (page: Page) =>

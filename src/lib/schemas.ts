@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { TODO } from './todo';
+import { RULES } from './rules';
 
 export { TODO };
 
@@ -29,11 +30,25 @@ export const eventSchema = z.object({
     z.object({ type: z.literal('memento') }),
   ]),
   rules: bilingualList,
-  coordinator: z.object({ name: z.string(), phone: z.string() }),
+  /** 1–3 people; phone = 10 digits (RULES.phone), shown as a tel: link each. */
+  coordinators: z
+    .array(
+      z
+        .object({
+          name: z.string().trim().min(1),
+          phone: z.string().regex(new RegExp(RULES.phone.pattern), 'phone must be 10 digits starting with 6–9 (no +91, no spaces)'),
+        })
+        .strict(),
+    )
+    .min(1)
+    .max(3),
   completed: z.boolean(),
 });
 export const eventsSchema = z.array(eventSchema);
-export type CompetitionEvent = z.infer<typeof eventSchema>;
+/** An events.json entry as stored (what scripts read). */
+export type EventRecord = z.infer<typeof eventSchema>;
+/** An event as the browser gets it: `rules` live in `virtual:competition-rules` (scripts/vite-plugin-split-rules.ts). */
+export type CompetitionEvent = Omit<EventRecord, 'rules'>;
 
 /** One stop of the Day 2 timeline. Start times only — the site shows no end times or durations. */
 export const scheduleItemSchema = z
@@ -143,5 +158,10 @@ export const siteSchema = z.object({
     default: z.array(z.number().int().min(1).max(10)).min(1),
     byDepartment: z.record(z.string(), z.array(z.number().int().min(1).max(10)).min(1)),
   }),
+  /** "General instructions" for every competition (Competitions page + Register review step). */
+  generalRules: bilingualList,
 });
-export type SiteConfig = z.infer<typeof siteSchema>;
+/** site.json as stored (what scripts read). */
+export type SiteRecord = z.infer<typeof siteSchema>;
+/** site.json as the browser gets it: `generalRules` live in `virtual:competition-rules`. */
+export type SiteConfig = Omit<SiteRecord, 'generalRules'>;

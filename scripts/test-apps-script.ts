@@ -40,13 +40,31 @@ const base = {
   elapsedMs: 45000,
   lang: 'kn',
 };
-const quiz = {
+/** Treasure Hunt: exactly 4 people, i.e. the registrant + 3 members. */
+const hunt = {
   ...base,
-  eventId: 's-quiz',
+  eventId: 's-treasure-hunt',
   id: '1BY23CS010',
   teamName: 'Kannada Kalpa',
-  members: [{ name: 'Ravi K', id: '1BY23CS011', phone: '9845011111' }],
+  members: [
+    { name: 'Ravi K', id: '1BY23CS011', phone: '9845011111' },
+    { name: 'Meera S', id: '1BY23CS012', phone: '9845022222' },
+    { name: 'Kiran P', id: '1BY23CS013', phone: '9845033333' },
+  ],
 };
+type Member = { name: string; id: string; phone: string };
+let crewN = 0;
+/** A 3-member Treasure Hunt crew whose first member is `first`; the other two are fresh people nobody else uses. */
+const crew = (first: Member): Member[] => [
+  first,
+  ...[0, 1].map(() => {
+    const n = ++crewN;
+    return { name: `Crew ${String.fromCharCode(65 + (n % 26))}`, id: `1BY23ZZ${String(n).padStart(3, '0')}`, phone: `97400${String(n).padStart(5, '0')}` };
+  }),
+];
+/** n people for a team event: the registrant (from `over.id`) + n − 1 fresh members. */
+const membersFor = (n: number, prefix: string): Member[] =>
+  Array.from({ length: n - 1 }, (_, i) => ({ name: `Member ${String.fromCharCode(65 + i)}`, id: `${prefix}${i + 1}`, phone: `96000${String(i + 1).padStart(5, '0')}` }));
 const reg = (rt: GasRuntime, over: Record<string, unknown> = {}) => rt.post({ ...base, ...over });
 /** Row n of an event's own tab (13 columns: timestamp | reg_id | category | name | usn | dept | sem | phone | email | team | members_json | member_ids | consent). */
 const regRow = (rt: GasRuntime, n: number, eventId = 's-essay') => rt.tab(eventId).getRange(n, 1, 1, 13).getDisplayValues()[0] ?? [];
@@ -122,11 +140,11 @@ t('status reports isOpen/deadline/registeredCount per event — and no seats any
   const rt = createOpenRuntime();
   reg(rt);
   reg(rt, { id: '1BY23CS002' });
-  rt.post(quiz);
+  rt.post(hunt);
   const s0 = st(rt);
   assert.equal(s0.ok, true);
   assert.deepEqual(s0.events['s-essay'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 2 });
-  assert.deepEqual(s0.events['s-quiz'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 1 });
+  assert.deepEqual(s0.events['s-treasure-hunt'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 1 });
   assert.deepEqual(s0.events['s-poem'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 0 });
   assert.ok(!Number.isNaN(Date.parse(s0.serverTime)));
   assert.doesNotMatch(JSON.stringify(s0), /seat/i);
@@ -134,7 +152,7 @@ t('status reports isOpen/deadline/registeredCount per event — and no seats any
 t('setupSheet is safe to run again: a second run changes nothing', () => {
   const rt = createOpenRuntime();
   reg(rt);
-  rt.post(quiz);
+  rt.post(hunt);
   rt.setEventField('s-debate', 'is_open', 'FALSE'); // a coordinator's manual close must survive
   const before = rt.ss.snapshot();
   const tabsBefore = rt.ss.getSheets().length;
@@ -211,11 +229,11 @@ t('success returns regId KR26-ESY-0001 and writes a normalised plain-text row', 
   assert.equal(row[12], 'FALSE');
   assert.ok(rt.tab('s-essay').formats[1]?.every((f) => f === '@'), 'every written cell is plain-text format');
 });
-t('running number per event: 0001, 0002 for essay; quiz starts at 0001', () => {
+t('running number per event: 0001, 0002 for essay; treasure hunt starts at 0001', () => {
   const rt = createOpenRuntime();
   assert.equal(reg(rt).regId, 'KR26-ESY-0001');
   assert.equal(reg(rt, { id: '1BY23CS002' }).regId, 'KR26-ESY-0002');
-  assert.equal(rt.post(quiz).regId, 'KR26-QIZ-0001');
+  assert.equal(rt.post(hunt).regId, 'KR26-TRH-0001');
 });
 t('after a coordinator deletes a middle row, numbering continues from the highest (no reuse)', () => {
   const rt = createOpenRuntime();
@@ -243,11 +261,11 @@ t('faculty event: employee ID accepted, semester ignored, category faculty', () 
 });
 t('team registration stores members_json and member_ids', () => {
   const rt = createOpenRuntime();
-  assert.equal(rt.post(quiz).ok, true);
-  const row = regRow(rt, 2, 's-quiz');
+  assert.equal(rt.post(hunt).ok, true);
+  const row = regRow(rt, 2, 's-treasure-hunt');
   assert.equal(row[9], 'Kannada Kalpa');
-  assert.deepEqual(JSON.parse(row[10] ?? ''), [{ name: 'Ravi K', id: '1BY23CS011', phone: '9845011111' }]);
-  assert.equal(row[11], '1BY23CS011');
+  assert.deepEqual(JSON.parse(row[10] ?? ''), hunt.members);
+  assert.equal(row[11], '1BY23CS011,1BY23CS012,1BY23CS013');
 });
 t('"Other" department is stored as "Other: <text>"', () => {
   const rt = createOpenRuntime();
@@ -294,11 +312,11 @@ t('exactly 20 characters accepted; inner spaces removed before the length check'
 });
 t('team members with any USN format register and are duplicate-checked', () => {
   const rt = createOpenRuntime();
-  assert.equal(rt.post({ ...quiz, id: '1TD24CS001', members: [{ name: 'Ravi K', id: 'abc-123', phone: '9845011111' }] }).ok, true);
-  assert.equal(regRow(rt, 2, 's-quiz')[11], 'ABC-123');
-  const r = rt.post({ ...quiz, id: 'xyz 9', members: [{ name: 'Meera S', id: 'ABC-123', phone: '9845022222' }] });
-  assert.deepEqual(r, { ok: false, code: 'DUPLICATE', regId: 'KR26-QIZ-0001' });
-  assert.equal(rt.post({ ...quiz, id: 'xyz 9', members: [{ name: 'Meera S', id: '1td24cs001', phone: '9845022222' }] }).code, 'DUPLICATE');
+  assert.equal(rt.post({ ...hunt, id: '1TD24CS001', members: crew({ name: 'Ravi K', id: 'abc-123', phone: '9845011111' }) }).ok, true);
+  assert.match(regRow(rt, 2, 's-treasure-hunt')[11] ?? '', /^ABC-123,/);
+  const r = rt.post({ ...hunt, id: 'xyz 9', members: crew({ name: 'Meera S', id: 'ABC-123', phone: '9845022222' }) });
+  assert.deepEqual(r, { ok: false, code: 'DUPLICATE', regId: 'KR26-TRH-0001' });
+  assert.equal(rt.post({ ...hunt, id: 'xyz 9', members: crew({ name: 'Meera S', id: '1td24cs001', phone: '9845022222' }) }).code, 'DUPLICATE');
 });
 t('lookup works with a non-BMSIT USN', () => {
   const rt = createOpenRuntime();
@@ -324,20 +342,20 @@ t('same USN again for the same event → DUPLICATE with the existing regId', () 
 });
 t('new registrant who is already a member of another team → DUPLICATE', () => {
   const rt = createOpenRuntime();
-  rt.post(quiz);
-  const r = rt.post({ ...quiz, id: '1BY23CS011', members: [{ name: 'Meera S', id: '1BY23CS020', phone: '9845022222' }] });
-  assert.deepEqual(r, { ok: false, code: 'DUPLICATE', regId: 'KR26-QIZ-0001' });
+  rt.post(hunt);
+  const r = rt.post({ ...hunt, id: '1BY23CS011', members: crew({ name: 'Meera S', id: '1BY23CS020', phone: '9845022222' }) });
+  assert.deepEqual(r, { ok: false, code: 'DUPLICATE', regId: 'KR26-TRH-0001' });
 });
 t('new team containing an existing registrant as a member → DUPLICATE', () => {
   const rt = createOpenRuntime();
-  rt.post(quiz);
-  const r = rt.post({ ...quiz, id: '1BY23CS030', members: [{ name: 'Ravi K', id: '1BY23CS010', phone: '9845011111' }] });
+  rt.post(hunt);
+  const r = rt.post({ ...hunt, id: '1BY23CS030', members: crew({ name: 'Ravi K', id: '1BY23CS010', phone: '9845011111' }) });
   assert.equal(r.code, 'DUPLICATE');
 });
 t('new team sharing only a member with an existing team → DUPLICATE', () => {
   const rt = createOpenRuntime();
-  rt.post(quiz);
-  const r = rt.post({ ...quiz, id: '1BY23CS040', members: [{ name: 'Ravi K', id: '1by23cs011', phone: '9845011111' }] });
+  rt.post(hunt);
+  const r = rt.post({ ...hunt, id: '1BY23CS040', members: crew({ name: 'Ravi K', id: '1by23cs011', phone: '9845011111' }) });
   assert.equal(r.code, 'DUPLICATE');
 });
 t('faculty team member employee IDs are duplicate-checked too', () => {
@@ -347,10 +365,11 @@ t('faculty team member employee IDs are duplicate-checked too', () => {
     eventId: 'f-group-singing',
     id: 'EMP1',
     teamName: 'Gaana',
-    members: [{ name: 'Asha', id: 'EMP2', phone: '9845000002' }, { name: 'Bindu', id: 'EMP3', phone: '9845000003' }],
+    // Group Singing needs 6–12 people: the registrant + 5 members.
+    members: [{ name: 'Asha', id: 'EMP2', phone: '9845000002' }, { name: 'Bindu', id: 'EMP3', phone: '9845000003' }, ...membersFor(4, 'EMPA')],
   };
   assert.equal(rt.post(fac).ok, true);
-  const r = rt.post({ ...fac, id: 'EMP9', members: [{ name: 'Chetan', id: 'emp3', phone: '9845000009' }, { name: 'Divya', id: 'EMP8', phone: '9845000008' }] });
+  const r = rt.post({ ...fac, id: 'EMP9', members: [{ name: 'Chetan', id: 'emp3', phone: '9845000009' }, { name: 'Divya', id: 'EMP8', phone: '9845000008' }, ...membersFor(4, 'EMPB')] });
   assert.equal(r.code, 'DUPLICATE');
 });
 console.log('\nRegister — CLOSED / deadline (no seat limit exists)');
@@ -429,28 +448,53 @@ for (const [name, over, field] of cases) {
 }
 t('MBA semester 3 accepted', () => assert.equal(reg(createOpenRuntime(), { department: 'MBA', semester: 3 }).ok, true));
 t('Kannada name with conjuncts accepted (ಶ್ರೀನಿವಾಸ್ ಕೆ.)', () => assert.equal(reg(createOpenRuntime(), { name: 'ಶ್ರೀನಿವಾಸ್ ಕೆ.' }).ok, true));
-t('team: too few members (Group Dance min 6 incl. registrant) → members', () => {
-  const r = createOpenRuntime().post({ ...quiz, eventId: 's-group-dance', members: quiz.members });
+t('team: too few members (Group Dance min 4 incl. registrant: 3 people) → members', () => {
+  const r = createOpenRuntime().post({ ...hunt, eventId: 's-group-dance', members: hunt.members.slice(0, 2) });
   assert.deepEqual(r, { ok: false, code: 'VALIDATION', field: 'members' });
 });
-t('team: too many members (Quiz max 2) → members', () => {
-  const r = createOpenRuntime().post({ ...quiz, members: [...quiz.members, { name: 'Extra', id: '1BY23CS012', phone: '9845011112' }] });
+t('team: Group Dance accepts 4 and 12 people (registrant included), rejects 13', () => {
+  const rt = createOpenRuntime();
+  assert.equal(rt.post({ ...hunt, eventId: 's-group-dance', id: 'GD4', members: membersFor(4, 'GDA') }).ok, true);
+  assert.equal(rt.post({ ...hunt, eventId: 's-group-dance', id: 'GD12', members: membersFor(12, 'GDB') }).ok, true);
+  assert.equal(rt.post({ ...hunt, eventId: 's-group-dance', id: 'GD13', members: membersFor(13, 'GDC') }).field, 'members');
+});
+t('team: too many members (Treasure Hunt exactly 4) → members', () => {
+  const r = createOpenRuntime().post({ ...hunt, members: [...hunt.members, { name: 'Extra', id: '1BY23CS014', phone: '9845011112' }] });
   assert.equal(r.field, 'members');
 });
+t('team: exact size — Rangoli needs exactly 5: 4 and 6 rejected, 5 accepted', () => {
+  const rt = createOpenRuntime();
+  const rangoli = { ...hunt, eventId: 's-rangoli' };
+  assert.equal(rt.post({ ...rangoli, members: membersFor(4, 'RGA') }).field, 'members');
+  assert.equal(rt.post({ ...rangoli, members: membersFor(6, 'RGB') }).field, 'members');
+  const ok = rt.post({ ...rangoli, members: membersFor(5, 'RGC') });
+  assert.equal(ok.regId, 'KR26-RGL-0001');
+});
+t('team: Group Singing (students) now needs 6–12 people: 5 rejected, 6 accepted', () => {
+  const rt = createOpenRuntime();
+  const sing = { ...hunt, eventId: 's-group-singing' };
+  assert.equal(rt.post({ ...sing, members: membersFor(5, 'GSA') }).field, 'members');
+  assert.equal(rt.post({ ...sing, members: membersFor(6, 'GSB') }).ok, true);
+});
+t('Quiz is individual now: no team name needed, and members sent anyway → members', () => {
+  const rt = createOpenRuntime();
+  assert.equal(reg(rt, { eventId: 's-quiz' }).regId, 'KR26-QIZ-0001');
+  assert.equal(rt.post({ ...hunt, eventId: 's-quiz', id: '1BY23CS050', members: hunt.members.slice(0, 1) }).field, 'members');
+});
 t('team: duplicate USN inside the team → members.0.id', () => {
-  const r = createOpenRuntime().post({ ...quiz, members: [{ name: 'Ravi K', id: '1BY23CS010', phone: '9845011111' }] });
+  const r = createOpenRuntime().post({ ...hunt, members: crew({ name: 'Ravi K', id: '1BY23CS010', phone: '9845011111' }) });
   assert.deepEqual(r, { ok: false, code: 'VALIDATION', field: 'members.0.id' });
 });
 t('team: member USN longer than 20 characters → members.0.id', () => {
-  const r = createOpenRuntime().post({ ...quiz, members: [{ name: 'Ravi K', id: 'X'.repeat(21), phone: '9845011111' }] });
+  const r = createOpenRuntime().post({ ...hunt, members: crew({ name: 'Ravi K', id: 'X'.repeat(21), phone: '9845011111' }) });
   assert.equal(r.field, 'members.0.id');
 });
 t('team: empty member USN → members.0.id', () => {
-  const r = createOpenRuntime().post({ ...quiz, members: [{ name: 'Ravi K', id: ' ', phone: '9845011111' }] });
+  const r = createOpenRuntime().post({ ...hunt, members: crew({ name: 'Ravi K', id: ' ', phone: '9845011111' }) });
   assert.equal(r.field, 'members.0.id');
 });
 t('team: missing team name → teamName', () => {
-  assert.equal(createOpenRuntime().post({ ...quiz, teamName: '' }).field, 'teamName');
+  assert.equal(createOpenRuntime().post({ ...hunt, teamName: '' }).field, 'teamName');
 });
 
 console.log('\nFormula injection');
@@ -537,19 +581,19 @@ t('lookup searches every event tab and returns all passes found (individual + te
   reg(rt); // Essay, Ananya 1BY23CS001 / 9845012345
   reg(rt, { eventId: 's-poem' });
   reg(rt, { eventId: 'f-debate', id: 'EMP9', phone: '9000000001' }); // someone else, other tab
-  rt.post({ ...quiz, id: '1BY23CS001', phone: '9845012345', members: [{ name: 'Ravi K', id: '1BY23CS011', phone: '9845011111' }] });
+  rt.post({ ...hunt, id: '1BY23CS001', phone: '9845012345' });
   rt.post({ ...base, eventId: 's-painting', id: '1BY23CS077', phone: '9845077777' });
   const r = rt.post({ action: 'lookup', id: '1by23cs001', phone: '9845012345' }) as unknown as { ok: boolean; passes: { regId: string; event: string; name: string }[] };
   assert.equal(r.ok, true);
   assert.deepEqual(
     r.passes.map((p) => `${p.event}:${p.regId}`),
-    ['s-essay:KR26-ESY-0001', 's-poem:KR26-POM-0001', 's-quiz:KR26-QIZ-0001'],
+    ['s-essay:KR26-ESY-0001', 's-poem:KR26-POM-0001', 's-treasure-hunt:KR26-TRH-0001'],
   );
   assert.ok(r.passes.every((p) => Object.keys(p).sort().join() === 'event,name,regId'), 'only regId, event, name');
-  // a team member found in the Quiz tab with their own phone
+  // a team member found in the Treasure Hunt tab with their own phone
   assert.deepEqual(rt.post({ action: 'lookup', id: '1BY23CS011', phone: '9845011111' }), {
     ok: true,
-    passes: [{ regId: 'KR26-QIZ-0001', event: 's-quiz', name: 'Ravi K' }],
+    passes: [{ regId: 'KR26-TRH-0001', event: 's-treasure-hunt', name: 'Ravi K' }],
   });
 });
 t('lookup survives one broken tab and still finds passes in the others', () => {
@@ -563,10 +607,10 @@ t('lookup survives one broken tab and still finds passes in the others', () => {
 });
 t('team member can look up with their own ID + phone', () => {
   const rt = createOpenRuntime();
-  rt.post(quiz);
+  rt.post(hunt);
   assert.deepEqual(rt.post({ action: 'lookup', id: '1BY23CS011', phone: '9845011111' }), {
     ok: true,
-    passes: [{ regId: 'KR26-QIZ-0001', event: 's-quiz', name: 'Ravi K' }],
+    passes: [{ regId: 'KR26-TRH-0001', event: 's-treasure-hunt', name: 'Ravi K' }],
   });
 });
 t('right ID, wrong phone → NOT_FOUND (no data leaked)', () => {
@@ -619,14 +663,14 @@ t('the same ID can register for two different events, but a second time for the 
 });
 t('a team member of one event may register on their own for another event', () => {
   const rt = createOpenRuntime();
-  assert.equal(rt.post(quiz).ok, true);
-  assert.equal(reg(rt, { id: '1BY23CS011', name: 'Ravi K' }).ok, true); // Ravi is in a Quiz team and registers for Essay
+  assert.equal(rt.post(hunt).ok, true);
+  assert.equal(reg(rt, { id: '1BY23CS011', name: 'Ravi K' }).ok, true); // Ravi is in a Treasure Hunt team and registers for Essay
 });
 t('reg ID numbering is per tab: busy events do not advance the others', () => {
   const rt = createOpenRuntime();
   for (let i = 1; i <= 5; i++) assert.equal(reg(rt, { id: `1BY23CS00${i}` }).regId, `KR26-ESY-000${i}`);
   assert.equal(reg(rt, { eventId: 's-poem' }).regId, 'KR26-POM-0001');
-  assert.equal(rt.post(quiz).regId, 'KR26-QIZ-0001');
+  assert.equal(rt.post(hunt).regId, 'KR26-TRH-0001');
   assert.equal(reg(rt, { id: '1BY23CS006' }).regId, 'KR26-ESY-0006');
   assert.equal(reg(rt, { eventId: 's-poem', id: '1BY23CS002' }).regId, 'KR26-POM-0002');
 });
@@ -638,11 +682,11 @@ t('numbering uses the highest number IN THAT TAB (a hand-added higher row is res
 });
 t('duplicate checks cover the registrant and all members, only inside the event tab', () => {
   const rt = createOpenRuntime();
-  rt.post(quiz);
+  rt.post(hunt);
   // same people in a different event are fine
-  assert.equal(rt.post({ ...quiz, eventId: 's-treasure-hunt', teamName: 'Hunters', members: [...quiz.members, { name: 'Meera S', id: '1BY23CS012', phone: '9845022222' }] }).ok, true);
-  // ...but not again in the Quiz
-  assert.equal(rt.post({ ...quiz, id: '1BY23CS099' }).code, 'DUPLICATE'); // member 1BY23CS011 already in the quiz team
+  assert.equal(rt.post({ ...hunt, eventId: 's-group-dance', teamName: 'Hunters' }).ok, true);
+  // ...but not again in the Treasure Hunt
+  assert.equal(rt.post({ ...hunt, id: '1BY23CS099' }).code, 'DUPLICATE'); // members 1BY23CS011–13 already in the hunt team
 });
 t('a coordinator can rename a tab: update the sheet_name cell and registrations follow the renamed tab', () => {
   const rt = createOpenRuntime();
@@ -1128,7 +1172,7 @@ t('status NEVER contains the link (valid, invalid, or channel), not even as a ke
   const rt = createOpenRuntime();
   setWa(rt, 's-essay', WA);
   setWa(rt, 's-poem', 'https://example.org/not-whatsapp');
-  setWa(rt, 's-quiz', WA_CHANNEL);
+  setWa(rt, 's-treasure-hunt', WA_CHANNEL);
   const fresh = st(rt);
   const cached = rt.get({ action: 'status' }) as unknown as typeof fresh;
   for (const s of [fresh, cached]) {
@@ -1192,14 +1236,14 @@ t('an empty or whitespace-only cell is "no link": no key, no warning', () => {
 t('lookup returns the link together with each pass (individual and team member), only for events that have one', () => {
   const rt = createOpenRuntime();
   setWa(rt, 's-essay', WA);
-  setWa(rt, 's-quiz', WA_CHANNEL);
+  setWa(rt, 's-treasure-hunt', WA_CHANNEL);
   reg(rt);
   reg(rt, { eventId: 's-poem' });
-  rt.post(quiz); // Ravi K (1BY23CS011 / 9845011111) is a team member
+  rt.post(hunt); // Ravi K (1BY23CS011 / 9845011111) is a team member
   const mine = rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }) as unknown as LookupOk;
   assert.deepEqual(mine.passes.map((p) => [p.event, p.whatsappUrl ?? null]), [['s-essay', WA], ['s-poem', null]]);
   const ravi = rt.post({ action: 'lookup', id: '1BY23CS011', phone: '9845011111' }) as unknown as LookupOk;
-  assert.deepEqual(ravi.passes, [{ regId: 'KR26-QIZ-0001', event: 's-quiz', name: 'Ravi K', whatsappUrl: WA_CHANNEL }]);
+  assert.deepEqual(ravi.passes, [{ regId: 'KR26-TRH-0001', event: 's-treasure-hunt', name: 'Ravi K', whatsappUrl: WA_CHANNEL }]);
 });
 t('lookup with the wrong phone leaks nothing: NOT_FOUND only', () => {
   const rt = createOpenRuntime();
@@ -1263,8 +1307,8 @@ t('without a link the email is as before (no WhatsApp wording anywhere) and stil
 });
 t('HTML body escapes what the registrant typed (team name "Tom & Co"), the text body keeps it as typed', () => {
   const rt = createOpenRuntime();
-  setWa(rt, 's-quiz', WA);
-  rt.post({ ...quiz, teamName: 'Tom & Co' });
+  setWa(rt, 's-treasure-hunt', WA);
+  rt.post({ ...hunt, teamName: 'Tom & Co' });
   const m = mailOf(rt);
   assert.ok(m.body.includes('Tom & Co'));
   assert.ok((m.htmlBody ?? '').includes('Tom &amp; Co'));
@@ -1339,9 +1383,9 @@ t("lookup by registration ID + the registrant's phone returns that pass (and the
 });
 t("lookup by registration ID also accepts a team member's own phone (their own name on the pass)", () => {
   const rt = createOpenRuntime();
-  rt.post(quiz);
-  const r = rt.post({ action: 'lookup', id: 'KR26-QIZ-0001', phone: '9845011111' }) as unknown as LookupOk;
-  assert.deepEqual(r.passes, [{ regId: 'KR26-QIZ-0001', event: 's-quiz', name: 'Ravi K' }]);
+  rt.post(hunt);
+  const r = rt.post({ action: 'lookup', id: 'KR26-TRH-0001', phone: '9845011111' }) as unknown as LookupOk;
+  assert.deepEqual(r.passes, [{ regId: 'KR26-TRH-0001', event: 's-treasure-hunt', name: 'Ravi K' }]);
 });
 t('lookup by registration ID: wrong phone, unknown number or wrong event code → NOT_FOUND, nothing leaked', () => {
   const rt = createOpenRuntime();

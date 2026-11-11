@@ -4,12 +4,14 @@
  *   2. npm run e2e:competitions    (E2E_BASE, E2E_OUT, CHROME_PATH env vars optional)
  * Both languages × 320/360/768/1280 px: no horizontal scroll, layout columns, no clipped Kannada,
  * footer once, no console errors. Plus behaviour: ?for= sync, Register links, TBA values,
- * hidden tel: links, rules disclosure, live open/closed status + fallback, reduced motion.
+ * one tel: link per coordinator (Treasure Hunt has three), rules disclosure + every rule list vs events.json,
+ * General instructions panel, live open/closed status + fallback, reduced motion.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
 import events from '../src/data/events.json' with { type: 'json' };
+import site from '../src/data/site.json' with { type: 'json' };
 
 const BASE = process.env.E2E_BASE ?? 'http://localhost:5173';
 const OUT = resolve(process.env.E2E_OUT ?? 'e2e-output/competitions');
@@ -108,7 +110,7 @@ async function main() {
               perRow: cards.length / tops.size,
               footers: document.querySelectorAll('footer').length,
               h1: document.querySelectorAll('h1').length,
-              tel: document.querySelectorAll('a[href^="tel:"]').length,
+              tel: [...document.querySelectorAll('[data-testid=competition-grid] a[href^="tel:"]')].map((a) => a.getAttribute('href')),
               clipped,
               pressed: document.querySelector('[aria-pressed=true]')?.getAttribute('data-testid'),
             };
@@ -121,11 +123,13 @@ async function main() {
           expect(m.cards === expectCards, `cards ${m.cards} ≠ ${expectCards}`);
           expect(Math.ceil(m.perRow) === Math.min(cols, expectCards), `columns ≈ ${m.perRow}, expected ${cols}`);
           expect(m.footers === 1 && m.h1 === 1, `footers ${m.footers}, h1 ${m.h1}`);
-          expect(m.tel === 0, `tel: links shown although every coordinator phone is TODO (${m.tel})`);
+          // One tel: link per coordinator, in data order, each a full +91 number (never a dead link).
+          const wantTel = (cat === 'students' ? students : faculty).flatMap((e) => e.coordinators.map((c) => `tel:+91${c.phone}`));
+          expect(m.tel.join() === wantTel.join(), `tel: links ${m.tel.length}, expected ${wantTel.length} matching events.json`);
           expect(m.clipped.length === 0, `clipped headings: ${m.clipped.join(', ')}`);
           expect(m.pressed === `toggle-${cat}`, `toggle shows ${m.pressed}`);
           await page.browserContext().close();
-          return `${m.cards} cards, ${cols} col, no h-scroll, footer×1, no tel:, no clipping`;
+          return `${m.cards} cards, ${cols} col, no h-scroll, footer×1, ${m.tel.length} tel: links = coordinators, no clipping`;
         });
       }
     }
@@ -153,7 +157,9 @@ async function main() {
   await scenario('cards-content-en', async (errors) => {
     const page = await open(browser, 'en', 1280, '/competitions?for=students&mock=', errors);
     const card = await page.$eval('[data-testid=card-s-essay]', (e) => e.textContent ?? '');
-    expect(card.includes('Time to be announced') && card.includes('To be announced'), 'TBA time + venue + coordinator');
+    expect(card.includes('Time to be announced') && card.includes('To be announced'), 'TBA time + venue');
+    const essay = events.find((e) => e.id === 's-essay')!;
+    expect(card.includes('Coordinators') && essay.coordinators.every((c) => card.includes(c.name)), 'coordinator names from events.json');
     expect(card.includes('Day 1 · 20 November'), 'Day 1 date');
     expect(card.includes('₹2,000') && card.includes('₹1,000'), 'cash prizes with ₹ grouping');
     expect(card.includes('18 November, 11:59 PM'), 'deadline from data');
@@ -167,7 +173,7 @@ async function main() {
     const url = new URL(page.url());
     expect(url.pathname === '/register' && url.searchParams.get('event') === 's-quiz', `navigated to ${page.url()}`);
     await page.browserContext().close();
-    return `TBA shown for time/venue/coordinator, no raw TODO; ${hrefs.length} Register links → /register?event=<id>; clicking Quiz opens the form preselected`;
+    return `TBA shown for time/venue, coordinator names shown, no raw TODO; ${hrefs.length} Register links → /register?event=<id>; clicking Quiz opens the form preselected`;
   });
 
   await scenario('rules-disclosure-kn', async (errors) => {
@@ -179,16 +185,113 @@ async function main() {
     await page.waitForSelector('[data-testid=rules-s-debate]');
     await sleep(400);
     const expanded = await page.$eval(btn, (b) => [b.getAttribute('aria-expanded'), b.getAttribute('aria-controls')]);
-    const panelText = await page.$eval('[data-testid=rules-s-debate]', (e) => e.textContent);
+    const items = await page.$$eval('[data-testid=rules-s-debate] li', (li) => li.map((x) => x.textContent));
+    const debate = events.find((e) => e.id === 's-debate')!;
     expect(expanded[0] === 'true' && expanded[1] === 'rules-s-debate', `aria ${expanded.join(',')}`);
-    expect(panelText?.includes('ಶೀಘ್ರದಲ್ಲೇ'), `TODO rules → announced soon, got "${panelText}"`);
+    expect(items.join('|') === debate.rules.kn.join('|'), `Kannada debate rules: ${items.length} items, expected ${debate.rules.kn.length}`);
     await page.$eval('[data-testid=card-s-debate]', (e) => e.scrollIntoView({ block: 'center' }));
     await page.screenshot({ path: resolve(OUT, 'rules-open-kn-360.png') });
     await page.keyboard.press('Space');
     await page.waitForFunction(() => !document.querySelector('[data-testid=rules-s-debate]'));
+    // Faculty Group Dance has no rules in the PDF yet → "announced soon".
+    await page.click('[data-testid=toggle-faculty]');
+    await page.waitForSelector('[data-testid=rules-toggle-f-group-dance]');
+    await page.click('[data-testid=rules-toggle-f-group-dance]');
+    await page.waitForSelector('[data-testid=rules-f-group-dance]');
+    const tba = await page.$eval('[data-testid=rules-f-group-dance]', (e) => e.textContent);
+    expect(tba?.includes('ಶೀಘ್ರದಲ್ಲೇ'), `TODO rules → announced soon, got "${tba}"`);
     await page.browserContext().close();
-    return `Enter opens (aria-expanded=true, controls panel), Space closes; TODO rules → "${panelText}"`;
+    return `Enter opens (aria-expanded=true, controls panel), Space closes; ${items.length} Kannada debate rules from data; f-group-dance → "${tba}"`;
   });
+
+  for (const lang of ['kn', 'en'] as const) {
+    await scenario(`every-card-rules-match-data-${lang}`, async (errors) => {
+      const issues: string[] = [];
+      for (const cat of ['students', 'faculty'] as const) {
+        const page = await open(browser, lang, 1280, `/competitions?for=${cat}&mock=`, errors, true);
+        for (const e of events.filter((x) => x.category === cat)) {
+          await page.click(`[data-testid=rules-toggle-${e.id}]`);
+          await page.waitForSelector(`[data-testid=rules-${e.id}]`);
+          const items = await page.$$eval(`[data-testid=rules-${e.id}] li`, (li) => li.map((x) => x.textContent));
+          const want = e.rules[lang].filter((r) => r !== 'TODO-CONFIRM');
+          if (items.join('|') !== want.join('|')) issues.push(`${e.id}: ${items.length} shown, ${want.length} in data`);
+        }
+        const text = await page.$eval('main', (m) => m.textContent ?? '');
+        if (text.includes('TODO')) issues.push(`${cat}: raw TODO text`);
+        await page.browserContext().close();
+      }
+      expect(!issues.length, issues.join('; '));
+      return `all ${events.length} rule lists render exactly as in events.json (${lang}), numbered, no raw TODO`;
+    });
+
+    await scenario(`treasure-hunt-three-coordinators-${lang}-360`, async (errors) => {
+      const page = await open(browser, lang, 360, '/competitions?for=students&mock=', errors);
+      const hunt = events.find((e) => e.id === 's-treasure-hunt')!;
+      await page.$eval('[data-testid=card-s-treasure-hunt]', (e) => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await sleep(600);
+      const m = await page.$eval('[data-testid=coordinators-s-treasure-hunt]', (box) => {
+        const vw = document.documentElement.clientWidth;
+        const card = box.closest('article')!.getBoundingClientRect();
+        return {
+          label: box.querySelector('p')?.textContent ?? '',
+          rows: [...box.querySelectorAll('li')].map((li) => {
+            const a = li.querySelector('a');
+            const r = (a ?? li).getBoundingClientRect();
+            const n = li.querySelector('span')!.getBoundingClientRect();
+            return {
+              name: li.querySelector('span')?.textContent ?? '',
+              href: a?.getAttribute('href') ?? null,
+              aria: a?.getAttribute('aria-label') ?? '',
+              h: r.height,
+              inside: r.left >= card.left - 0.5 && r.right <= card.right + 0.5 && n.right <= card.right + 0.5 && r.right <= vw,
+            };
+          }),
+          hScroll: document.documentElement.scrollWidth > vw,
+        };
+      });
+      expect(m.rows.length === 3, `${m.rows.length} coordinator rows`);
+      m.rows.forEach((r, i) => {
+        const c = hunt.coordinators[i]!;
+        expect(r.name === c.name, `row ${i} name "${r.name}"`);
+        expect(r.href === `tel:+91${c.phone}`, `row ${i} href ${r.href}`);
+        expect(r.aria.includes(c.name), `row ${i} aria-label "${r.aria}"`);
+        expect(r.h >= 44, `row ${i} link only ${r.h}px tall`);
+        expect(r.inside, `row ${i} leaves the card or the screen`);
+      });
+      expect(m.label === (lang === 'kn' ? 'ಸಂಯೋಜಕರು' : 'Coordinators'), `label "${m.label}"`);
+      expect(!m.hScroll, 'horizontal scroll');
+      await page.$eval('[data-testid=coordinators-s-treasure-hunt]', (e) => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await page.screenshot({ path: resolve(OUT, `coordinators-treasure-hunt-${lang}-360.png`) });
+      await page.browserContext().close();
+      return `3 coordinators, each with its own tel:+91… link (≥44 px, labelled), all inside the card at 360 px, no h-scroll`;
+    });
+
+    await scenario(`general-instructions-${lang}-360`, async (errors) => {
+      const page = await open(browser, lang, 360, '/competitions?mock=', errors);
+      const btn = '[data-testid=general-rules-toggle]';
+      const before = await page.$eval(btn, (b) => [b.getAttribute('aria-expanded'), b.textContent?.trim()]);
+      expect(before[0] === 'false', 'starts collapsed');
+      expect(before[1] === (lang === 'kn' ? 'ಸಾಮಾನ್ಯ ಸೂಚನೆಗಳು' : 'General instructions'), `label "${before[1]}"`);
+      const gridTop = await page.$eval('[data-testid=competition-grid]', (g) => g.getBoundingClientRect().top);
+      const btnTop = await page.$eval(btn, (b) => b.getBoundingClientRect().top);
+      expect(btnTop < gridTop, 'panel sits above the cards');
+      await page.click(btn);
+      await page.waitForSelector('[data-testid=general-rules]');
+      await sleep(400);
+      const items = await page.$$eval('[data-testid=general-rules] li', (li) => li.map((x) => x.textContent));
+      const want = site.generalRules[lang];
+      expect(items.join('|') === want.join('|'), `${items.length} items, expected ${want.length} from site.json`);
+      expect(!items.some((x) => /10:15/.test(x ?? '')), 'no fixed 10:15 reporting time');
+      const geo = await page.$eval('[data-testid=general-rules]', (p) => {
+        const r = p.getBoundingClientRect();
+        return { right: r.right, vw: document.documentElement.clientWidth, hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth };
+      });
+      expect(geo.right <= geo.vw && !geo.hScroll, 'panel fits, no horizontal scroll');
+      await page.screenshot({ path: resolve(OUT, `general-instructions-${lang}-360.png`) });
+      await page.browserContext().close();
+      return `collapsed by default, above the cards; opens to the ${items.length} instructions from site.json; fits 360 px`;
+    });
+  }
 
   await scenario(
     'status-down-fallback-kn',

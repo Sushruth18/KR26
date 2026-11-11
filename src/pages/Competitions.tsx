@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button';
 import { CategoryToggle } from '../components/competitions/CategoryToggle';
 import { CATEGORIES, parseCategory, type Category } from '../components/competitions/category';
 import { TableauCard } from '../components/competitions/TableauCard';
+import { GeneralInstructions } from '../components/competitions/GeneralInstructions';
 import { events } from '../lib/data';
 import { useReducedMotion } from '../hooks/useMotionPrefs';
 
@@ -48,6 +49,7 @@ export default function Competitions() {
       <PageHeader title={t('pages.competitions.title')} subtitle={t('pages.competitions.subtitle')} />
       <div className="container-page pb-16">
         <div className="flex flex-col items-center gap-3">
+          <GeneralInstructions className="mb-2 w-full max-w-xl" />
           <CategoryToggle value={category} counts={counts} onChange={setCategory} />
           {/* Reserves two lines on phones: the "status unavailable" note + Retry wraps there, and must not push the cards down. */}
           <div aria-live="polite" className="flex min-h-[44px] flex-wrap items-center justify-center gap-x-3 text-center text-sm text-ivory-300 max-[480px]:min-h-[64px]">

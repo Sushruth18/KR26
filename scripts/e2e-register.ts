@@ -288,18 +288,70 @@ async function main() {
     return `regId ${r.regId}; filled in ${fill.fillMs} ms; no horizontal scroll: ${fill.overflowFree}; PNG ${w}×${h} (2× ${cardW}px card); .ics ${lines.length - 1} lines, CRLF, folded, all-day Day 1 + one timed entry per Day 2 stop; pass persists after refresh`;
   });
 
-  await scenario(browser, '02-success-team-en', 'en', async (page) => {
-    const fill = await fillToReview(page, {
-      eventId: 's-quiz', name: 'Meera S', id: '1BY23AI050', dept: 'AIML', sem: '3', phone: '9845033333', email: 'meera@example.com',
-      team: { teamName: 'Kannada Kalpa', members: [{ name: 'Ravi K', id: '1by23ai051', phone: '9845044444' }] },
+  await scenario(browser, '02-success-team-exact-en', 'en', async (page) => {
+    // Rangoli: exactly 5 people (min = max) → 4 member rows from the start, no add/remove buttons.
+    const team = {
+      teamName: 'Kannada Kalpa',
+      members: [
+        { name: 'Ravi K', id: '1by23ai051', phone: '9845044444' },
+        { name: 'Asha M', id: '1BY23AI052', phone: '9845044445' },
+        { name: 'Bharath N', id: '1BY23AI053', phone: '9845044446' },
+        { name: 'Chaitra P', id: '1BY23AI054', phone: '9845044447' },
+      ],
+    };
+    await page.goto(`${BASE}/register?event=s-rangoli&mock=`, { waitUntil: 'networkidle0' });
+    await page.waitForFunction(() => !document.querySelector('[data-testid=event-summary] .skeleton'), { timeout: 15000 });
+    await page.click('[data-testid=next]');
+    await waitStep(page, 'details');
+    await typeInto(page, '#f-name', 'Meera S');
+    await typeInto(page, '#f-id', '1BY23AI050');
+    await page.select('#f-department', 'AIML');
+    await page.select('#f-semester', '3');
+    await typeInto(page, '#f-phone', '9845033333');
+    await typeInto(page, '#f-email', 'meera@example.com');
+    await page.click('[data-testid=next]');
+    await waitStep(page, 'team');
+    const step = await page.evaluate(() => ({
+      rows: document.querySelectorAll('[data-testid^=member-]').length,
+      add: !!document.querySelector('[data-testid=add-member]'),
+      remove: document.querySelectorAll('[data-testid^=member-] button').length,
+      intro: document.querySelector('[data-testid=team-intro]')?.textContent ?? '',
+      count: document.querySelector('[data-testid=team-count]')?.textContent ?? '',
+    }));
+    expect(step.rows === 4, `${step.rows} member rows (want 4)`);
+    expect(!step.add && step.remove === 0, `add button ${step.add}, remove buttons ${step.remove}`);
+    expect(step.intro.includes('exactly 5 members including you'), `intro: ${step.intro}`);
+    expect(step.count === 'Team members: 5 of 5', `count: ${step.count}`);
+    const overflowFree = await noHorizontalScroll(page);
+    await typeInto(page, '#f-teamName', team.teamName);
+    for (const [i, m] of team.members.entries()) {
+      await typeInto(page, `#f-members-${i}-name`, m.name);
+      await typeInto(page, `#f-members-${i}-id`, m.id);
+      await typeInto(page, `#f-members-${i}-phone`, m.phone);
+    }
+    await page.click('[data-testid=next]');
+    await waitStep(page, 'review');
+    // General instructions sit right above the rules-agreement checkbox and open in place.
+    const general = await page.evaluate(() => {
+      const btn = document.querySelector('[data-testid=general-rules-toggle]');
+      const box = document.querySelector('#f-consentRules');
+      return { found: !!btn, before: !!btn && !!box && !!(btn.compareDocumentPosition(box) & Node.DOCUMENT_POSITION_FOLLOWING) };
     });
+    expect(general.found && general.before, `General instructions beside the rules checkbox: ${JSON.stringify(general)}`);
+    await page.click('[data-testid=general-rules-toggle]');
+    await page.waitForSelector('[data-testid=general-rules] li');
+    const generalItems = await page.$$eval('[data-testid=general-rules] li', (li) => li.length);
+    expect(generalItems === 6, `${generalItems} general instructions`);
+    await page.click('#f-consentRules');
+    await sleep(500);
+    const fill = { overflowFree: overflowFree && (await noHorizontalScroll(page)) };
     const review = await page.$eval('[data-testid=register-form]', (e) => e.textContent ?? '');
     expect(review.includes('1BY23AI051'), 'review shows normalised member USN');
     const r = await submit(page);
-    expect(r.kind === 'success' && r.regId === 'KR26-QIZ-0001', JSON.stringify(r));
+    expect(r.kind === 'success' && r.regId === 'KR26-RGL-0001', JSON.stringify(r));
     const passText = await page.$eval('[data-testid=pass-card]', (e) => e.textContent ?? '');
-    expect(passText.includes('Meera S, Ravi K') && passText.includes('Day 1 · 20 November'), 'pass lists team, Latin numerals in EN');
-    return `regId ${r.regId}; team of 2 (quiz min=max=2 → exactly 1 member row); no horizontal scroll: ${fill.overflowFree}`;
+    expect(passText.includes('Meera S, Ravi K, Asha M, Bharath N, Chaitra P') && passText.includes('Day 1 · 20 November'), 'pass lists team, Latin numerals in EN');
+    return `regId ${r.regId}; Rangoli exactly 5 → 4 member rows, no add/remove, "${step.intro.slice(0, 50)}…", "${step.count}"; no horizontal scroll: ${fill.overflowFree}`;
   });
 
   await scenario(browser, '03-duplicate-real-kn', 'kn', async (page) => {
@@ -492,9 +544,13 @@ async function main() {
     // Kannada-heavy pass: Kannada names with conjuncts, Kannada event name, team.
     await fillToReview(page, {
       eventId: 's-group-singing', name: 'ಶ್ರೀನಿವಾಸ್ ಕೃಷ್ಣಮೂರ್ತಿ', id: '1BY21EC077', dept: 'ECE', sem: '7', phone: '9845055555', email: 'sri@example.com',
+      // Group Singing: 6–12 people incl. the registrant → 5 members.
       team: { teamName: 'ಸ್ವರ ಸಂಗಮ', members: [
         { name: 'ಅಕ್ಷತಾ ಭಟ್', id: '1BY21EC078', phone: '9845055556' },
         { name: 'ದ್ವಾರಕೀಶ್', id: '1BY21EC079', phone: '9845055557' },
+        { name: 'ಲಕ್ಷ್ಮೀ ನಾರಾಯಣ', id: '1BY21EC080', phone: '9845055558' },
+        { name: 'ಪ್ರಜ್ವಲ್ ಕೆ.', id: '1BY21EC081', phone: '9845055559' },
+        { name: 'ಸೌಮ್ಯಾ ರಾವ್', id: '1BY21EC082', phone: '9845055560' },
       ] },
     });
     const r = await submit(page);
@@ -522,9 +578,11 @@ async function main() {
   await scenario(browser, '14-any-usn-abc-123-team-kn', 'kn', async (page) => {
     const p: Person = {
       eventId: 's-treasure-hunt', name: 'Nandini B', id: 'abc-123', dept: 'ISE', sem: '5', phone: '9845077770', email: 'nandini@example.com',
+      // Treasure Hunt: exactly 4 people → 3 members.
       team: { teamName: 'Hudukata', members: [
         { name: 'Pavan M', id: 'zz 9/1', phone: '9845077771' },
         { name: 'Rekha L', id: '1TD24EC010', phone: '9845077772' },
+        { name: 'Sagar D', id: '1TD24EC011', phone: '9845077775' },
       ] },
     };
     await fillToReview(page, p);
@@ -537,6 +595,7 @@ async function main() {
       ...p, id: 'new-one', phone: '9845077773', email: 'x2@example.com', team: { teamName: 'Matte', members: [
         { name: 'Usha K', id: 'qq1', phone: '9845077774' },
         { name: 'Nandini B', id: 'ABC - 123', phone: '9845077770' },
+        { name: 'Vinay R', id: 'qq2', phone: '9845077776' },
       ] },
     });
     const dup = await submit(page);

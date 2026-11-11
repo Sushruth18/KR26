@@ -251,7 +251,7 @@ All content lives in JSON; components never hard-code event data.
     "deadline": "2026-11-18T23:59:00+05:30",
     "prizes": { "type": "cash", "first": 2000, "second": 1000 },
     "rules": { "kn": ["TODO-CONFIRM"], "en": ["TODO-CONFIRM"] },
-    "coordinator": { "name": "TODO-CONFIRM", "phone": "TODO-CONFIRM" },
+    "coordinators": [{ "name": "…", "phone": "98450xxxxx" }],
     "completed": false
   }
 ]
@@ -261,27 +261,32 @@ The prize-pool plaque sums only cash prizes. Add a build-time check in `validate
 total equals `site.json → prizePoolTotal` (39000) and fails the build if not.
 
 Seed with the **12 competitions from the 2026 budget proposal** (prizes are final per the proposal;
-times/venues/team sizes/rules are TODO-CONFIRM). **Every competition is on 20 Nov 2026 (Day 1)**, with `deadline` 2026-11-18T23:59:00+05:30:
+times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the organisers, see the Competitions data notes below). **Every competition is on 20 Nov 2026 (Day 1)**, with `deadline` 2026-11-18T23:59:00+05:30:
 
-| id | code | category | Kannada | English | 1st (₹) | 2nd (₹) | Team (TODO-CONFIRM) | Time |
+| id | code | category | Kannada | English | 1st (₹) | 2nd (₹) | Team | Time |
 |---|---|---|---|---|---|---|---|---|
 | s-essay | ESY | students | ಪ್ರಬಂಧ ಬರಹ | Essay Writing | 2000 | 1000 | 1 | TODO |
 | s-poem | POM | students | ಕವನ ಸ್ಪರ್ಧೆ | Poem | 2000 | 1000 | 1 | TODO |
 | s-painting | PNT | students | ಚಿತ್ರಕಲೆ | Painting | 2000 | 1000 | 1 | TODO |
 | s-debate | DEB | students | ವಾದ-ವಿವಾದ | Debate | 2000 | 1000 | 1 | TODO |
-| s-quiz | QIZ | students | ಪ್ರಶ್ನೋತ್ತರ ಸ್ಪರ್ಧೆ | Quiz | 2000 | 1000 | 2 | TODO |
-| s-group-dance | GDN | students | ಸಾಮೂಹಿಕ ನೃತ್ಯ | Group Dance | 4000 | 2000 | 6–12 | TODO |
-| s-treasure-hunt | TRH | students | ಖಜಾನೆ ಹುಡುಕಾಟ | Treasure Hunt | 4000 | 2000 | 3–4 | TODO |
-| s-group-singing | GSG | students | ಸಮೂಹ ಗಾಯನ | Group Singing | 4000 | 2000 | 3–8 | TODO |
-| s-rangoli | RGL | students | ರಂಗೋಲಿ | Rangoli | 4000 | 2000 | 2–4 | TODO |
+| s-quiz | QIZ | students | ಪ್ರಶ್ನೋತ್ತರ ಸ್ಪರ್ಧೆ | Quiz | 2000 | 1000 | 1 | TODO |
+| s-group-dance | GDN | students | ಸಾಮೂಹಿಕ ನೃತ್ಯ | Group Dance | 4000 | 2000 | 4–12 | TODO |
+| s-treasure-hunt | TRH | students | ಖಜಾನೆ ಹುಡುಕಾಟ | Treasure Hunt | 4000 | 2000 | 4 | TODO |
+| s-group-singing | GSG | students | ಸಮೂಹ ಗಾಯನ | Group Singing | 4000 | 2000 | 6–12 | TODO |
+| s-rangoli | RGL | students | ರಂಗೋಲಿ | Rangoli | 4000 | 2000 | 5 | TODO |
 | f-debate | FDB | faculty | ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು) | Faculty Debate | memento | — | 1 | TODO |
-| f-group-dance | FGD | faculty | ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು) | Faculty Group Dance | memento | — | 4–10 | TODO |
-| f-group-singing | FGS | faculty | ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು) | Faculty Group Singing | memento | — | 3–8 | TODO |
+| f-group-dance | FGD | faculty | ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು) | Faculty Group Dance | memento | — | 4–12 | TODO |
+| f-group-singing | FGS | faculty | ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು) | Faculty Group Singing | memento | — | 6–12 | TODO |
 
 Cash total check: (5 × 3,000) + (4 × 6,000) = **₹39,000** ✔ matches the proposal.
 Icons (lucide): essay `file-text`, poem `feather`, painting `palette`, debate `mic`, quiz `brain`,
 group dance `users`, treasure hunt `search`, group singing `music`, rangoli `flower`.
 Rangoli is new this year and fits the theme perfectly — give its card a kolam-pattern corner ornament.
+
+**Competitions data notes (Nov 2026):**
+- `coordinators`: 1–3 `{ name, phone }` per event; `phone` is 10 digits matching `RULES.phone` (`^[6-9]\d{9}$`) — `validate-data` fails otherwise. Each person gets their own `tel:+91…` link on the card (`competitions/Coordinators.tsx`). The numbers live **only** in `events.json` (tests read them from there; never copy them into docs, tests or Config.gs).
+- `rules` come from the organisers' `RULES_AND_REGULATIONS_final.pdf` (Kannada and English sections, same numbering — `validate-data` checks both lists have the same length); adaptations are listed in `TODO-CONFIRM.md`. `site.json → generalRules` holds the "General instructions" shown at the top of /competitions and in the Register review step.
+- **Rules are not in the entry chunk:** `scripts/vite-plugin-split-rules.ts` serves the browser `events.json` without `rules` and `site.json` without `generalRules`, and exposes both through `virtual:competition-rules` (imported only by `RulesDisclosure` / `GeneralInstructions`). Browser types: `CompetitionEvent` / `SiteConfig` omit those fields; scripts use `EventRecord` / `SiteRecord`.
 
 ### Also
 - `schedule.json` — `[{ day, start, title:{kn,en}, venue:{kn,en}, description?:{kn,en}, highlight?:boolean, headline?:boolean }]` (start times only, no `end`; table in §5.3)
@@ -408,12 +413,12 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 ### Registration architecture (Phase 2 — refines §7)
 - **One server implementation.** `apps-script/Code.gs` is the only server code. `apps-script/Config.gs` is **generated** (`npm run gas:config`, also on every build) from `site.json`, `events.json` and `src/lib/rules.ts` — never edit it by hand. Validation rules live in `src/lib/rules.ts`; semesters/departments in `site.json` (`semesters.default` = odd semesters 1,3,5,7; `byDepartment` MBA/MCA = 1,3). Client (`src/lib/validation.ts`) and server read the same lists.
 - **Mock = real Code.gs.** `mock/gas-runtime.ts` runs Code.gs in a Node VM with fake Sheet/Lock/Cache/Mail services; `mock/vite-plugin-mock-gas.ts` serves it at `/mock-api` in `npm run dev` only. Force outcomes with `?mock=duplicate|closed|deadline|validation|server|network|slow|statusdown` on any page or the dev-only panel (bottom-left). Mock data is in memory and resets when the dev server restarts.
-- **Tests:** `npm run test:server` (Code.gs logic against a multi-tab fake spreadsheet, 147 cases), `npm run e2e` (registration, 18 scenarios) and `npm run e2e:competitions` (Competitions page: kn/en × 320/360/768/1280, 22 checks), `npm run e2e:pass` (pass page layout + WhatsApp button + PNG export, 133 checks) — browser, need `npm run dev`; `E2E_BASE` for another port, `npm run race -- <url> [eventId] [count]` (fires `count` simultaneous registrations at one event and checks all succeed with unique, sequential reg IDs and no duplicate rows; the real LockService test must be run against the deployed script — the mock is single-threaded).
+- **Tests:** `npm run test:server` (Code.gs logic against a multi-tab fake spreadsheet, 159 cases), `npm run e2e` (registration, 18 scenarios) and `npm run e2e:competitions` (Competitions page: kn/en × 320/360/768/1280, coordinators, rules vs data, General instructions, 28 checks), `npm run e2e:pass` (pass page layout + WhatsApp button + PNG export, 151 checks) — browser, need `npm run dev`; `E2E_BASE` for another port, `npm run race -- <url> [eventId] [count]` (fires `count` simultaneous registrations at one event and checks all succeed with unique, sequential reg IDs and no duplicate rows; the real LockService test must be run against the deployed script — the mock is single-threaded).
 - **Config.gs versioning.** The generated `Config.gs` starts with `CONFIG_SCHEMA` (format number; `Code.gs` has `EXPECTED_CONFIG_SCHEMA`, both must equal `GAS_CONFIG_SCHEMA` in `scripts/gas-config.ts` — `gas:config` fails otherwise) and `CONFIG_VERSION` (8-hex hash of the whole config; printed by `npm run gas:config`, returned as `configVersion` by `?action=status`). `assertConfig_()` runs first in status/register/lookup/`setupSheet`: a missing/old Config → `CONFIG_MISMATCH`, zero events → `CONFIG_EMPTY` (`setupSheet` throws "Config.gs has no events — paste the latest Config.gs" before touching the Sheet). `setupSheet` logs `Config <version> lists N events` and one line per event (row ADDED / already there; tab CREATED / already existed), then verifies the Events tab; `checkConfig()` is a read-only editor check. Bump the schema number in both places whenever `Code.gs` starts reading new or renamed `CONFIG` fields.
 - **WhatsApp groups (private per-event link).** Optional `whatsapp_url` column in the Events tab (`EVENT_HEADERS`; `setupSheet` adds it to an existing tab, format-only, never overwrites). Never in `status`, `events.json`, `site.json` or Config.gs (`validate-data` + `test:server` fail on any `chat.whatsapp.com` / `whatsapp.com/channel` in `src/data`). Rule in `RULES.whatsapp` (shared: Config.gs + `src/lib/whatsapp.ts` `cleanWhatsappUrl`): trim, drop `?query`/`#fragment`/trailing `/`, then only `https://chat.whatsapp.com/<code>` or `https://whatsapp.com/channel/<code>`; anything else is ignored and logged by event id only (`whatsappFor_`). Returned only as `whatsappUrl` in a successful register answer (that event) and on each lookup pass; errors (DUPLICATE/CLOSED/…) never carry it. Confirmation email = `buildEmail_` (text fallback + HTML body with button, both languages, everything escaped), `replyTo` = `site.json → contactEmail` when set (empty today — never invent one). Client: `PassData.whatsappUrl` (kept in sessionStorage, re-validated wherever it becomes an href), green `AnchorButton variant="whatsapp"` (`target=_blank rel="noopener noreferrer"`) in `PassActions`; the export card never shows it. Config schema is now 3 (Code.gs reads `CONFIG.contactEmail` and `CONFIG.rules.whatsapp`).
 - **Pass layout & PNG export.** The on-screen `PassCard` is fluid (`w-full min-w-0 max-w-[380px]`, reg ID size from `clamp()`); the PNG is made from a second, fixed 380 px `PassCard fixed` rendered off-screen (`left:-10000px`, `aria-hidden`, test ids suffixed `-export`) so it is always 760 px wide whatever the phone and never inherits `margin:auto` offsets. Root causes fixed: a `grid` track without `minmax(0,…)` grew to the nowrap reg ID (large-text phones pushed the card past the screen) — use `grid-cols-1`/`min-w-0`; and `<body>` has `overflow-x: clip`, so **`scrollWidth` cannot detect clipped content — measure element rects** (`npm run e2e:pass` does, 133 checks: kn/en × 320–768 px, 130 % text, after registering / reload / fresh load / lookup, WhatsApp button, PNG size and border).
 - **Sheet column `member_ids`** (not `member_usns`): holds USNs or employee IDs. `user_agent` dropped. `Config.gs` carries each event's default `sheetName` (`npm run gas:config`; `validate-data` rejects invalid or duplicate tab names).
-- **Team size counts the registrant** (Group Dance 6–12 = registrant + 5–11 member rows). Photo/video consent optional; rules consent required.
+- **Team size counts the registrant** (Group Dance 4–12 = registrant + 3–11 member rows; min = max events such as Rangoli 5 show exactly that many rows with no add/remove buttons). Photo/video consent optional; rules consent required.
 - **Extra codes:** `CLOSED` carries `reason: NOT_OPEN` (switched off by a coordinator) `| DEADLINE`; **every `SERVER` carries a machine-readable `reason`** (`EVENTS_TAB_MISSING`, `EVENTS_COLUMN_MISSING:<col>`, `EVENT_SHEET_NAME_MISSING|EVENT_TAB_RESERVED|EVENT_TAB_SHARED|EVENT_TAB_MISSING:<eventId>`, `EVENT_TAB_COLUMN_MISSING:<eventId>:<col>`, `LOCK_TIMEOUT`, `CONFIG_MISMATCH`, `CONFIG_EMPTY`, `UNEXPECTED`; never secrets, stacks or sheet contents). `Code.gs` raises them with `fail_()` and maps every exception in `doGet`/`doPost` through `serverError_()` (also `console.error`s reason + real message in the Apps Script log); `src/lib/api.ts` logs `[registration] <status|register|lookup>: server error, reason=…` to the browser console and the UI shows nothing extra (the website adds `BAD_RESPONSE` for non-JSON answers; `submit.BUSY` text is shown for `LOCK_TIMEOUT`); lookup returns `NOT_FOUND` / `RATE_LIMITED` (5 failures per ID per 10 min). Client adds `NETWORK` and `CONFIG` (endpoint not set).
 - The min-time check uses a **client-reported** `elapsedMs`; it stops naive bots, not a determined attacker.
 

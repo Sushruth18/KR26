@@ -8,6 +8,7 @@ import { eventDisplay } from '../../lib/eventDisplay';
 import { formatNumber } from '../../lib/format';
 import { useLang } from '../../hooks/useLang';
 import { CheckboxField } from '../ui/Field';
+import { GeneralInstructions } from '../competitions/GeneralInstructions';
 import type { StepId } from './steps';
 
 type F = RegistrationValues;
@@ -80,6 +81,7 @@ export function StepReview({ event, onEdit }: Props) {
       ))}
 
       <div className="space-y-2">
+        <GeneralInstructions />
         <CheckboxField<F> name="consentRules" label={t('register.consentRules')} />
         <CheckboxField<F> name="consentPhoto" label={t('register.consentPhoto')} />
       </div>

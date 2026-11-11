@@ -23,5 +23,23 @@
   "semesters": {
     "default": [1, 3, 5, 7],
     "byDepartment": { "MBA": [1, 3], "MCA": [1, 3] }
+  },
+  "generalRules": {
+    "kn": [
+      "ನಿಮ್ಮ ಸ್ಪರ್ಧೆ ಆರಂಭವಾಗುವ ಸಮಯಕ್ಕಿಂತ 15 ನಿಮಿಷಗಳ ಮೊದಲು ಸ್ಥಳದಲ್ಲಿರಿ.",
+      "ಸ್ಥಳವನ್ನು ವಾಟ್ಸಾಪ್ ಗುಂಪುಗಳಲ್ಲಿ ತಿಳಿಸಲಾಗುವುದು.",
+      "ಯಾವುದೇ ಪ್ರಶ್ನೆಗಳಿಗೆ ಭಾಗವಹಿಸುವವರು ಆಯಾ ಸ್ಪರ್ಧಾ ಸಂಯೋಜಕರನ್ನು ಸಂಪರ್ಕಿಸಬೇಕು.",
+      "ಸ್ಪರ್ಧೆಯನ್ನು ವೈಯಕ್ತಿಕವಾಗಿ ಅಲ್ಲ ವೃತ್ತಿಪರವಾಗಿ ನಡೆಸಲು ಬಿಡಿ.",
+      "ಸಾಂಸ್ಕೃತಿಕ ಕಾರ್ಯಕ್ರಮಗಳ ಪ್ರದರ್ಶಕರಿಗೆ ಸ್ಪರ್ಧೆಗಳಲ್ಲಿ ಮೊದಲ ಆದ್ಯತೆ ನೀಡಲಾಗುವುದು.",
+      "ಯಾವುದೇ ನಿಯಮಗಳನ್ನು ಉಲ್ಲಂಘಿಸಿದರೆ ತಂಡ ಅಥವಾ ಭಾಗವಹಿಸುವವರ ಅನರ್ಹತೆಗೆ ಕಾರಣವಾಗುತ್ತದೆ."
+    ],
+    "en": [
+      "Be at the venue 15 minutes before your event's start time.",
+      "The venue will be informed in the WhatsApp groups.",
+      "For any queries, participants should contact the respective competition coordinator.",
+      "Let the competition go professionally, not personally.",
+      "The cultural events performers will be given first priority in competitions.",
+      "Violation of any of the rules will lead to disqualification of the team or participants."
+    ]
   }
 }

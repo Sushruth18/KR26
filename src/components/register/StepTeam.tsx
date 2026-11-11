@@ -20,13 +20,21 @@ export function StepTeam({ event }: { event: CompetitionEvent }) {
   const student = event.category === 'students';
   const minRows = event.teamSize.min - 1; // team size counts the registrant
   const maxRows = event.teamSize.max - 1;
+  // min = max (Treasure Hunt 4, Rangoli 5): the rows are all there from the start, so no add/remove buttons.
+  const exact = minRows === maxRows;
+  const n = (x: number) => formatNumber(x, lang);
   // Array-level error (team size) lives at errors.members.message or errors.members.root.message.
   const membersErr = get(formState.errors, 'members') as { message?: string; root?: { message?: string } } | undefined;
-  const teamError = membersErr?.message ?? membersErr?.root?.message;
+  const rawTeamError = membersErr?.message ?? membersErr?.root?.message;
+  const teamError = exact && rawTeamError === 'errors.teamSize' ? 'errors.teamSizeExact' : rawTeamError;
 
   return (
     <div className="space-y-5">
-      <p className="text-ivory-300">{t('register.teamIntro', { range })}</p>
+      <p className="text-ivory-300" data-testid="team-intro">
+        {exact
+          ? t('register.teamIntroExact', { n: n(event.teamSize.max), others: n(maxRows) })
+          : t('register.teamIntro', { range })}
+      </p>
       <TextField<F> name="teamName" label={t('register.teamName')} />
 
       <ol className="space-y-4">
@@ -62,17 +70,21 @@ export function StepTeam({ event }: { event: CompetitionEvent }) {
       </ol>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-ivory-300" aria-live="polite">
-          {t('register.teamCount', { n: formatNumber(fields.length + 1, lang) })}
+        <p className="text-sm text-ivory-300" aria-live="polite" data-testid="team-count">
+          {exact
+            ? t('register.teamCountExact', { n: n(fields.length + 1), max: n(event.teamSize.max) })
+            : t('register.teamCount', { n: n(fields.length + 1), min: n(event.teamSize.min), max: n(event.teamSize.max) })}
         </p>
-        <Button variant="ghost" onClick={() => append(emptyMember())} disabled={fields.length >= maxRows} data-testid="add-member">
-          <Plus size={18} aria-hidden="true" />
-          {t('register.addMember')}
-        </Button>
+        {!exact && (
+          <Button variant="ghost" onClick={() => append(emptyMember())} disabled={fields.length >= maxRows} data-testid="add-member">
+            <Plus size={18} aria-hidden="true" />
+            {t('register.addMember')}
+          </Button>
+        )}
       </div>
       {teamError && (
         <p className="field-error" role="alert">
-          {t(teamError, { range })}
+          {t(teamError, { range, n: n(event.teamSize.max) })}
         </p>
       )}
     </div>

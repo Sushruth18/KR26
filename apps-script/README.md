@@ -53,7 +53,7 @@ You should now have exactly two files: `Code.gs` and `Config.gs`.
    2. Choose the club Google account.
    3. You'll see **"Google hasn't verified this app"**. This is normal, because it's your own script. Click **Advanced** (bottom left), then **Go to KR 2026 Registration (unsafe)**.
    4. Read the list (it needs to see and edit this spreadsheet and to send email as you) and click **Allow**.
-4. An **Execution log** panel opens at the bottom. It should start with **`Config 302d7532 (schema 4) lists 12 events`** (this is an example: your version is the one printed by `npm run gas:config` and found at the top of `Config.gs`; it changes whenever the events or site data change), then one line per event (`s-essay: Events row ADDED; tab "ESY – Essay Writing" CREATED`), and end with **`Setup complete … 12 events; 12 Events row(s) added; 12 event tab(s) created …`**. On a re-run the same lines say *already there / already existed*.
+4. An **Execution log** panel opens at the bottom. It should start with **`Config da9c17ad (schema 4) lists 12 events`** (this is an example: your version is the one printed by `npm run gas:config` and found at the top of `Config.gs`; it changes whenever the events or site data change), then one line per event (`s-essay: Events row ADDED; tab "ESY – Essay Writing" CREATED`), and end with **`Setup complete … 12 events; 12 Events row(s) added; 12 event tab(s) created …`**. On a re-run the same lines say *already there / already existed*.
    - If it instead fails with **`Config.gs has no events — paste the latest Config.gs`** or **`Config.gs is schema … but Code.gs expects …`**, the `Config.gs` file in the Apps Script project is empty, old, or from another version of the site. Nothing was changed in the spreadsheet. Paste the latest `Config.gs` (step 2.4), save, and run `setupSheet` again.
    - To check which Config the project is using without changing anything, run **`checkConfig`**.
 5. Switch back to the spreadsheet tab. You now have **13 tabs** at the bottom:
@@ -164,7 +164,7 @@ You need this when a developer changes `Code.gs`, or when **`Config.gs`** change
 
 ⚠️ Do **not** use "New deployment" for updates. That creates a *different* URL, and the website would keep talking to the old one. "Manage deployments → Edit → New version" keeps the same URL.
 
-**Check that the right Config is live.** Open `<your /exec URL>?action=status` in a browser: the answer contains `"configVersion":"302d7532"` (example: it changes with the data). It must equal the `CONFIG_VERSION` printed by `npm run gas:config` (and found at the top of `Config.gs`). If it differs, or the answer is `CONFIG_MISMATCH`, the deployment is still running old code: paste, save, and deploy a New version.
+**Check that the right Config is live.** Open `<your /exec URL>?action=status` in a browser: the answer contains `"configVersion":"da9c17ad"` (example: it changes with the data). It must equal the `CONFIG_VERSION` printed by `npm run gas:config` (and found at the top of `Config.gs`). If it differs, or the answer is `CONFIG_MISMATCH`, the deployment is still running old code: paste, save, and deploy a New version.
 
 Event IDs come from the website's data. If a new competition is added there, run **`setupSheet`** again after updating `Config.gs`. It adds the missing Events row and the new event's tab, and never deletes or overwrites anything.
 
