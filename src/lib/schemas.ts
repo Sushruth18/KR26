@@ -91,6 +91,11 @@ export const siteSchema = z.object({
   eventEnd: isoDateTime,
   registrationClose: isoDateTime,
   prizePoolTotal: z.number().int().positive(),
+  /** Public origin of the deployed site, no trailing slash — used for canonical, og:url/og:image, sitemap and emails. */
+  siteUrl: z
+    .string()
+    .url()
+    .refine((u) => /^https:\/\/[^/]+$/.test(u), 'siteUrl must be an https origin with no path or trailing slash'),
   /** Empty string = not yet confirmed; UI hides the element. */
   instagramUrl: z.union([z.literal(''), z.string().url()]),
   contactEmail: z.union([z.literal(''), z.string().email()]),

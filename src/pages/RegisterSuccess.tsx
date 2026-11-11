@@ -26,7 +26,7 @@ function PassBlock({ pass }: { pass: PassData }) {
 
 export default function RegisterSuccess() {
   const { t } = useTranslation();
-  useDocumentMeta('pages.pass.title', 'pages.pass.description');
+  useDocumentMeta('pages.pass.title', 'pages.pass.description', { noindex: true });
   const location = useLocation();
   const [params] = useSearchParams();
   const fromState = (location.state as { pass?: unknown } | null)?.pass;

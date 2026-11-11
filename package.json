@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "validate": "tsx scripts/validate-data.ts",
-    "prebuild": "npm run gas:config && npm run validate",
+    "prebuild": "npm run gas:config && npm run seo && npm run validate",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "preview": "vite preview",
+    "seo": "tsx scripts/build-seo.ts",
     "gas:config": "tsx scripts/build-gas-config.ts",
     "brand:images": "tsx scripts/build-brand-images.ts",
     "test:server": "tsx scripts/test-apps-script.ts",

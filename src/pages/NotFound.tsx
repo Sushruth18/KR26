@@ -5,7 +5,7 @@ import { FolkDivider } from '../components/ui/FolkDivider';
 
 export default function NotFound() {
   const { t } = useTranslation();
-  useDocumentMeta('pages.notFound.title', 'pages.notFound.description');
+  useDocumentMeta('pages.notFound.title', 'pages.notFound.description', { noindex: true });
   return (
     <section className="container-page flex flex-col items-center py-20 text-center">
       <p className="font-display text-7xl text-gold-600" aria-hidden="true">

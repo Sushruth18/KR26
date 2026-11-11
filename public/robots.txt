@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /register/success
+
+Sitemap: https://kr2k26-bmsit.netlify.app/sitemap.xml
