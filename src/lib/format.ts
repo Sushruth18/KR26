@@ -4,7 +4,7 @@
  *  - en: Latin numerals.
  * Registration IDs, phone numbers and USNs are never passed through here — they stay Latin.
  */
-import { TODO } from './schemas';
+import { TODO } from './todo';
 
 export type Lang = 'kn' | 'en';
 

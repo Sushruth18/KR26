@@ -367,8 +367,11 @@
   }
   .segmented-btn {
     position: relative;
+    /* Fixed height, not min-height: when the Kannada body font swaps in (late, after first paint) the
+       line box changes by a few px, which used to push the whole grid down (CLS). */
+    height: 44px;
     min-height: 44px;
-    padding: 0.45rem clamp(0.6rem, 3vw, 1rem);
+    padding: 0 clamp(0.6rem, 3vw, 1rem);
     border: 0;
     border-radius: 999px;
     background: transparent;

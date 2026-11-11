@@ -49,7 +49,8 @@ export default function Competitions() {
       <div className="container-page pb-16">
         <div className="flex flex-col items-center gap-3">
           <CategoryToggle value={category} counts={counts} onChange={setCategory} />
-          <div aria-live="polite" className="flex min-h-[44px] flex-wrap items-center justify-center gap-x-3 text-center text-sm text-ivory-300">
+          {/* Reserves two lines on phones: the "status unavailable" note + Retry wraps there, and must not push the cards down. */}
+          <div aria-live="polite" className="flex min-h-[44px] flex-wrap items-center justify-center gap-x-3 text-center text-sm text-ivory-300 max-[480px]:min-h-[64px]">
             {loading && (
               <span className="inline-flex items-center gap-2" role="status">
                 <span className="spinner" aria-hidden="true" />

@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import { TODO } from './todo';
 
-export const TODO = 'TODO-CONFIRM';
+export { TODO };
 
 const bilingual = z.object({ kn: z.string().min(1), en: z.string().min(1) });
 const bilingualList = z.object({ kn: z.array(z.string()).min(1), en: z.array(z.string()).min(1) });
