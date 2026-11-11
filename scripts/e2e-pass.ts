@@ -347,6 +347,34 @@ async function main() {
       check('button after finding the pass with ID + phone', await buttonIssues());
       const l2 = await measure(page);
       check('layout fits after lookup', [...l2.problems, ...(l2.docScroll > l2.vw ? ['document scrolls horizontally'] : [])]);
+
+      // The confirmation email's "View your pass" link: /register/success?id=<regId> → ID filled in, only the phone to type.
+      const regId = ((await page.$eval('[data-testid=pass-reg-id]', (el) => el.textContent)) ?? '').trim();
+      await page.evaluate(() => sessionStorage.clear());
+      await page.goto('about:blank');
+      await page.goto(`${BASE}/register/success?id=${encodeURIComponent(regId)}`, { waitUntil: 'networkidle0' });
+      await page.waitForSelector('[data-testid=lookup-form]');
+      const emailLink = await page.evaluate(() => ({
+        id: (document.querySelector('#lk-id') as HTMLInputElement).value,
+        phone: (document.querySelector('#lk-phone') as HTMLInputElement).value,
+        phoneFocused: document.activeElement?.id === 'lk-phone',
+        robots: document.querySelector('meta[name=robots]')?.getAttribute('content') ?? '',
+      }));
+      check(
+        'email link: ID pre-filled, phone empty and focused, page noindex',
+        [
+          ...(emailLink.id === regId ? [] : [`ID field is "${emailLink.id}", expected "${regId}"`]),
+          ...(emailLink.phone === '' ? [] : ['phone is not empty']),
+          ...(emailLink.phoneFocused ? [] : ['phone field is not focused']),
+          ...(emailLink.robots === 'noindex' ? [] : [`robots meta is "${emailLink.robots}"`]),
+        ],
+      );
+      await typeInto(page, '#lk-phone', creds.phone);
+      await page.click('[data-testid=lookup-form] button[type=submit]');
+      await page.waitForSelector('[data-testid=pass-reg-id]', { timeout: 15000 });
+      const shown = ((await page.$eval('[data-testid=pass-reg-id]', (el) => el.textContent)) ?? '').trim();
+      check('email link: typing the phone shows that pass', shown === regId ? [] : [`pass shows ${shown}, expected ${regId}`]);
+      check('email link: WhatsApp button still present after lookup by registration ID', await buttonIssues());
     } catch (e) {
       failures.push(`${tag}: ${(e as Error).message}`);
       console.log(`FAIL  ${tag}: ${(e as Error).message}`);

@@ -167,8 +167,8 @@
     "icsLocation": "BMSIT&M, Avalahalli, Yelahanka, Bengaluru",
     "lookup": {
       "title": "Find your pass",
-      "intro": "We couldn't find a pass on this device. Enter the USN/employee ID and full mobile number you registered with.",
-      "id": "USN or employee ID",
+      "intro": "We couldn't find a pass on this device. Enter your registration ID (e.g. KR26-ESY-0042) or USN/employee ID, and the full mobile number you registered with.",
+      "id": "Registration ID, USN or employee ID",
       "phone": "Mobile number",
       "submit": "Find",
       "searching": "Searching…",

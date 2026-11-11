@@ -8,12 +8,13 @@
 
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
-var CONFIG_SCHEMA = 3;
-var CONFIG_VERSION = 'aa337bed';
+var CONFIG_SCHEMA = 4;
+var CONFIG_VERSION = '302d7532';
 
 var CONFIG = {
   "minFormMs": 3000,
   "contactEmail": "",
+  "siteUrl": "https://kr2k26-bmsit.netlify.app",
   "departments": [
     "CSE",
     "ISE",

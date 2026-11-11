@@ -10,13 +10,16 @@ export function Layout() {
   const { t } = useTranslation();
   const { pathname, hash } = useLocation();
   const main = useRef<HTMLElement>(null);
-  const first = useRef(true);
+  const lastPath = useRef(pathname);
 
   // Scroll to top on route change (unless a #hash target is coming); move focus to <main> for keyboard/screen-reader users.
   useEffect(() => {
     if (!hash) window.scrollTo(0, 0);
-    if (first.current) first.current = false;
-    else main.current?.focus({ preventScroll: true });
+    // Compared with the last path (not a "first run" flag) so React StrictMode's double effect in dev does not steal focus on load.
+    if (lastPath.current !== pathname) {
+      lastPath.current = pathname;
+      main.current?.focus({ preventScroll: true });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only on navigation to a new page
   }, [pathname]);
 

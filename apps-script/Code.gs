@@ -14,7 +14,7 @@
  * Endpoints
  *   GET  ?action=status                         -> { ok, events: { [id]: { isOpen, deadline, registeredCount } }, serverTime, configVersion }
  *   POST { action: "register", ...fields }      -> { ok:true, regId, event, name, whatsappUrl? } | { ok:false, code, reason?, field?, regId? }
- *   POST { action: "lookup", id, phone }        -> { ok:true, passes:[{ regId, event, name, whatsappUrl? }] } | { ok:false, code }
+ *   POST { action: "lookup", id, phone }        -> (id = USN / employee ID, or a registration ID like KR26-ESY-0042) { ok:true, passes:[{ regId, event, name, whatsappUrl? }] } | { ok:false, code }
  * whatsappUrl is present only when the event's whatsapp_url cell holds a valid https://chat.whatsapp.com/<code> (or
  * https://whatsapp.com/channel/<code>) link; any other value is ignored and logged (never returned).
  * The browser sends POST bodies as Content-Type text/plain so no CORS preflight is needed.
@@ -51,7 +51,10 @@ var REG_HEADERS = [
 var LOCK_WAIT_MS = 20000;
 // Config.gs (generated) must declare CONFIG_SCHEMA with this exact number, or every request answers CONFIG_MISMATCH.
 // Keep equal to GAS_CONFIG_SCHEMA in scripts/gas-config.ts (npm run gas:config fails if they differ).
-var EXPECTED_CONFIG_SCHEMA = 3;
+var EXPECTED_CONFIG_SCHEMA = 4;
+
+// Registration ID format: KR26-<event code>-<4 digits> (the same shape the website shows on the pass).
+var REG_ID_RE = /^KR26-([A-Z]{3})-(\d{4})$/;
 var STATUS_CACHE_KEY = 'status_v3';
 var STATUS_CACHE_S = 10;
 var LOOKUP_MAX_FAILS = 5;
@@ -538,9 +541,52 @@ function lookup_(b) {
   var fails = Number(cache.get(key) || 0);
   if (fails >= LOOKUP_MAX_FAILS) return { ok: false, code: 'RATE_LIMITED' };
 
-  // Every event tab is searched; a person registered for several events gets all their passes.
   var passes = [];
   var events = readEvents_();
+
+  // A registration ID (KR26-ESY-0042, as in the confirmation email's "View your pass" link) + the phone of the
+  // registrant or of a team member: only that one registration's own tab is read. Same rate limit as below.
+  var regIdMatch = REG_ID_RE.exec(id);
+  if (regIdMatch) {
+    Object.keys(CONFIG.events).forEach(function (eventId) {
+      if (CONFIG.events[eventId].code !== regIdMatch[1]) return;
+      var tab = eventTabOrNull_(eventId, events);
+      if (!tab) return;
+      var link = null;
+      var passFor = function (name) {
+        if (link === null) link = whatsappFor_(events, eventId);
+        var pass = { regId: id, event: eventId, name: name };
+        if (link) pass.whatsappUrl = link;
+        return pass;
+      };
+      readTable_(tab).forEach(function (r) {
+        if (String(r.reg_id) !== id) return;
+        if (normPhone_(r.phone) === phone) {
+          passes.push(passFor(r.name));
+          return;
+        }
+        var members;
+        try {
+          members = r.members_json ? JSON.parse(r.members_json) : [];
+        } catch (err) {
+          return;
+        }
+        for (var i = 0; i < members.length; i++) {
+          if (normPhone_(members[i].phone) === phone) {
+            passes.push(passFor(members[i].name));
+            return;
+          }
+        }
+      });
+    });
+    if (!passes.length) {
+      cache.put(key, String(fails + 1), LOOKUP_WINDOW_S);
+      return { ok: false, code: 'NOT_FOUND' };
+    }
+    return { ok: true, passes: passes };
+  }
+
+  // Every event tab is searched; a person registered for several events gets all their passes.
   Object.keys(CONFIG.events).forEach(function (eventId) {
     var tab = eventTabOrNull_(eventId, events);
     if (!tab) return;
@@ -627,24 +673,36 @@ function buildEmail_(p, ev, regId, whatsappUrl) {
 
   var knJoin = 'ವಾಟ್ಸಾಪ್ ಗುಂಪಿಗೆ ಸೇರಿ';
   var enJoin = 'Join the WhatsApp group';
+  var knPass = 'ನಿಮ್ಮ ಪಾಸ್ ವೀಕ್ಷಿಸಿ';
+  var enPass = 'View your pass';
+  var knPassNote = 'ನೋಂದಣಿಯಲ್ಲಿ ನೀಡಿದ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ — ಐಡಿ ಮೊದಲೇ ತುಂಬಿರುತ್ತದೆ.';
+  var enPassNote = 'Enter the mobile number you registered with — your ID is already filled in.';
   var signoff = '— Honnudi Kannada Sangha, BMSIT&M';
 
-  var text = knLines.concat(whatsappUrl ? [knJoin + ': ' + whatsappUrl] : [], ['', '---', ''], enLines,
+  // "View your pass": opens the website's pass page with the registration ID filled in; the person types their phone.
+  var siteUrl = typeof CONFIG.siteUrl === 'string' ? CONFIG.siteUrl.replace(/\/+$/, '') : '';
+  var passUrl = siteUrl ? siteUrl + '/register/success?id=' + encodeURIComponent(regId) : '';
+
+  var text = knLines.concat(passUrl ? [knPass + ': ' + passUrl, knPassNote] : [], whatsappUrl ? [knJoin + ': ' + whatsappUrl] : [],
+    ['', '---', ''], enLines, passUrl ? [enPass + ': ' + passUrl, enPassNote] : [],
     whatsappUrl ? [enJoin + ': ' + whatsappUrl] : [], ['', signoff]).join('\n');
 
   function paras(lines) {
     return lines.map(function (l) { return '<p style="margin:0 0 10px">' + esc_(l) + '</p>'; }).join('');
   }
-  function button(label) {
-    if (!whatsappUrl) return '';
-    return '<p style="margin:16px 0 6px"><a href="' + esc_(whatsappUrl) + '" style="display:inline-block;background:#0E6B4D;' +
+  function button(url, label, bg) {
+    if (!url) return '';
+    return '<p style="margin:16px 0 6px"><a href="' + esc_(url) + '" style="display:inline-block;background:' + bg + ';' +
       'color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:8px">' + esc_(label) + '</a></p>' +
-      '<p style="margin:0 0 10px;font-size:12px;color:#555555">' + esc_(whatsappUrl) + '</p>';
+      '<p style="margin:0 0 10px;font-size:12px;color:#555555">' + esc_(url) + '</p>';
+  }
+  function passBlock(label, note) {
+    return button(passUrl, label, '#8B1E2D') + (passUrl ? '<p style="margin:0 0 10px;font-size:13px;color:#555555">' + esc_(note) + '</p>' : '');
   }
   var html = '<div style="font-family:Arial,\'Noto Sans Kannada\',sans-serif;font-size:15px;line-height:1.6;color:#222222;max-width:560px">' +
-    paras(knLines) + button(knJoin) +
+    paras(knLines) + passBlock(knPass, knPassNote) + button(whatsappUrl, knJoin, '#0E6B4D') +
     '<hr style="border:none;border-top:1px solid #dddddd;margin:18px 0">' +
-    paras(enLines) + button(enJoin) +
+    paras(enLines) + passBlock(enPass, enPassNote) + button(whatsappUrl, enJoin, '#0E6B4D') +
     '<p style="margin:16px 0 0;color:#555555">' + esc_(signoff) + '</p></div>';
 
   return { subject: 'KR 2026 · ' + ev.name.en + ' · ' + regId, text: text, html: html };

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import { lookup } from '../../lib/api';
@@ -9,9 +10,15 @@ import { Button } from '../ui/Button';
 
 type State = { kind: 'idle' } | { kind: 'busy' } | { kind: 'error'; key: string };
 
+/** `?id=` comes from the "View your pass" button in the confirmation email: a registration ID, a USN or an employee ID. */
+const PREFILL_ID = /^[A-Za-z0-9-]{1,20}$/;
+
 export function LookupForm({ onFound }: { onFound: (passes: PassData[]) => void }) {
   const { t } = useTranslation();
-  const [id, setId] = useState('');
+  const [params] = useSearchParams();
+  const prefill = params.get('id')?.trim() ?? '';
+  const prefilled = PREFILL_ID.test(prefill);
+  const [id, setId] = useState(prefilled ? prefill : '');
   const [phone, setPhone] = useState('');
   const [state, setState] = useState<State>({ kind: 'idle' });
 
@@ -55,7 +62,7 @@ export function LookupForm({ onFound }: { onFound: (passes: PassData[]) => void 
         <label htmlFor="lk-phone" className="field-label">
           {t('pass.lookup.phone')}
         </label>
-        <input id="lk-phone" className="input" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} lang="en" />
+        <input id="lk-phone" className="input" type="tel" inputMode="tel" autoFocus={prefilled} value={phone} onChange={(e) => setPhone(e.target.value)} lang="en" />
       </div>
       <div aria-live="polite">
         {state.kind === 'error' && (

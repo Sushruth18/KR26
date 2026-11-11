@@ -1292,6 +1292,72 @@ t('a mail failure (quota/outage) with a link set still registers and still retur
   assert.equal(r.whatsappUrl, WA);
 });
 
+console.log('\nConfirmation email: "View your pass" button and lookup by registration ID');
+const PASS_URL = 'https://kr2k26-bmsit.netlify.app/register/success?id=KR26-ESY-0001';
+t('every confirmation carries a "View your pass" link with the registration ID, in both languages, text and HTML', () => {
+  const rt = createOpenRuntime();
+  assert.equal((rt.ctx.CONFIG as { siteUrl: string }).siteUrl, 'https://kr2k26-bmsit.netlify.app', 'siteUrl comes from site.json via Config.gs');
+  reg(rt);
+  const m = mailOf(rt);
+  const [knBlock = '', enBlock = ''] = m.body.split('\n---\n');
+  assert.ok(knBlock.includes(`ನಿಮ್ಮ ಪಾಸ್ ವೀಕ್ಷಿಸಿ: ${PASS_URL}`), 'Kannada line');
+  assert.ok(enBlock.includes(`View your pass: ${PASS_URL}`), 'English line');
+  assert.equal(count(m.body, PASS_URL), 2);
+  assert.equal(count(m.htmlBody ?? '', `<a href="${PASS_URL}"`), 2, 'one button per language');
+  assert.ok((m.htmlBody ?? '').includes('>View your pass</a>') && (m.htmlBody ?? '').includes('>ನಿಮ್ಮ ಪಾಸ್ ವೀಕ್ಷಿಸಿ</a>'));
+  assert.doesNotMatch(`${m.body}${m.htmlBody}`, /9845012345|98450 12345/, 'the phone number is never in the link or the mail');
+});
+t('the pass link never carries the phone or the USN — only the registration ID', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  const urls = mailOf(rt).body.match(/https:\/\/\S+/g) ?? [];
+  assert.deepEqual([...new Set(urls)], [PASS_URL]);
+});
+t('with a WhatsApp link too: both buttons, the pass one first', () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  reg(rt);
+  const h = mailOf(rt).htmlBody ?? '';
+  assert.equal(count(h, '<a href='), 4);
+  assert.ok(h.indexOf(PASS_URL) < h.indexOf(WA));
+});
+t('a Config without siteUrl simply leaves the pass link out (the email still goes out)', () => {
+  const rt = createOpenRuntime();
+  (rt.ctx.CONFIG as { siteUrl: string }).siteUrl = '';
+  reg(rt);
+  assert.equal(rt.mail.sent.length, 1);
+  assert.doesNotMatch(`${mailOf(rt).body}${mailOf(rt).htmlBody}`, /register\/success|View your pass/);
+});
+t("lookup by registration ID + the registrant's phone returns that pass (and the event's WhatsApp link)", () => {
+  const rt = createOpenRuntime();
+  setWa(rt, 's-essay', WA);
+  reg(rt);
+  assert.deepEqual(rt.post({ action: 'lookup', id: 'kr26-esy-0001', phone: '+91 98450 12345' }), {
+    ok: true,
+    passes: [{ regId: 'KR26-ESY-0001', event: 's-essay', name: 'Ananya Rao', whatsappUrl: WA }],
+  });
+});
+t("lookup by registration ID also accepts a team member's own phone (their own name on the pass)", () => {
+  const rt = createOpenRuntime();
+  rt.post(quiz);
+  const r = rt.post({ action: 'lookup', id: 'KR26-QIZ-0001', phone: '9845011111' }) as unknown as LookupOk;
+  assert.deepEqual(r.passes, [{ regId: 'KR26-QIZ-0001', event: 's-quiz', name: 'Ravi K' }]);
+});
+t('lookup by registration ID: wrong phone, unknown number or wrong event code → NOT_FOUND, nothing leaked', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  assert.deepEqual(rt.post({ action: 'lookup', id: 'KR26-ESY-0001', phone: '9845099999' }), { ok: false, code: 'NOT_FOUND' });
+  assert.deepEqual(rt.post({ action: 'lookup', id: 'KR26-ESY-0002', phone: '9845012345' }), { ok: false, code: 'NOT_FOUND' });
+  assert.deepEqual(rt.post({ action: 'lookup', id: 'KR26-POM-0001', phone: '9845012345' }), { ok: false, code: 'NOT_FOUND' });
+});
+t('lookup by registration ID shares the 5-failures rate limit, and a USN lookup still works as before', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  for (let i = 0; i < 5; i++) rt.post({ action: 'lookup', id: 'KR26-ESY-0001', phone: `98450000${10 + i}` });
+  assert.deepEqual(rt.post({ action: 'lookup', id: 'KR26-ESY-0001', phone: '9845012345' }), { ok: false, code: 'RATE_LIMITED' });
+  assert.equal(rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }).ok, true, 'a different key (the USN) is not rate-limited');
+});
+
 console.log('\nClient/server parity');
 t('normalisers in validation.ts and Code.gs give identical results', () => {
   const rt = createOpenRuntime();

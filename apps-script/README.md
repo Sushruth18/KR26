@@ -53,7 +53,7 @@ You should now have exactly two files: `Code.gs` and `Config.gs`.
    2. Choose the club Google account.
    3. You'll see **"Google hasn't verified this app"**. This is normal, because it's your own script. Click **Advanced** (bottom left), then **Go to KR 2026 Registration (unsafe)**.
    4. Read the list (it needs to see and edit this spreadsheet and to send email as you) and click **Allow**.
-4. An **Execution log** panel opens at the bottom. It should start with **`Config e9b500b5 (schema 2) lists 12 events`** (the version is printed by `npm run gas:config` and is at the top of `Config.gs`), then one line per event (`s-essay: Events row ADDED; tab "ESY – Essay Writing" CREATED`), and end with **`Setup complete … 12 events; 12 Events row(s) added; 12 event tab(s) created …`**. On a re-run the same lines say *already there / already existed*.
+4. An **Execution log** panel opens at the bottom. It should start with **`Config 302d7532 (schema 4) lists 12 events`** (this is an example: your version is the one printed by `npm run gas:config` and found at the top of `Config.gs`; it changes whenever the events or site data change), then one line per event (`s-essay: Events row ADDED; tab "ESY – Essay Writing" CREATED`), and end with **`Setup complete … 12 events; 12 Events row(s) added; 12 event tab(s) created …`**. On a re-run the same lines say *already there / already existed*.
    - If it instead fails with **`Config.gs has no events — paste the latest Config.gs`** or **`Config.gs is schema … but Code.gs expects …`**, the `Config.gs` file in the Apps Script project is empty, old, or from another version of the site. Nothing was changed in the spreadsheet. Paste the latest `Config.gs` (step 2.4), save, and run `setupSheet` again.
    - To check which Config the project is using without changing anything, run **`checkConfig`**.
 5. Switch back to the spreadsheet tab. You now have **13 tabs** at the bottom:
@@ -148,7 +148,8 @@ If you rename the tab but not the cell (or the other way round), registrations f
 
 ## 8. Confirmation emails and the daily limit
 
-- Each successful registration emails the registrant (in Kannada and English) from the club account. The email has an HTML version (with a "Join the WhatsApp group" button when the event has a valid link) and a plain-text version for apps that don't show HTML.
+- Each successful registration emails the registrant (in Kannada and English) from the club account. The email has an HTML version (with a **"View your pass"** button, and a "Join the WhatsApp group" button when the event has a valid link) and a plain-text version for apps that don't show HTML.
+- **"View your pass"** opens `<siteUrl>/register/success?id=<registration ID>` (`siteUrl` is in `src/data/site.json`). The registration ID is filled in; the person types the mobile number they registered with. The link contains only the registration ID, never the phone number or USN. The pass page also accepts a registration ID in place of a USN/employee ID (a team member can use their own phone number).
 - **Gmail has a daily sending limit**: about **100 emails/day** for a normal Gmail account (more for Google Workspace accounts). On a busy day the limit may run out. Registration **still succeeds**; only the email is skipped. The student still sees their pass on screen and can download it.
 - To check how many emails are left today: Apps Script → function drop-down → **`checkEmailQuota`** → **▶ Run** → read the Execution log.
 
@@ -163,7 +164,7 @@ You need this when a developer changes `Code.gs`, or when **`Config.gs`** change
 
 ⚠️ Do **not** use "New deployment" for updates. That creates a *different* URL, and the website would keep talking to the old one. "Manage deployments → Edit → New version" keeps the same URL.
 
-**Check that the right Config is live.** Open `<your /exec URL>?action=status` in a browser: the answer contains `"configVersion":"e9b500b5"`. It must equal the `CONFIG_VERSION` printed by `npm run gas:config` (and found at the top of `Config.gs`). If it differs, or the answer is `CONFIG_MISMATCH`, the deployment is still running old code: paste, save, and deploy a New version.
+**Check that the right Config is live.** Open `<your /exec URL>?action=status` in a browser: the answer contains `"configVersion":"302d7532"` (example: it changes with the data). It must equal the `CONFIG_VERSION` printed by `npm run gas:config` (and found at the top of `Config.gs`). If it differs, or the answer is `CONFIG_MISMATCH`, the deployment is still running old code: paste, save, and deploy a New version.
 
 Event IDs come from the website's data. If a new competition is added there, run **`setupSheet`** again after updating `Config.gs`. It adds the missing Events row and the new event's tab, and never deletes or overwrites anything.
 
@@ -192,4 +193,4 @@ Event IDs come from the website's data. If a new competition is added there, run
 
 **Finding out what went wrong.** Every "Something went wrong on our side" answer carries a short `reason`. In the browser it is printed to the console (F12 → Console) as `[registration] register: server error, reason=…`; visitors never see it. The same line is written to the Apps Script log (**Executions**) as `SERVER reason=… where=…`, followed by the detailed message. Reasons: `CONFIG_MISMATCH`, `CONFIG_EMPTY`, `EVENTS_TAB_MISSING`, `EVENTS_COLUMN_MISSING:<column>`, `EVENT_SHEET_NAME_MISSING:<eventId>`, `EVENT_TAB_RESERVED:<eventId>`, `EVENT_TAB_SHARED:<eventId>`, `EVENT_TAB_MISSING:<eventId>`, `EVENT_TAB_COLUMN_MISSING:<eventId>:<column>`, `LOCK_TIMEOUT`, and `UNEXPECTED` (anything else — the real error message is only in the Executions log). `BAD_RESPONSE` is added by the website itself when the script answers with something that isn't JSON (usually a Google sign-in or error page: check step 5.3 and step 9).
 | No confirmation emails | Daily quota used up (step 8), or the email went to spam. Registrations are still saved. |
-| A student lost their pass | On the site's pass page, they enter their USN/employee ID **and** the full phone number they registered with. After 5 wrong tries the lookup pauses for 10 minutes. |
+| A student lost their pass | On the site's pass page, they enter their registration ID (or USN/employee ID) **and** the full phone number they registered with, or open the "View your pass" button in their confirmation email. After 5 wrong tries the lookup pauses for 10 minutes. |
