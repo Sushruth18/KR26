@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "seo": "tsx scripts/build-seo.ts",
     "gas:config": "tsx scripts/build-gas-config.ts",
+    "social:images": "tsx scripts/build-social-images.ts",
     "brand:images": "tsx scripts/build-brand-images.ts",
     "test:server": "tsx scripts/test-apps-script.ts",
     "e2e": "tsx scripts/e2e-register.ts",
