@@ -26,7 +26,9 @@
     "e2e:event": "tsx scripts/e2e-event.ts",
     "test:schedule": "tsx scripts/test-schedule.ts",
     "check:banned": "tsx scripts/check-banned-terms.ts",
-    "perf:home": "tsx scripts/perf-home.ts"
+    "perf:home": "tsx scripts/perf-home.ts",
+    "team:import": "tsx scripts/import-team.ts",
+    "e2e:team": "tsx --tsconfig tsconfig.node.json scripts/e2e-team.ts"
   },
   "dependencies": {
     "@fontsource/baloo-tamma-2": "^5.3.0",
@@ -56,6 +58,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.14.0",
+    "heic-convert": "^2.1.0",
     "postcss": "^8.5.32",
     "prettier": "^3.9.10",
     "puppeteer-core": "^25.16.0",

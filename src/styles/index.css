@@ -2,6 +2,7 @@
 @import './art.css';
 @import './home.css';
 @import './event.css';
+@import './team.css';
 
 @tailwind base;
 @tailwind components;

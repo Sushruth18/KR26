@@ -288,7 +288,7 @@ Rangoli is new this year and fits the theme perfectly — give its card a kolam-
 - `artist.json` — `{ name:{kn,en}, photo, focus, caption:{kn,en} }` (headline artist, §5.3); WebP copies come from `npm run brand:images`
 - `attractions.json` — `[{ id, icon, title:{kn,en}, text:{kn,en}, starts:["HH:MM"], headline? }]` (banner list; every `starts` value must be a schedule stop)
 - `guests.json` — `[{ name:{kn,en}, title:{kn,en}, photo }]`
-- `team.json` — `[{ group:{kn,en}, members:[{ name:{kn,en}, role:{kn,en}, photo, linkedin?, instagram? }] }]`
+- `team.json` — now `[{ id, members:[{ id, name:{kn,en}, role:{kn,en}, photo, linkedin?, instagram? }] }]`: `id` is a troupe of `src/data/team-config.json`, which owns the group labels (`label:{kn,en}`), icons and the page order (replaces the earlier `[{ group:{kn,en}, members }]`)
 - `gallery.json` — `{ photos:[{ year, src, alt:{kn,en}, caption? }], reels:[{ year, poster, video?|url?, title }] }`
 - `site.json` — `competitionsStart` ("2026-11-20T09:00:00+05:30" — TODO-CONFIRM start time), `competitionsEnd` ("2026-11-20T18:00:00+05:30" — TODO-CONFIRM), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), the registration close time (`registrationClose` "2026-11-18T23:59:00+05:30"; there is **no** `registrationOpen` — registration is open from the start), `prizePoolTotal` (39000), Instagram URL, contact email.
 

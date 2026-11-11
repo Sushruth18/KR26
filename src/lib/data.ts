@@ -3,10 +3,9 @@ import scheduleRaw from '../data/schedule.json';
 import artistRaw from '../data/artist.json';
 import attractionsRaw from '../data/attractions.json';
 import guestsRaw from '../data/guests.json';
-import teamRaw from '../data/team.json';
 import galleryRaw from '../data/gallery.json';
 import siteRaw from '../data/site.json';
-import type { CompetitionEvent, SiteConfig, ScheduleItem, Guest, TeamGroup, GalleryData, Artist, Attraction } from './schemas';
+import type { CompetitionEvent, SiteConfig, ScheduleItem, Guest, GalleryData, Artist, Attraction } from './schemas';
 
 // The data files are validated with the zod schemas in scripts/validate-data.ts on every build (`prebuild`), so the
 // browser does not ship or run zod just to re-check them — that cost ~16 KB gzip on the critical path of every page.
@@ -17,7 +16,6 @@ export const schedule = scheduleRaw as unknown as ScheduleItem[];
 export const artist = artistRaw as unknown as Artist;
 export const attractions = attractionsRaw as unknown as Attraction[];
 export const guests = guestsRaw as unknown as Guest[];
-export const team = teamRaw as unknown as TeamGroup[];
 export const gallery = galleryRaw as unknown as GalleryData;
 
 export const cashPrizePool = events.reduce(

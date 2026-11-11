@@ -6,6 +6,7 @@ import type { LogoAsset, LogoKey } from '../src/lib/logos';
 import { sheetNameFor } from './gas-config';
 import { BANNED } from './banned-terms';
 import type { ArtistAsset } from '../src/lib/artist';
+import { validateTeam } from './validate-team';
 import {
   artistSchema,
   attractionsSchema,
@@ -39,7 +40,7 @@ const schedule = load('schedule.json', scheduleSchema);
 const artist = load('artist.json', artistSchema);
 const attractions = load('attractions.json', attractionsSchema);
 load('guests.json', guestsSchema);
-load('team.json', teamSchema);
+validateTeam(load('team.json', teamSchema), errors);
 load('gallery.json', gallerySchema);
 
 if (site && events) {

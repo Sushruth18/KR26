@@ -1,0 +1,468 @@
+{
+  "arya-k-hirematha": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRrIAAABXRUJQVlA4IKYAAAAQBACdASoQABQAPt1apkyopSOiMAgBEBuJZADE2YwIY1vscdNomOsuAAD+y/VCRMiH2SzNxehDs6qpQHn4KQHfJgh/mfehp8iCJrPuYwMXbzt7vPkNjl1Dx7G95qVTrtnP4EpzZvmOxCH7kwHxJII/WB/GoWqg7vndtjo+W+49bMkw+mcM2nMWO12GKNMv1ZlkxcdOzC+Z9kLxJk6ElT5+6Ba+1gAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/arya-k-hirematha-480w.5caf6a7c.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/arya-k-hirematha-960w.ec07a4b9.webp"
+      }
+    ]
+  },
+  "pranjal-raj": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAACQAwCdASoQABQAPt1apkyopSOiMAgBEBuJQBdgMX1PobbceyyAAPv2i1azG3Gy/2WuMUocxk9IH7RVQ4GtE9LdiJUkykeWeEv8vNRYSotU5AC0m7uQA6G5UL7skggHQ7dGhlNnl94HWl30cf7lK5Y5Z0ZVQ6+uAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/pranjal-raj-480w.2df2ab2e.webp"
+      }
+    ]
+  },
+  "manjunath-biradar": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAADwAwCdASoQABQAPt1apkyopSOiMAgBEBuJQAqoMKAD/uInxcewusfgAM2kIUIkvwUFuzxzIj1zCqtHXkQgMheEfRUw0nag6wfB5gbSYniY8xb8XwMv96y5cD9ZqWMyLCC9j4kcodG64rA54jJo7+wDEcoMTx2FDmY/EJVaaJ10B0WAAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/manjunath-biradar-480w.8d02a669.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/manjunath-biradar-960w.a367bdaa.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/manjunath-biradar-1600w.5bb48714.webp"
+      }
+    ]
+  },
+  "sowmya-n": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAABQBACdASoQABQAPt1apkyopSOiMAgBEBuJZQB/fwHPhcxTC+HNzJpYf5ZAAP7x1rvv2aUSem0k2LZcQOKuxHBjoeODXPnN/Nb3jsZmRJ0dXMTQBj5JoY163NAdAa6McrH6p5y84j/D+DOQlrR5okYPKKkWauXxXA9x3eNceau/E7GezOs9mBJZm7qrplsCjbwURIAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/sowmya-n-480w.bc91f49a.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/sowmya-n-960w.b2e04203.webp"
+      }
+    ]
+  },
+  "thejas-nirmal": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAADwAwCdASoQABQAPt1apkyopSOiMAgBEBuJZACdAYxE7W1fzPsKguPYAP7nZlmf7nUJ3Gdx5FFwzNM+gLauOUNNexmnTxqqLQl1NAihO5eJj1ZUdZIUsy+rnH9KD/hqyZShsYdFujDZmAXdepzfFfpFTPgxvmA0FMeMuYXbnHXnofUWTrpS0CCx+PLDOeZkIBCi8AAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/thejas-nirmal-480w.285b6e3c.webp"
+      }
+    ]
+  },
+  "spandana-b-s": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRpoAAABXRUJQVlA4II4AAABwBACdASoQABQAPt1apkyopSOiMAgBEBuJaACdMoMrgYAATJF74OS8kBOsAAD9ITlfc6PT4PVeWjlUIf2C0C1cjLbIVPCcethnzC7pWvVX09HTwsSKfLZ95O3D5+1TuJ4bHFnZPkbTG0Ftb5NBNa/PmL2p4GkyNb40H1arjcoIxVSe1DNq8+nYKG+bIAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/spandana-b-s-480w.d134ab01.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/spandana-b-s-960w.94fd6a34.webp"
+      }
+    ]
+  },
+  "vinyas-kt": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRqIAAABXRUJQVlA4IJYAAAAQBACdASoQABQAPt1apkyopSOiMAgBEBuJbACsABxLNjhaZUT5g5TuAAD86eUIJMxcIL0z8fmbtH3JixZU3AQvrDPRT28q+3x8Js0pdYoYlFbvGNz3gN1vHDFgpHgLV3VdNWFCMhnaUD3XTrfEstCi68nxvRh5f4UUdAITUBQ4gZ8wYLNsoe8CqzdFS2jueX1BnnwAAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/vinyas-kt-480w.a0fbdaf2.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/vinyas-kt-960w.e7eec45c.webp"
+      }
+    ]
+  },
+  "rohit-sundar": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRqYAAABXRUJQVlA4IJoAAAAwBACdASoQABQAPt1apkyopSOiMAgBEBuJZAAAXkL4+20urcmtlU2z5AAA+W69OZG3JM0diT1/1e8kZGWOkEYybJDwtzJhamSTPSLlorJ8m467OEAw+WxS7kGV4pKxDlzNi9fdAo6Mm8ZhnNvO463B+uToK0zOW0Fcq2O8ym0S5sAftq8Ok+uA3X9qAK4ArSWYwNM9SLMIAAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/rohit-sundar-480w.29b657b0.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/rohit-sundar-960w.57e419f2.webp"
+      }
+    ]
+  },
+  "ashutosh": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAADwAwCdASoQABQAPt1apkyopSOiMAgBEBuJZQC7ACP64mk2qBvGla9UAP7pB1ftGxyuvqYriCHZaaEbALjrFOKIxPAazlHKGnNIgZydFGIels0hnCUNza+CGXZp/xdrBb0JqOuQSf+5EQUJISdQJxZh9P17eeo2AAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/ashutosh-480w.0bc3238b.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/ashutosh-960w.a02f7694.webp"
+      }
+    ]
+  },
+  "deepashree-c": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAACQBACdASoQABQAPt1apkyopSOiMAgBEBuJZACdIMF6AAdXxkh4qDw131VG8uAA/usUNxg49r0P9YKwHVNdL9Lg8p9vW6f54MaKOqWpMYYvW4plRfIXGi7mUmf7ioNT2epfDKXQcpLSAHfEN/cJUTNIHEsn/Fr/L64Qi6n9AMtDDaqsYTc76X21CrtwzwuGcGUyIAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/deepashree-c-480w.bc5bd5b5.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/deepashree-c-960w.e083c7d0.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/deepashree-c-1600w.cfe73844.webp"
+      }
+    ]
+  },
+  "tejas-s": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRp4AAABXRUJQVlA4IJIAAABQBACdASoQABQAPt1apkyopSOiMAgBEBuJaQAD43oRjBzFSPj2i8ZTuFEAAP4w0pkf1YaDiE2iIDgEWS9S2a+IPepD6bKU7asI4SdlBl8dtGwMEk9uR3O1SJwAk0LIUhbTYs0BCdOFctZPlDKW8lmicbItXleTsb1K+XkBs/X0n5RokvypYxDAxZ/qmjYvAAAAAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/tejas-s-480w.ce472637.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/tejas-s-960w.2b1b88d1.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/tejas-s-1600w.803ed1e3.webp"
+      }
+    ]
+  },
+  "s-nishitha": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAAAwBACdASoQABQAPt1apkyopSOiMAgBEBuJZACsACKmkz1EEYowRl0qMsAA/ZpCwS9JrLB/dHTxQymv/49N1yDsk3uZYRJHOs+0kJGvFqgct6jEyzY1FWVyfx0LeNemw2wGWeFVSmyMrnJRy+UBxmpHNnJ7Qykh9CoxZe25CK4FjT7k15TQAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/s-nishitha-480w.4bbb0b1c.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/s-nishitha-960w.4132d347.webp"
+      }
+    ]
+  },
+  "punith-p-gowda": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRnoAAABXRUJQVlA4IG4AAADwAwCdASoQABQAPt1apkyopSOiMAgBEBuJYwCdMoADgXBcVPKvUyYAAP7gq57f2mJeXgthSSpQPDwx+yYsWs+X32sHxyPczBEkUskRch37fP7686E9iZzChjfgDUCXNGeW7N6tfpLve2PYiUvwAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/punith-p-gowda-480w.0a228032.webp"
+      }
+    ]
+  },
+  "tejas-gowda-l": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRqQAAABXRUJQVlA4IJgAAABQBACdASoQABQAPt1apkyopSOiMAgBEBuJZgCdMoAlvRIUCpfbywpA+IF4APywfac8AwjEi4gnw5voAv7b67zONvuyfXe/RJMr30lW3gb3QKokox0zVzvVURUSyX6uSEwUnJmO+2C2ES6QW80HwfSBj5D7XYaDN4rhg89grz4H5leEk8ZL50/IegCvKZ6h2oajISrA5qQ4AA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/tejas-gowda-l-480w.a78ac9d2.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/tejas-gowda-l-960w.472c4cc3.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/tejas-gowda-l-1600w.9cf1b47d.webp"
+      }
+    ]
+  },
+  "aditya-biju-nair": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAAAQBACdASoQABQAPt1apkyopSOiMAgBEBuJZQC7ACP/pVj4RwKhxoc9AAD+7A6GgizeslsxSbmRnWvnMZBK+RJOka5Dbl02lpG9cF6rG/uW1dqW5alMfe4W6ZrXzM5TpwXXhce6WPnyrWp66/M4PTIb2kleEC7jTxWV4cp+f5tftDEB7+QAAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/aditya-biju-nair-480w.a4a50251.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/aditya-biju-nair-960w.5827249f.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/aditya-biju-nair-1600w.cc182417.webp"
+      }
+    ]
+  },
+  "dhivii-suresh": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAACQBACdASoQABQAPt1apkyopSOiMAgBEBuJbAC7MoFWZjlmGUMAfVNgNags8AAA+NGi9BSFkKOSVK8kNd+4DafnLVPdxBTI7uzG3YOKi/SG+6mhSsUUI8uwxoOFdNG3peyXriufxqhFsvibv1hjPxJFmiFj01Z4Nkwa8JA5hWEWEr+QNkEHpUD4AVTWfF1WSyFBNHXfb9u5ebgwFvL3vH83EPeo8G/7UpuI2L/gAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/dhivii-suresh-480w.340c4a31.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/dhivii-suresh-960w.30128446.webp"
+      }
+    ]
+  },
+  "mallikarjun-katagi": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAACQBACdASoQABQAPt1apkyopSOiMAgBEBuJYgC1CDZgsRitCNHQuVWsooMSnYAAzf0lAMOHySLs2TKUvdlyiQy1CJAcf+7NSlTsy3JroeSvNl1WAounlyZpGOiVvYuhui8IFqSCuNgcNM5eLveu5KlvaiG/Kxox+P7o8xhC4w6+osPzr2vUohrJR/x09W/8QAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/mallikarjun-katagi-480w.c6ed71f0.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/mallikarjun-katagi-960w.38b3cbed.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/mallikarjun-katagi-1600w.286be873.webp"
+      }
+    ]
+  },
+  "kethan-gowda-b-r": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRoYAAABXRUJQVlA4IHoAAACQBACdASoQABQAPt1cpkyopSOiMAgBEBuJbACdMoR3ACnH+gwG/IvuDmBb3EAA/vHOum46ZQE+Lq6dISvqxFhf6smjiX1NamR/dooyvkMq+Nkz/W2+e6ThLevvqxckubi20mPpKIfcnwi99DPAy2KxJDF5aYkG77qAAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/kethan-gowda-b-r-480w.ecf8db09.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/kethan-gowda-b-r-960w.14d84820.webp"
+      }
+    ]
+  },
+  "swaroop-b-h": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRqwAAABXRUJQVlA4IKAAAABwBACdASoQABQAPt1apkyopSOiMAgBEBuJZQDCoExgshGZGolW2vGsnzcZQAD+7WHoF+NlwlJEGHBvGCPsHMpCneeR2gDszMSXbA7vJ5XMI5GGhSO4TDbWyMrENyakFJyfg8pE6CrAz0btsmXSwjp04QDSB+WrcxSNRNH6S03qHTQulzDBJxbs+Irnc+1HCKTh4Z6xBxc8K8a4PbTFsAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/swaroop-b-h-480w.89dfc25f.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/swaroop-b-h-960w.ae92beb2.webp"
+      }
+    ]
+  },
+  "raghavendra-r": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAAAQBACdASoQABQAPt1apkyopSOiMAgBEBuJYwAAVOw31eeyYaS/HGiTAAD+402mICDHECQ25R46h1o5LXB/OMDdHjJOSavCog7vxxagYhhK1aP2Cty2WfNLtRu9nsajdvhxeLZ2P791+gHQmrQpcHFe8cnbfeDrfZbLb2OgSHnctlnzR6p09qvBoV8Iu271bW4slQAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/raghavendra-r-480w.fab1c17a.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/raghavendra-r-960w.52293af4.webp"
+      }
+    ]
+  },
+  "manish-kv": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRpgAAABXRUJQVlA4IIwAAAAQBACdASoQABQAPt1apkyopSOiMAgBEBuJQBdmUABleceR1XD+vQ7e+AD9waq1HsHpMW4LdfHEmBlkpLkqy7dSKrNCgRqC9lxgAQUzZZwbPO5vu8HdTKBsPIcyfil40Fw3cCug66ztkW2vAV+vmtrkw9tYy0QGISvxHDIpUTzr+TDX8O5RO0PHgESgAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/manish-kv-480w.7bf09166.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/manish-kv-960w.6227a246.webp"
+      }
+    ]
+  },
+  "sushruth-kumar": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAABQBACdASoQABQAPt1apkyopSOiMAgBEBuJYgCw7CHgCnLq8p3/FFK5XTcAAP7vtf6GDGnvCuFkKcLUK3pzii9277KwcGaDnFJheZPM+Rxwh5BtZBaGjjMloULBsoDdJ0Lz6+VirtKImxdEG80NsfI+2xJ0fSqGrZZjvxiRrq3AAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/sushruth-kumar-480w.fd425849.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/sushruth-kumar-960w.185ab565.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/sushruth-kumar-1600w.91eb3272.webp"
+      }
+    ]
+  },
+  "rohan-jojee-c": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAACwBACdASoQABQAPt1apkyopSOiMAgBEBuJbACdMoR4PxaD5TzWFvZgHYiTAXQAAP6lauVvZ+my45MxUk3HTZ2bM3oKTLTNgLWX4lic18D8v6epWWFa4wj/RaR7J/H5If0w6zNMXLGxOITwJZPLti9f5NoDMBparRftv+e+KTTh1T3O12kgw7pv9AjcX3u0yJ785EwntmHTWW7wU9rbAa4yw99pkm5+P/M6MtPAAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/rohan-jojee-c-480w.a762f0a0.webp"
+      }
+    ]
+  },
+  "g-rushika": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAAAwBACdASoQABQAPt1apkyopSOiMAgBEBuJQBOmUABN+ZphVAUMTk0QrAAA/DuBSd5SmkofY69rTpf7iMmEgMwzyLk3u0l7x8Tz3KQsjZK7uvMGUyR46v7bjo59QB3zoQM4Tjv9+srdj4O6rE+v7d1EOf4iEN6+M/cJ4ZGSAj9VJAJqB9ByUqAa2xgagbDi9EzxbAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/g-rushika-480w.1559f5cd.webp"
+      }
+    ]
+  },
+  "abhishek-s-hebbar": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAACwBACdASoQABQAPt1apkyopSOiMAgBEBuJYgCdMoR3BtABy/joX/ZOHAqHYn4AAP7uqTZrw1B639FoCK6si9KSL4lFwk1DLpbkHV0ul4TjabYc7klXo0xSlQ07iIETHcO324/ZGuKNZ0dIZ22JU5PCvUubt3jOEbhJY4HgkTlxPHKIH7wAAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/abhishek-s-hebbar-480w.b8bd461c.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/abhishek-s-hebbar-960w.78ec4d10.webp"
+      }
+    ]
+  },
+  "gagan-h-s": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAADwAwCdASoQABQAPt1apkyopSOiMAgBEBuJZQC7ABue9wi9gnbS4dIAAP7v1DB+ynYDdrpyUWG+CYQBQBpE6FLLb0uq0EwxnZP2CgJxZm2LfY7+jaSi75+q5cE5jGl/RWmjLjN8ZyQmQwxs7dqeV10QAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/gagan-h-s-480w.e6ae1d0e.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/gagan-h-s-960w.5a849095.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/gagan-h-s-1600w.32a16d9b.webp"
+      }
+    ]
+  },
+  "aditya-jamane": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAACQBACdASoQABQAPt1apkyopSOiMAgBEBuJYwCdH8IIBLJIFRZSd+ydctiupgAA/u/SLGS39vXryl2IB+NnclGARYkZq+KkRBW/GcZStf07OClrgCUlg0U+T8nEeiHTOd1CG0sWCByBqeBzDWN/D42ctXOWN0xbn1t5b5WkGaD8s77SgchptwLNMytURURoeSflgAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/aditya-jamane-480w.a126d84c.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/aditya-jamane-960w.c09e8b5c.webp"
+      }
+    ]
+  },
+  "dhanush-rajakumar": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRr4AAABXRUJQVlA4ILIAAACQBACdASoQABQAPt1apkyopSOiMAgBEBuJaACdH8GGzC4LHatO8YR6estuEgAAzjvIjzX3xO7u4wWUncNOWJYnSUDpO2ewW1bKX2XPBqDjoUUTcLLlRl0D7HBNnip2RDeF/vIME78673cN1ePtHNF6l31L4YE/2/dxbR4fpKZn3VQ8RUPwPTl6PbNzwgp+aKiiViTRRxGbd+flg33eNXnqbwWv2pq+fXRK00bT22Y9gAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/dhanush-rajakumar-480w.85b6d33e.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/dhanush-rajakumar-960w.e0aba37c.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/dhanush-rajakumar-1600w.c5c8538a.webp"
+      }
+    ]
+  },
+  "priyanka-navale": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAAAQBACdASoQABQAPt1apkyopSOiMAgBEBuJZQDE+DZCgrkr8bNZNPMnAADzk+xVejo1H+/UuwCjSnmMO5ac4sEMIV8WRNDr+xHoBOLteM22RWHW6r3njy2Uk0hUhXHLM7UCy65M5pYYBKntxHYT9OA0fx628uaFWBfQhSCHfCJ0E8gAAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/priyanka-navale-480w.8f63c0f1.webp"
+      }
+    ]
+  },
+  "sacheth-kumar-p-n": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRoYAAABXRUJQVlA4IHoAAADQAwCdASoQABQAPt1cp0yopSOiMAgBEBuJZQAAW+v/gl3r0LYvvYAA/vHE36RJb6gtbNQiwZpXKiUWkk/vHFMgymKajlmGznMng34HzhsBHCAUDANCGgAifbR6P3nyFJYXvS66hUDQ3riA0FcMpXdz+WvdAo0SqGWgAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/sacheth-kumar-p-n-480w.2f9ed937.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/sacheth-kumar-p-n-960w.ee332730.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/sacheth-kumar-p-n-1600w.92981a13.webp"
+      }
+    ]
+  }
+}
