@@ -26,9 +26,11 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 8. **Faculty Debate** rule 4: "Students" → "Participants" / "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ" → "ಭಾಗವಹಿಸುವವರಿಗೆ" (same rules as the student debate otherwise)
 9. Clean-ups only (meaning unchanged): missing "1." restored (Poem, Essay, Treasure Hunt, Rangoli), split first letters ("E ach", "T he", "V ulgar", "J udging", "J udges"), duplicate "2." (Singing rule 3), stray "8" glitch (Singing rule 8), "ಕನ್ನಡ" inside the English Dance/Singing rules → "Kannada", small grammar fixes ("a proper and decent costumes" → "proper and decent costumes", "slangs" → "slang", "Poems Recitation composed" → "poems composed", "Violation any" → "Violation of any", "Whatsapp" → "WhatsApp", missing full stops/commas)
 
+10. **Painting** rule 4 (Kannada): "ಪತ್ರಿಕೆಗಳನ್ನು" (newspapers) → "ಹಾಳೆಗಳನ್ನು" (A3 sheets), as the English says
+11. **Debate** rule 8 (both debates), **Poem** rule 1, **Essay** rule 1 (Kannada): the PDF said "in **both** Kannada and English" (… ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಎರಡರಲ್ಲಿಯೂ); changed to "Kannada **or** English" (ಕನ್ನಡ ಅಥವಾ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ) so it agrees with the English "English or Kannada"
+
 ### Differences between the Kannada and English PDF text — kept as written, please confirm
-- [ ] Debate rule 8, Poem rule 1, Essay rule 1: Kannada says "in **both** Kannada and English" (ಎರಡರಲ್ಲಿಯೂ), English says "in English **or** Kannada"
-- [ ] Painting rule 4 (Kannada): "ಪತ್ರಿಕೆಗಳನ್ನು" usually means newspapers — "ಹಾಳೆಗಳನ್ನು" (sheets) may be intended. Rule 8 ends "ಅಚ್ಚುಕಟ್ಟಾಗಿ" where Rangoli rule 4 says "ಅಚ್ಚುಕಟ್ಟು"
+- [ ] Painting rule 8 (Kannada) ends "ಅಚ್ಚುಕಟ್ಟಾಗಿ" where Rangoli rule 4 says "ಅಚ್ಚುಕಟ್ಟು"
 - [ ] General instructions rule 2 says the venue will be announced in the WhatsApp groups, while the cards will also show the venue once it is set
 - [ ] Rules keep the PDF's Latin digits inside Kannada text (3+1, 500–800, 15); say if they should become Kannada numerals
 
