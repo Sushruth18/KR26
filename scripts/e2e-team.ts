@@ -22,7 +22,7 @@ import { cleanInstagram, cleanLinkedin } from '../src/lib/social';
 import { buildTroupes, groupConfig, type TeamGroupConfig } from '../src/lib/team';
 import { mapRole, type RoleMap } from '../src/lib/teamRoles';
 import { importTeam, type ImportInput, type TeamGroupData } from './lib/team-import';
-import { renderReport } from './lib/team-report';
+import { mergeReport, renderReport, REPORT_END, REPORT_START } from './lib/team-report';
 
 const BASE = process.env.E2E_BASE ?? 'http://localhost:5173';
 const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -272,7 +272,27 @@ async function main() {
     const settled = await importTeam(baseInput([HEADER, ...ROWS_V1].join('\n'), v1.team, v1.manifest, { 'gita-p': { file: 'IMG_5' } }));
     expect(settled.team.flatMap((g) => g.members).find((x) => x.id === 'gita-p')!.photo === 'gita-p', 'override did not assign the photo');
     expect(settled.team.flatMap((g) => g.members).find((x) => x.id === 'hari-p')!.photo === '', 'override must not touch the other person');
-    return 'name-matched, ambiguous left empty and reported, 4:5 WebP without EXIF, override works';
+    // photos renamed by person in a subfolder, pointed at by exact name (folder path or bare file name)
+    const sub = resolve(FIX, 'photos', 'ambiguous');
+    mkdirSync(sub, { recursive: true });
+    const face = (r: number) => sharp({ create: { width: 900, height: 1100, channels: 3, background: { r, g: 90, b: 120 } } }).jpeg().toBuffer();
+    writeFileSync(join(sub, 'IMG_5.jpg'), await face(200)); // "IMG_5" alone would also hit "IMG_5 - Gita P.jpg": the exact name must win
+    writeFileSync(join(sub, 'Second photo.jpg'), await face(30));
+    const exact = await importTeam(
+      baseInput([HEADER, ...ROWS_V1].join('\n'), structuredClone(v1.team), v1.manifest, { 'gita-p': { file: 'ambiguous/IMG_5.jpg' }, 'hari-p': { file: 'Second photo.jpg', focus: { x: 0.5, y: 0.4 }, zoom: 2.5 } }),
+    );
+    const members = exact.team.flatMap((g) => g.members);
+    expect(members.find((x) => x.id === 'gita-p')!.photo === 'gita-p' && members.find((x) => x.id === 'hari-p')!.photo === 'hari-p', 'exact-name overrides in a subfolder were not assigned');
+    expect(exact.manifest['hari-p']!.width === 352 && exact.manifest['hari-p']!.variants.map((x) => x.w).join() === '352', 'a zoomed crop must never be upscaled');
+    const others = Object.keys(v1.manifest).filter((k) => k !== 'gita-p' && k !== 'hari-p');
+    expect(others.length > 0 && others.every((k) => JSON.stringify(exact.manifest[k]) === JSON.stringify(v1.manifest[k])), 'other people\'s photos changed');
+    expect(!JSON.stringify([exact.team, exact.manifest]).includes('ambiguous'), 'source file names reached the result');
+    rmSync(sub, { recursive: true, force: true });
+    // the generated TODO block is replaced in place on a CRLF checkout too (no blank line added per run)
+    const crlf = `# T\r\n\r\n${REPORT_START}\r\nold\r\n${REPORT_END}\r\n\r\n## After\r\n`;
+    const once = mergeReport(crlf, `${REPORT_START}\nnew\n${REPORT_END}\n`);
+    expect(mergeReport(once, `${REPORT_START}\nnew\n${REPORT_END}\n`) === once && !/-->\n\n\r?\n/.test(once), 'mergeReport adds blank lines on a CRLF file');
+    return 'name-matched, ambiguous left empty and reported, 4:5 WebP without EXIF, overrides (substring, exact name in a subfolder, no upscale) work';
   });
 
   await scenario('import-reimport-keeps-order-and-edits', async () => {

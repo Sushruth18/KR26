@@ -464,5 +464,76 @@
         "src": "/team/sacheth-kumar-p-n-1600w.92981a13.webp"
       }
     ]
+  },
+  "keerthana-s": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRpQAAABXRUJQVlA4IIgAAADQAwCdASoQABQAPt1apkyopSOiMAgBEBuJbACdMoAC2pF30HOwMHAA/ZUaOCguMyR8hsTSp+gXDcLIJtGxhMT59cn5wKHyhyajOn/NtIKynAazHcl0P0zyYDd8n0BNVkSu8Hz5th03+59VvRMElohg2usL4FwTV+i3t/6tfdPtZImeB+39gAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/keerthana-s-480w.fba1be09.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/keerthana-s-960w.fb652ef7.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/keerthana-s-1600w.66ffa0b2.webp"
+      }
+    ]
+  },
+  "asha-s": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRqYAAABXRUJQVlA4IJoAAAAwBACdASoQABQAPt1apkyopSOiMAgBEBuJZACdMoAlnhc56E1qbd/RTzgA/Y4q8UaZohb/UOxHkS6+LQyJMq7XWq+TA5G056HmWR3rQpkCIEicKnrhof37tHoehiReETY1duILtT9BsGz40lWL88qKtjHscc+xR8/XCcqO5Kyv3EsAKX8H86YteudvSN99m9+igq82o7sa8AAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/asha-s-480w.fe4b5d86.webp"
+      }
+    ]
+  },
+  "nishan-babu": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAABwAwCdASoQABQAPt1apkyopSOiMAgBEBuJbAAAIZYGMNdFRGgAzhoi+9phGvgV2xlvGF7UWRFscM22jFMYxwg5cbjeACVmE0AzSIycHqISuOBqp+mmJ3AAceupf+ZnkHJ1O6I1WPHDjVjuDnZa71dOWcDkxFIpBTcKJKSW2wepXlodKghcqEXNCkLkBFHJJEUsAAAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/nishan-babu-480w.5d92806c.webp"
+      }
+    ]
+  },
+  "arjun-livik-jp": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRooAAABXRUJQVlA4IH4AAAAQBACdASoQABQAPt1apkyopSOiMAgBEBuJZwCsABS/aE8F4O4Ci4bboAD+6peUij5F4FgFhEK7ztLOHftD7UEmOIHrktr702IG1K9Cwj4/p7xPRyKnW6wvU9OPSTWnKK9dlLMPMiWtRCCYx8QwlkX/fHkay4RwSODqukoQAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/arjun-livik-jp-480w.0c6a8525.webp"
+      }
+    ]
+  },
+  "krishna-charan-p": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAAAwBACdASoQABQAPt1apkyopSOiMAgBEBuJQBYdhApmDG5Svb1G3h3tqgAA/smeQRWN3z+hFc3H9ZXaYv/zVW7pksS+WxYuKW5C7NdClq4hz5/T1slqGO3WCoLGw+BX4Rz20+te0XVFAyyafUhWpXiMR5WJhjeay/zEtf+TTQ0rtv9BMZmQIZ4IQzwkq+wAAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/krishna-charan-p-480w.94e2321f.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/krishna-charan-p-960w.c5fe9657.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/krishna-charan-p-1600w.40172688.webp"
+      }
+    ]
   }
 }

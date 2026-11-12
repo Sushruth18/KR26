@@ -1,5 +1,5 @@
 {
-  "_comment": "Per-person photo decisions for npm run team:import. `file` = a unique piece of the photo file name BEFORE the \" - \" (e.g. \"WA0064\") — use it when the importer lists a photo as ambiguous. `focus` = where the 4:5 crop should be centred ({ \"x\": 0.5, \"y\": 0.35 }, fractions of the photo) when the automatic crop cuts a head. Keys are member ids from team.json.",
+  "_comment": "Per-person photo decisions for npm run team:import. `file` = the photo's exact file name or its path inside the photo folder (e.g. \"ambiguous/Asha.jpg\"; subfolders are searched too), or a unique piece of the original file name BEFORE the \" - \" (e.g. \"WA0064\") — use it when the importer lists a photo as ambiguous. `focus` = where the 4:5 crop should be centred ({ \"x\": 0.5, \"y\": 0.35 }, fractions of the photo) when the automatic crop cuts a head. `zoom` = crop tighter than the full 4:5 window (never upscales: a crop narrower than 480 px gives one smaller copy). Keys are member ids from team.json.",
   "people": {
     "s-nishitha": {
       "focus": {
@@ -33,6 +33,46 @@
         "x": 0.42,
         "y": 0.5
       }
+    },
+    "arjun-livik-jp": {
+      "file": "ambiguous/Arjun.png",
+      "focus": {
+        "x": 0.51,
+        "y": 0.36
+      },
+      "zoom": 1.4
+    },
+    "asha-s": {
+      "file": "ambiguous/Asha.jpg",
+      "focus": {
+        "x": 0.43,
+        "y": 0.52
+      },
+      "zoom": 1.875
+    },
+    "keerthana-s": {
+      "file": "ambiguous/Keerthana S.jpg",
+      "focus": {
+        "x": 0.53,
+        "y": 0.55
+      },
+      "zoom": 1.4
+    },
+    "krishna-charan-p": {
+      "file": "ambiguous/Krishna Charan P.jpg",
+      "focus": {
+        "x": 0.53,
+        "y": 0.33
+      },
+      "zoom": 1.5
+    },
+    "nishan-babu": {
+      "file": "ambiguous/Nishaan.jpg",
+      "focus": {
+        "x": 0.43,
+        "y": 0.3
+      },
+      "zoom": 1.7
     }
   }
 }

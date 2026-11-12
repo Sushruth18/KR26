@@ -12,6 +12,8 @@ import type { TeamPhoto } from '../../src/lib/team';
 
 export interface SourceFile {
   path: string;
+  /** Path inside the photo folder with "/" separators and the extension (e.g. "ambiguous/Asha.jpg"). */
+  rel: string;
   /** Original file name without the " - uploader" part and the extension (e.g. "IMG-20260821-WA0064"): safe to show. */
   original: string;
   /** The uploader's label (name, department, sometimes a USN): used for matching only, never printed or stored. */
@@ -19,21 +21,43 @@ export interface SourceFile {
   sha1: string;
 }
 
+const PHOTO_EXT = /\.(jpe?g|png|webp|heic|heif)$/i;
+
+/** Every photo in `dir` and its subfolders (e.g. an "ambiguous" folder of photos renamed by person). */
 export function listSourceFiles(dir: string): SourceFile[] {
-  return readdirSync(dir)
-    .filter((f) => /\.(jpe?g|png|webp|heic|heif)$/i.test(f))
+  const walk = (sub: string): string[] =>
+    readdirSync(join(dir, sub), { withFileTypes: true })
+      .filter((d) => !d.name.startsWith('.'))
+      .flatMap((d) => {
+        const rel = sub ? `${sub}/${d.name}` : d.name;
+        if (d.isDirectory()) return walk(rel);
+        return d.isFile() && PHOTO_EXT.test(d.name) ? [rel] : [];
+      });
+  return walk('')
     .sort()
-    .map((f) => {
+    .map((rel) => {
+      const f = rel.slice(rel.lastIndexOf('/') + 1);
       const base = f.slice(0, f.length - extname(f).length);
       const at = base.indexOf(' - ');
-      const path = join(dir, f);
+      const path = join(dir, rel);
       return {
         path,
+        rel,
         original: (at === -1 ? base : base.slice(0, at)).trim(),
         label: at === -1 ? base : base.slice(at + 3),
         sha1: createHash('sha1').update(readFileSync(path)).digest('hex'),
       };
     });
+}
+
+/**
+ * The files a team-photo-map.json `file` value points at: an exact file name or folder path
+ * ("Asha.jpg", "ambiguous/Asha.jpg") matches only that file; anything else is a piece of the original name.
+ */
+export function filesForOverride(files: SourceFile[], want: string): SourceFile[] {
+  const exact = files.filter((f) => f.rel === want || f.rel.slice(f.rel.lastIndexOf('/') + 1) === want);
+  const hits = exact.length ? exact : files.filter((f) => f.original.includes(want));
+  return [...new Map(hits.map((f) => [f.sha1, f])).values()];
 }
 
 // ---------- matching ----------
@@ -109,7 +133,7 @@ export type PhotoMatch =
   | { kind: 'none' };
 
 export interface PhotoOverride {
-  /** Unique substring of the photo's original file name (not of the uploader label). */
+  /** The photo's exact file name or path inside the photo folder ("ambiguous/Asha.jpg"), or a unique piece of its original file name (not of the uploader label). */
   file?: string;
   /** Where the crop should be centred, 0–1 of the photo's width/height. */
   focus?: { x: number; y: number };
@@ -175,7 +199,7 @@ export function matchPhotos(
   for (const p of people) {
     const want = overrides[p.id]?.file;
     if (!want) continue;
-    const hits = uniq(files.filter((f) => f.original.includes(want)));
+    const hits = filesForOverride(files, want);
     if (hits.length !== 1) throw new Error(`team-photo-map.json: "${want}" (for ${p.id}) matches ${hits.length} photos — it must match exactly one`);
     result.set(p.id, { kind: 'assigned', file: hits[0]! });
   }

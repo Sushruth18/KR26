@@ -83,5 +83,5 @@ export function mergeReport(existing: string | null, block: string): string {
   const a = existing.indexOf(REPORT_START);
   const b = existing.indexOf(REPORT_END);
   if (a === -1 || b === -1 || b < a) return `${existing.trimEnd()}\n\n${block}`;
-  return existing.slice(0, a) + block.trimEnd() + existing.slice(b + REPORT_END.length).replace(/^\n?/, '\n');
+  return existing.slice(0, a) + block.trimEnd() + existing.slice(b + REPORT_END.length).replace(/^\r?\n?/, '\n'); // CRLF checkouts (Windows) too, so re-runs never add blank lines
 }
