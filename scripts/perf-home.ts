@@ -47,7 +47,7 @@ async function measure(browser: Browser, opts: { intro: boolean; lang: 'kn' | 'e
   });
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   await page.goto(`${BASE}${PATH}`, { waitUntil: 'load', timeout: 60000 });
-  await new Promise((r) => setTimeout(r, 6000)); // splash (3 s) + settle
+  await new Promise((r) => setTimeout(r, 8000)); // splash (5 s) + settle
   const v = (await page.evaluate('window.__vitals')) as Vitals;
   await ctx.close();
   return v;

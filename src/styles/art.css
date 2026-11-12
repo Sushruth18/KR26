@@ -70,7 +70,7 @@
   }
   .palace[data-mode='animate'] .palace-row {
     animation: bulb-on 0.34s var(--ease-out) both;
-    animation-delay: calc(var(--row) * 0.17s + var(--palace-delay, 0s));
+    animation-delay: calc(var(--row) * var(--row-step, 0.17s) + var(--palace-delay, 0s));
   }
   /* Whole-layer opacity per twinkle set: composited, no repaint. Starts after the light-up. */
   .palace[data-twinkle='true'] .palace-lights {

@@ -300,8 +300,7 @@
   },
   "intro": {
     "presents": "BMS Institute of Technology & Management presents",
-    "skip": "Skip",
-    "label": "Intro"
+    "skip": "Skip"
   },
   "home": {
     "presents": "presents",

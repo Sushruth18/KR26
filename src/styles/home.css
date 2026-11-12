@@ -1,4 +1,4 @@
-/* Home page + intro splash. Imported by index.css. */
+/* Home page. Imported by index.css. (Intro splash: intro.css.) */
 
 @layer components {
   /* ---------- Hero lockup ---------- */
@@ -345,67 +345,6 @@
   .deadline-link:active {
     background: rgb(255 210 122 / 0.08);
   }
-
-  /* ---------- Intro splash ---------- */
-  .intro {
-    position: fixed;
-    inset: 0;
-    z-index: 90;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    background: radial-gradient(ellipse 90% 60% at 50% 75%, #0b0a1f, #000 72%);
-    touch-action: none;
-    overscroll-behavior: contain;
-  }
-  .intro[data-leaving='true'] {
-    animation: intro-lift 0.5s cubic-bezier(0.65, 0, 0.85, 0.3) forwards;
-  }
-  .intro-glow {
-    position: absolute;
-    inset: auto 0 0;
-    height: 70%;
-    background: radial-gradient(ellipse 60% 60% at 50% 85%, rgb(245 184 65 / 0.22), transparent 70%);
-    opacity: 0;
-    animation: intro-fade 1.6s ease-out 0.2s forwards;
-  }
-  .intro-palace {
-    position: relative;
-    opacity: 0;
-    animation: intro-fade 0.35s ease-out forwards;
-    display: flex;
-    justify-content: center;
-    width: 100%;
-  }
-  .intro-palace::after {
-    content: '';
-    position: absolute;
-    inset: auto 8% -1px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgb(201 138 27 / 0.75), transparent);
-  }
-  .intro-palace .palace {
-    flex: none;
-    width: max(560px, min(92vw, 880px));
-  }
-  .intro-presents {
-    max-width: 30ch;
-    margin: 2rem auto 0;
-    padding-inline: var(--gutter);
-    text-align: center;
-    font-family: var(--font-display);
-    font-size: clamp(1.05rem, 4vw, 1.4rem);
-    line-height: 1.45;
-    color: var(--ivory-50);
-    opacity: 0;
-    animation: intro-fade 0.8s ease-out 1.7s forwards;
-  }
-  /* Two classes: must beat .btn { position: relative } from index.css, which loads after this file. */
-  .intro .intro-skip {
-    position: absolute;
-    top: max(12px, env(safe-area-inset-top));
-    right: 12px;
-  }
 }
 
 @keyframes amb-cross {
@@ -419,15 +358,5 @@
 @keyframes marquee {
   to {
     transform: translateX(-50%);
-  }
-}
-@keyframes intro-fade {
-  to {
-    opacity: 1;
-  }
-}
-@keyframes intro-lift {
-  to {
-    transform: translateY(-100%);
   }
 }

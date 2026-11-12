@@ -8,6 +8,8 @@ interface Props {
   mode: PalaceMode;
   /** Gentle shimmer once lit (off for reduced motion / low-end devices). */
   twinkle: boolean;
+  /** How many of the 3 twinkle sets of bulbs to light (fewer = fewer bulbs, for low-end devices). Default all. */
+  lightSets?: number;
   className?: string;
 }
 
@@ -18,7 +20,7 @@ const viewBox = `${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`;
  * (one per twinkle set) so the shimmer animates whole-layer opacity on the compositor — no repaints.
  * Decorative: the page heading carries the meaning.
  */
-export function PalaceSilhouette({ mode, twinkle, className = '' }: Props) {
+export function PalaceSilhouette({ mode, twinkle, lightSets = PALACE.rows.length, className = '' }: Props) {
   const gid = `gild-${useId().replace(/:/g, '')}`;
   return (
     <div className={`palace ${className}`} data-mode={mode} data-twinkle={twinkle} aria-hidden="true">
@@ -36,7 +38,7 @@ export function PalaceSilhouette({ mode, twinkle, className = '' }: Props) {
         <path d={FLAG.yellow} fill="#FFD500" />
         <path d={FLAG.red} fill="#E31B23" />
       </svg>
-      {PALACE.rows.map((rows, set) => (
+      {PALACE.rows.slice(0, lightSets).map((rows, set) => (
         <svg key={set} viewBox={viewBox} className={`palace-layer palace-lights palace-set-${set}`} focusable="false">
           {rows.map((d, row) =>
             d ? (

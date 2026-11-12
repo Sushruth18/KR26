@@ -1,0 +1,237 @@
+/*
+ * Intro splash (CLAUDE.md §5.0). Imported by index.css. Only transform and opacity are animated.
+ * Timeline (keep in sync with INTRO_LIFT_AT_MS / INTRO_LIFT_MS in IntroSplash.tsx):
+ *   0.0–0.8 s flag fades in from black · 0.4–2.8 s palace bulbs, row by row · 1.2–2.2 s logos rise in
+ *   2.6–3.8 s "… presents" · 2.8 s+ twinkle · 3.8–4.4 s hold · 4.4–5.0 s lift away.
+ */
+
+@layer components {
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr); /* the palace is wider than a phone: never let it widen the track */
+    place-items: center;
+    overflow: hidden;
+    background: #000;
+    touch-action: none;
+    overscroll-behavior: contain;
+  }
+  .intro[data-leaving='true'] {
+    animation: intro-lift 0.6s cubic-bezier(0.65, 0, 0.85, 0.3) forwards;
+  }
+
+  /* ---------- Karnataka flag: yellow over red, a wavy seam and cloth folds sliding sideways ---------- */
+  .intro-flag {
+    --seam: clamp(18px, 5vh, 44px);
+    position: absolute;
+    inset: 0;
+    background: var(--flag-yellow);
+    opacity: 0;
+    animation: intro-fade 0.8s ease-out forwards;
+  }
+  .intro-flag-strip {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    will-change: transform;
+    animation: intro-wave 7s linear infinite;
+  }
+  .intro-flag-red {
+    top: calc(50% - var(--seam) / 2);
+    display: flex;
+    flex-direction: column;
+  }
+  .intro-flag-seam {
+    display: block;
+    flex: none;
+    width: 100%;
+    height: var(--seam);
+  }
+  .intro-flag-band {
+    flex: 1;
+    margin-top: -1px; /* no hairline between the seam and the band */
+    background: var(--flag-red);
+  }
+  /* One fold per wave period (50vw): highlight on the crest, shadow in the trough. */
+  .intro-flag-folds {
+    background: repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.06) 0,
+      rgb(255 255 255 / 0.16) 12.5vw,
+      rgb(0 0 0 / 0.06) 25vw,
+      rgb(0 0 0 / 0.28) 37.5vw,
+      rgb(0 0 0 / 0.06) 50vw
+    );
+  }
+  .intro-flag[data-still='true'] .intro-flag-strip {
+    animation: none;
+    will-change: auto;
+  }
+
+  /* Night over the flag: it reads as a glow behind the palace, not a poster. */
+  .intro-night {
+    position: absolute;
+    inset: 0;
+    background:
+      /* warm dark in the middle keeps the yellow golden (indigo over yellow turns it olive)… */
+      radial-gradient(ellipse 85% 58% at 50% 50%, rgb(40 14 6 / 0.1), rgb(30 10 14 / 0.5) 58%, rgb(7 6 26 / 0.9) 100%),
+      /* …and the night sky closes in at the top and bottom edges. */
+      linear-gradient(180deg, rgb(7 6 26 / 0.66), rgb(7 6 26 / 0) 34%, rgb(7 6 26 / 0) 58%, rgb(7 6 26 / 0.86) 100%);
+  }
+
+  /* ---------- Stage: logos → palace → "presents" ---------- */
+  .intro-stage {
+    /* Palace width: cropped at the sides on phones, and shrunk on short (landscape) screens. */
+    --pw: min(880px, max(560px, 92vw));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(10px, 3vh, 28px);
+    width: 100%;
+    min-width: 0;
+    padding-block: 56px; /* clear of the Skip button */
+  }
+  @supports (height: 100svh) {
+    .intro-stage {
+      --pw: min(880px, max(560px, 92vw), max(300px, (100svh - 250px) * 3.333));
+    }
+  }
+  @media (max-height: 440px) {
+    .intro-stage {
+      padding-block: 8px;
+    }
+  }
+
+  .intro-logos {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: clamp(14px, 4vw, 22px);
+    padding: 10px clamp(18px, 5vw, 26px);
+    opacity: 0;
+    transform: translateY(14px);
+    animation: intro-rise 1s var(--ease-out) 1.2s forwards;
+  }
+  /* A dark cartouche, so the logos read on the flag's glow… */
+  .intro-logos::before,
+  .intro-logos::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .intro-logos::before {
+    inset: 0;
+    border: 1px solid rgb(201 138 27 / 0.6);
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgb(21 19 46 / 0.86), rgb(7 6 26 / 0.92));
+    box-shadow: inset 0 0 0 3px rgb(7 6 26 / 0.6), inset 0 0 0 4px rgb(201 138 27 / 0.25);
+  }
+  /* …and a soft gold glow that swells in behind it. */
+  .intro-logos::after {
+    inset: -26px -40px;
+    z-index: -2;
+    background: radial-gradient(closest-side, rgb(255 210 122 / 0.42), rgb(245 184 65 / 0.14) 60%, transparent);
+    opacity: 0;
+    animation: intro-fade 1s ease-out 1.5s forwards;
+  }
+  .intro-logo-divider {
+    flex: none;
+    align-self: stretch;
+    width: 1px;
+    margin-block: 4px;
+    background: linear-gradient(180deg, transparent, var(--gold-400) 20%, var(--gold-300) 50%, var(--gold-400) 80%, transparent);
+  }
+
+  .intro-palace {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .intro-palace::after {
+    content: '';
+    position: absolute;
+    inset: auto 6% -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(255 210 122 / 0.8), transparent);
+  }
+  .intro-palace .palace {
+    --palace-delay: 0.4s;
+    --row-step: 0.257s; /* 9 rows: the last switches on at 2.46 s and is fully lit at 2.8 s */
+    flex: none;
+    width: var(--pw);
+  }
+  /* A quicker twinkle than on Home, so it shows during the short hold. */
+  .intro .palace[data-twinkle='true'] .palace-lights {
+    animation-duration: 1.6s;
+  }
+  .intro .palace[data-twinkle='true'] .palace-set-0 {
+    animation-delay: 2.8s;
+  }
+  .intro .palace[data-twinkle='true'] .palace-set-1 {
+    animation-delay: 3.1s;
+  }
+  .intro .palace[data-twinkle='true'] .palace-set-2 {
+    animation-delay: 3.4s;
+  }
+
+  .intro-presents {
+    max-width: 32ch;
+    margin: 0;
+    padding-inline: var(--gutter);
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 4vw, 1.45rem);
+    line-height: 1.55;
+    color: var(--gold-300);
+    text-shadow:
+      0 1px 2px rgb(0 0 0 / 0.85),
+      0 0 16px rgb(7 6 26 / 0.95);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: intro-rise 1.2s var(--ease-out) 2.6s forwards;
+  }
+  @media (max-height: 440px) {
+    .intro-presents {
+      max-width: none;
+      font-size: 1rem;
+    }
+  }
+
+  /* Two classes: must beat .btn { position: relative } from index.css, which loads after this file. */
+  .intro .intro-skip {
+    position: absolute;
+    z-index: 1;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    background: rgb(7 6 26 / 0.62);
+  }
+}
+
+@keyframes intro-fade {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes intro-rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes intro-wave {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes intro-lift {
+  to {
+    transform: translateY(-100%);
+  }
+}

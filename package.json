@@ -21,6 +21,7 @@
     "e2e:pass": "tsx scripts/e2e-pass.ts",
     "race": "tsx scripts/race-test.ts",
     "shot": "tsx scripts/shot.ts",
+    "shot:intro": "tsx scripts/shot-intro.ts",
     "e2e:home": "tsx scripts/e2e-home.ts",
     "e2e:brand": "tsx scripts/e2e-brand.ts",
     "e2e:event": "tsx scripts/e2e-event.ts",
