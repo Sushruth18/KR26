@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import schedule from '../src/data/schedule.json' with { type: 'json' };
 import site from '../src/data/site.json' with { type: 'json' };
-import artist from '../src/data/artist.json' with { type: 'json' };
+import artists from '../src/data/artist.json' with { type: 'json' };
 import events from '../src/data/events.json' with { type: 'json' };
 import { buildIcs } from '../src/lib/ics';
 import { day2Position, day2Stops, defaultDay, istInstant, parseDay, positionIn, stopState } from '../src/lib/schedule';
@@ -96,7 +96,7 @@ ok('.ics: one entry per Day 2 stop with the same start and names; last stop ends
   const event = events[0]! as CompetitionEvent;
   const labels = { suffix: 'KR 2026', day2Description: 'Karnataka Rajyotsava 2026 — Day 2', description: 'Reg', location: 'BMSIT&M' };
   for (const lang of ['kn', 'en'] as const) {
-    const ics = buildIcs({ regId: 'KR26-ESY-0001', event, site: site as unknown as SiteConfig, lang, stops: day2Stops, artistName: artist.name[lang], labels });
+    const ics = buildIcs({ regId: 'KR26-ESY-0001', event, site: site as unknown as SiteConfig, lang, stops: day2Stops, artistName: artists.map((a) => a.name[lang]).join(' · '), labels });
     const text = ics.replace(/\r\n /g, '');
     assert.equal((text.match(/BEGIN:VEVENT/g) ?? []).length, 1 + day2Stops.length);
     const utc = (ms: number) => new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
@@ -105,7 +105,9 @@ ok('.ics: one entry per Day 2 stop with the same start and names; last stop ends
       assert.ok(text.includes(`DTSTART:${utc(at(s.start))}\r\nDTEND:${utc(end)}\r\n`), `${lang} ${s.start} times`);
       assert.ok(text.includes(`SUMMARY:${s.title[lang].replace(/,/g, '\\,')}\r\n`), `${lang} ${s.start} name`);
     });
-    assert.ok(text.includes(`DESCRIPTION:${artist.name[lang].replace(/,/g, '\\,')}`), `${lang}: headline stop mentions the artist`);
+    const names = artists.map((a) => a.name[lang]).join(' · ').replace(/,/g, '\\,');
+    assert.ok(text.includes(`DESCRIPTION:${names}`), `${lang}: headline stop names every artist`);
+    assert.ok(artists.length === 2 && artists.every((a) => text.includes(a.name[lang])), `${lang}: Remo and Tanmay both in the calendar file`);
     assert.ok(!/\bDAP\b|Motor Head|Movie Promotion|Break/.test(text));
     assert.ok(ics.split('\r\n').every((l) => Buffer.byteLength(l) <= 75), 'folded');
   }

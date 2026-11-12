@@ -8,7 +8,7 @@ import { BANNED } from './banned-terms';
 import type { ArtistAsset } from '../src/lib/artist';
 import { validateTeam } from './validate-team';
 import {
-  artistSchema,
+  artistsSchema,
   attractionsSchema,
   eventsSchema,
   gallerySchema,
@@ -37,7 +37,7 @@ function load<S extends ZodTypeAny>(file: string, schema: S): ReturnType<S['pars
 const site = load('site.json', siteSchema);
 const events = load('events.json', eventsSchema) as EventRecord[] | null;
 const schedule = load('schedule.json', scheduleSchema);
-const artist = load('artist.json', artistSchema);
+const artists = load('artist.json', artistsSchema);
 const attractions = load('attractions.json', attractionsSchema);
 load('guests.json', guestsSchema);
 validateTeam(load('team.json', teamSchema), errors);
@@ -166,22 +166,28 @@ if (schedule) {
   }
 }
 
-// Headline artist photo: the WebP copies must be made from the current master.
-if (artist) {
-  const abs = resolve(process.cwd(), 'public', artist.photo.replace(/^\//, ''));
+// Headline artist photos: the WebP copies must be made from the current masters, one entry per artist.
+if (artists) {
   const regen = 'run "npm run brand:images" and commit the result';
-  if (!existsSync(abs)) {
-    errors.push(`artist.json: photo "${artist.photo}" is not in public/`);
-  } else {
-    const entry = JSON.parse(readFileSync(resolve(dataDir, 'artist.generated.json'), 'utf8')) as ArtistAsset;
+  const manifest = JSON.parse(readFileSync(resolve(dataDir, 'artist.generated.json'), 'utf8')) as Record<string, ArtistAsset>;
+  for (const id of Object.keys(manifest)) {
+    if (!artists.some((a) => a.id === id)) errors.push(`artist.generated.json: "${id}" is not in artist.json — ${regen}`);
+  }
+  for (const artist of artists) {
+    const abs = resolve(process.cwd(), 'public', artist.photo.replace(/^\//, ''));
+    const entry = manifest[artist.id];
+    if (!existsSync(abs)) {
+      errors.push(`artist.json: ${artist.id} photo "${artist.photo}" is not in public/`);
+      continue;
+    }
     const sha1 = createHash('sha1').update(readFileSync(abs)).digest('hex');
-    if (entry.source !== artist.photo || entry.sha1 !== sha1) {
-      errors.push(`artist.generated.json: ${artist.photo} changed since its WebP copies were made — ${regen}`);
-    } else {
-      for (const v of entry.variants) {
-        if (!existsSync(resolve(process.cwd(), 'public', v.src.replace(/^\//, '')))) errors.push(`artist.generated.json: ${v.src} is missing — ${regen}`);
-        if (v.w > entry.width) errors.push(`artist.generated.json: ${v.src} is wider than the master (${entry.width}px) — copies must never be upscaled`);
-      }
+    if (!entry || entry.source !== artist.photo || entry.sha1 !== sha1) {
+      errors.push(`artist.generated.json: ${artist.photo} (${artist.id}) changed or has no WebP copies yet — ${regen}`);
+      continue;
+    }
+    for (const v of entry.variants) {
+      if (!existsSync(resolve(process.cwd(), 'public', v.src.replace(/^\//, '')))) errors.push(`artist.generated.json: ${v.src} is missing — ${regen}`);
+      if (v.w > entry.width) errors.push(`artist.generated.json: ${v.src} is wider than the master (${entry.width}px) — copies must never be upscaled`);
     }
   }
 }

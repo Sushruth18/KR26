@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Drama, Flag, Music, Navigation, Shirt, Sparkles, type LucideIcon } from 'lucide-react';
 import { Reveal } from '../ui/Reveal';
 import { useLang } from '../../hooks/useLang';
-import { artist, attractions } from '../../lib/data';
+import { artistNames, attractions } from '../../lib/data';
 import { formatTime } from '../../lib/format';
 import { day2Stops } from '../../lib/schedule';
 
@@ -38,7 +38,7 @@ export function Attractions() {
                   <p className="m-0 text-ivory-50">{a.text[lang]}</p>
                   {a.headline && (
                     <p className="m-0 font-display text-lg text-gold-300" data-testid="attraction-artist">
-                      {artist.name[lang]}
+                      {artistNames(lang)}
                     </p>
                   )}
                   {stops.length === 1 ? (

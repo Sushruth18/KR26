@@ -48,7 +48,7 @@ interface IcsInput {
   lang: Lang;
   /** Day 2 stops in start order (schedule.json). */
   stops: ScheduleItem[];
-  /** The headline artist's display name, added to the headline stop's description. */
+  /** Every headline artist's name (artistNames), added to the headline stop's description. */
   artistName: string;
   labels: { suffix: string; day2Description: string; description: string; location: string };
 }

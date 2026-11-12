@@ -1,12 +1,26 @@
 {
-  "source": "/artist/remo.jpg",
-  "sha1": "0ab49c50a732ad32286bc61576a281dad1a41ba8",
-  "width": 447,
-  "height": 447,
-  "variants": [
-    {
-      "w": 447,
-      "src": "/artist/web/remo-447w.9aad04dc.webp"
-    }
-  ]
+  "remo": {
+    "source": "/artist/remo.jpg",
+    "sha1": "0ab49c50a732ad32286bc61576a281dad1a41ba8",
+    "width": 447,
+    "height": 447,
+    "variants": [
+      {
+        "w": 447,
+        "src": "/artist/web/remo-447w.9aad04dc.webp"
+      }
+    ]
+  },
+  "tanmay": {
+    "source": "/artist/tanmay.jpg",
+    "sha1": "3e3c422b000dbc2b86b2340adfc2b6b7cc023a24",
+    "width": 200,
+    "height": 200,
+    "variants": [
+      {
+        "w": 200,
+        "src": "/artist/web/tanmay-200w.3d88e8ee.webp"
+      }
+    ]
+  }
 }

@@ -1,6 +1,6 @@
 import manifest from '../data/artist.generated.json';
 
-/** src/data/artist.generated.json (written by `npm run brand:images`). */
+/** One entry of src/data/artist.generated.json (written by `npm run brand:images`), keyed by artist id. */
 export interface ArtistAsset {
   /** The master under public/, as named in artist.json → photo. */
   source: string;
@@ -13,4 +13,5 @@ export interface ArtistAsset {
   variants: { w: number; src: string }[];
 }
 
-export const artistAsset = manifest as ArtistAsset;
+/** WebP copies per artist id (artist.json → id). */
+export const artistAssets = manifest as Record<string, ArtistAsset>;

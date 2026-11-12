@@ -5,6 +5,7 @@ import attractionsRaw from '../data/attractions.json';
 import guestsRaw from '../data/guests.json';
 import galleryRaw from '../data/gallery.json';
 import siteRaw from '../data/site.json';
+import type { Lang } from './format';
 import type { CompetitionEvent, SiteConfig, ScheduleItem, Guest, GalleryData, Artist, Attraction } from './schemas';
 
 // The data files are validated with the zod schemas in scripts/validate-data.ts on every build (`prebuild`), so the
@@ -13,7 +14,10 @@ import type { CompetitionEvent, SiteConfig, ScheduleItem, Guest, GalleryData, Ar
 export const site = siteRaw as unknown as SiteConfig;
 export const events = eventsRaw as unknown as CompetitionEvent[];
 export const schedule = scheduleRaw as unknown as ScheduleItem[];
-export const artist = artistRaw as unknown as Artist;
+/** Headline artists in display order (artist.json). */
+export const artists = artistRaw as unknown as Artist[];
+/** Every headline artist's name, in order — on the headline stop, its banner and the calendar file. */
+export const artistNames = (lang: Lang) => artists.map((a) => a.name[lang]).join(' · ');
 export const attractions = attractionsRaw as unknown as Attraction[];
 export const guests = guestsRaw as unknown as Guest[];
 export const gallery = galleryRaw as unknown as GalleryData;

@@ -4,14 +4,14 @@
  *   2. npm run e2e:event    (E2E_BASE, E2E_OUT, CHROME_PATH env vars optional)
  * kn/en × 320/360/768/1280 px: no clipped or overflowing element, footer once, one h1, no console errors,
  * Day 2 timeline = schedule.json (order, start times only, per-language numerals, no Break), Now/Next from the
- * dev clock, headline artist section + stop + banner, day tabs and ?day=, Day 1 stops, lazy map, reduced
+ * dev clock, headline artists section (both artists, equal frames, stacked / side by side) + stop + banner, day tabs and ?day=, Day 1 stops, lazy map, reduced
  * motion, and no banned programme names in the rendered text, alt or aria text.
  */
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
-import artist from '../src/data/artist.json' with { type: 'json' };
-import artistAsset from '../src/data/artist.generated.json' with { type: 'json' };
+import artists from '../src/data/artist.json' with { type: 'json' };
+import artistAssets from '../src/data/artist.generated.json' with { type: 'json' };
 import events from '../src/data/events.json' with { type: 'json' };
 import schedule from '../src/data/schedule.json' with { type: 'json' };
 import site from '../src/data/site.json' with { type: 'json' };
@@ -148,7 +148,7 @@ async function main() {
         expect(m.footers === 1 && m.h1 === 1, `footers ${m.footers}, h1 ${m.h1}`);
         expect(m.stops === day2.length, `stops ${m.stops}`);
         expect(m.banners === 5, `banners ${m.banners}`);
-        expect(m.frames === 2, `Darbar frames ${m.frames} (guests + artist)`);
+        expect(m.frames === 1 + artists.length, `Darbar frames ${m.frames} (guests + ${artists.length} artists)`);
         return `${m.stops} stops, ${m.banners} banners, ${m.frames} frames, no overflow/clipping, footer×1, h1×1`;
       });
     }
@@ -182,8 +182,8 @@ async function main() {
       const rally = stops[0]!;
       expect(rally.text.includes(lang === 'kn' ? 'ಬಿಲ್‌ಬೋರ್ಡ್' : 'Bill Board'), 'rally venue is Bill Board');
       const concert = stops[stops.length - 1]!;
-      expect(concert.text.includes(artist.name[lang]), `headline stop shows ${artist.name[lang]}`);
-      return `9 stops match schedule.json; ${lang} numerals; single start time per card; no links; artist on the 14:30 stop`;
+      expect(artists.every((a) => concert.text.includes(a.name[lang])), `headline stop shows ${artists.map((a) => a.name[lang]).join(' · ')}`);
+      return `9 stops match schedule.json; ${lang} numerals; single start time per card; no links; both artists on the 14:30 stop`;
     });
   }
 
@@ -227,73 +227,135 @@ async function main() {
     });
   }
 
-  // ---------- Headline artist ----------
+  // ---------- Headline artists ----------
+  // Tanmay's source photo is 200 px square: at 1x the browser may enlarge it at most this much (it is drawn at the arch's height).
+  const MAX_UPSCALE_1X = 1.35;
+  const names = (lang: Lang) => artists.map((a) => a.name[lang]).join(' · ');
   for (const lang of ['kn', 'en'] as const) {
-    await scenario(`artist-section-${lang}`, async (errors) => {
-      const page = await open(browser, lang, 360, `/event?${noon}&mock=`, errors);
-      await page.$eval('[data-testid=artist-section]', (e) => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
-      await page.waitForFunction(() => (document.querySelector('[data-testid=artist-photo]') as HTMLImageElement | null)?.complete);
-      const r = await page.evaluate(() => {
-        const img = document.querySelector('[data-testid=artist-photo]') as HTMLImageElement;
-        const cs = getComputedStyle(img);
-        const face = img.getBoundingClientRect();
-        return {
-          alt: img.alt,
-          w: img.getAttribute('width'),
-          h: img.getAttribute('height'),
-          natural: [img.naturalWidth, img.naturalHeight],
-          src: img.currentSrc,
-          srcset: img.srcset,
-          pos: cs.objectPosition,
-          fit: cs.objectFit,
-          filter: cs.filter,
-          radius: cs.borderRadius,
-          name: document.querySelector('[data-testid=artist-name]')?.textContent,
-          caption: document.querySelector('[data-testid=artist-caption]')?.textContent,
-          heading: document.querySelector('#artist-title')?.textContent,
-          inGuests: !!document.querySelector('#guests-title')?.closest('section')?.contains(img),
-          box: [face.width, face.height],
-          pillars: document.querySelector('[data-testid=artist-section]')!.querySelectorAll('.darbar-pillar').length,
-          sectionH2: document.querySelectorAll('[data-testid=artist-section] h2').length,
-        };
+    for (const width of [320, 360, 768, 1280]) {
+      await scenario(`artist-section-${lang}-${width}`, async (errors) => {
+        const page = await open(browser, lang, width, `/event?${noon}&mock=`, errors);
+        await page.$eval('[data-testid=artist-section]', (e) => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+        await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>('[data-testid=artist-photo]')].every((i) => i.complete && i.naturalWidth > 0));
+        const r = await page.evaluate(async () => {
+          const section = document.querySelector('[data-testid=artist-section]')!;
+          const items = [...section.querySelectorAll<HTMLElement>('[data-testid^=artist-]')].filter((e) => e.tagName === 'LI');
+          // With a `w` srcset, naturalWidth is scaled by `sizes`; load the served file on its own for its real pixel size.
+          // (inline, not a named helper: tsx would inject a __name() call that does not exist in the page)
+          const files = await Promise.all(
+            items.map(async (li) => {
+              const probe = new Image();
+              probe.src = li.querySelector<HTMLImageElement>('[data-testid=artist-photo]')!.currentSrc;
+              await probe.decode();
+              return [probe.naturalWidth, probe.naturalHeight];
+            }),
+          );
+          return {
+            items: items.map((li, k) => {
+              const img = li.querySelector<HTMLImageElement>('[data-testid=artist-photo]')!;
+              const cs = getComputedStyle(img);
+              const box = img.getBoundingClientRect();
+              const frame = li.querySelector('.darbar-arch')!.getBoundingClientRect();
+              return {
+                id: li.dataset.testid!.slice(7),
+                alt: img.alt,
+                w: img.getAttribute('width'),
+                h: img.getAttribute('height'),
+                natural: files[k]!,
+                src: img.currentSrc,
+                srcset: img.srcset,
+                pos: cs.objectPosition,
+                fit: cs.objectFit,
+                filter: cs.filter,
+                radius: cs.borderRadius,
+                box: [box.width, box.height],
+                frame: [Math.round(frame.left), Math.round(frame.top), Math.round(frame.width), Math.round(frame.height)],
+                name: li.querySelector('[data-testid=artist-name]')?.textContent,
+                pillars: li.querySelectorAll('.darbar-pillar').length,
+              };
+            }),
+            captions: [...section.querySelectorAll('[data-testid=artist-caption]')].map((c) => c.textContent),
+            heading: document.querySelector('#artist-title')?.textContent,
+            inGuests: !!document.querySelector('#guests-title')?.closest('section')?.contains(section),
+            sectionH2: section.querySelectorAll('h2').length,
+            hScroll: document.documentElement.scrollWidth > window.innerWidth,
+            sectionRight: section.getBoundingClientRect().right,
+          };
+        });
+        if (width === 360) {
+          // element shot (the stacked section is taller than the viewport); the sticky navbar is hidden so it cannot cover a frame
+          await page.addStyleTag({ content: 'header{visibility:hidden!important}' });
+          await (await page.$('[data-testid=artist-section]'))!.screenshot({ path: resolve(OUT, `artist-${lang}-360.png`) });
+        }
+        await page.browserContext().close();
+        // order, names, alt, photo handling
+        expect(r.items.map((i) => i.id).join() === artists.map((a) => a.id).join(), `artists in order ${r.items.map((i) => i.id).join()} (Remo first, then Tanmay)`);
+        const headline = day2.find((s) => s.headline)!;
+        for (const [k, a] of artists.entries()) {
+          const it = r.items[k]!;
+          const asset = artistAssets[a.id as keyof typeof artistAssets];
+          const event = a.caption?.[lang] ?? headline.title[lang];
+          expect(it.name === a.name[lang], `${a.id}: name "${it.name}"`);
+          expect(it.alt === `${a.name[lang]} — ${event}`, `${a.id}: alt is "${it.alt}"`);
+          expect(!/wearing|smil|jacket|glasses|shirt|woman|man\b|person|beard|hair/i.test(it.alt), `${a.id}: alt describes the person`);
+          expect(it.w === String(asset.width) && it.h === String(asset.height), `${a.id}: explicit width/height ${it.w}×${it.h}`);
+          expect(it.natural[0]! <= asset.width && asset.variants.every((v) => v.w <= asset.width), `${a.id}: upscaled copy (${it.natural[0]} px, source ${asset.width})`);
+          expect(it.src.endsWith('.webp') && it.srcset.includes('.webp'), `${a.id}: not WebP (${it.src})`);
+          expect(it.pos === a.focus && it.fit === 'cover', `${a.id}: object-position ${it.pos}, fit ${it.fit}`);
+          expect(it.filter === 'none' && it.radius === '0px', `${a.id}: filter ${it.filter}, radius ${it.radius} (photo must be shown as supplied)`);
+          expect(it.pillars === 2, `${a.id}: Darbar frame needs two gold pillars`);
+          // square photo with object-fit: cover → drawn at max(box w/h ÷ natural) of its source pixels
+          const scale = Math.max(it.box[0]! / asset.width, it.box[1]! / asset.height);
+          expect(scale <= MAX_UPSCALE_1X, `${a.id}: enlarged ${scale.toFixed(2)}× at 1x (limit ${MAX_UPSCALE_1X})`);
+        }
+        // same size; stacked on phones, side by side from 640 px
+        const [f1, f2] = r.items.map((i) => i.frame);
+        expect(f1![2] === f2![2] && f1![3] === f2![3], `frames differ: ${f1!.slice(2)} vs ${f2!.slice(2)}`);
+        if (width >= 640) expect(f1![1] === f2![1] && f2![0] > f1![0] + f1![2], `not side by side at ${width}px: ${f1} / ${f2}`);
+        else expect(f2![1] > f1![1] + f1![3] && f1![0] === f2![0], `not stacked at ${width}px: ${f1} / ${f2}`);
+        expect(!r.hScroll && r.sectionRight <= width, `horizontal scroll at ${width}px`);
+        // one shared caption read from the 14:30 stop
+        const want = `${headline.title[lang]} · ${formatDate(site.day2Date, lang, { short: true })} · ${formatTime(headline.start, lang)}`;
+        expect(r.captions.length === 1 && r.captions[0] === want, `captions ${JSON.stringify(r.captions)} ≠ "${want}"`);
+        expect(lang === 'en' ? r.captions[0] === 'Music Concert & DJ · 21 Nov · 2:30 PM' : r.captions[0]!.includes('೨೧') && r.captions[0]!.includes('೨:೩೦'), `caption wording "${r.captions[0]}"`);
+        expect(r.heading === (lang === 'kn' ? 'ಪ್ರಮುಖ ಕಲಾವಿದರು' : 'Headline artists') && r.sectionH2 === 1 && !r.inGuests, `heading "${r.heading}"`);
+        const scales = r.items.map((i, k) => `${i.id} ${Math.max(i.box[0]! / artistAssets[artists[k]!.id as keyof typeof artistAssets].width, i.box[1]! / artistAssets[artists[k]!.id as keyof typeof artistAssets].height).toFixed(2)}×`);
+        return `${width >= 640 ? 'side by side' : 'stacked'}, frames ${f1![2]}×${f1![3]}; caption "${r.captions[0]}"; 1x scale ${scales.join(', ')}`;
       });
-      await page.screenshot({ path: resolve(OUT, `artist-${lang}-360.png`), clip: await page.$eval('[data-testid=artist-section]', (e) => { const b = e.getBoundingClientRect(); return { x: 0, y: Math.max(0, b.top), width: 360, height: b.height }; }) });
-      await page.browserContext().close();
-      const event = artist.caption[lang];
-      expect(r.alt === `${artist.name[lang]} — ${event}`, `alt is "${r.alt}"`);
-      expect(!/wearing|smil|jacket|glasses|woman|man\b|person/i.test(r.alt), 'alt does not describe the person');
-      expect(r.name === artist.name[lang], `name "${r.name}"`);
-      const want = `${event} · ${formatDate(site.day2Date, lang, { short: true })} · ${formatTime(day2.find((s) => s.headline)!.start, lang)}`;
-      expect(r.caption === want, `caption "${r.caption}" ≠ "${want}"`);
-      expect(lang === 'en' ? r.caption === 'Music Concert & DJ · 21 Nov · 2:30 PM' : r.caption!.includes('೨೧') && r.caption!.includes('೨:೩೦'), `caption wording "${r.caption}"`);
-      expect(r.w === String(artistAsset.width) && r.h === String(artistAsset.height), `explicit width/height ${r.w}×${r.h}`);
-      expect(r.natural[0] <= artistAsset.width, `image ${r.natural[0]} px is wider than the ${artistAsset.width} px source (upscaled)`);
-      expect(artistAsset.variants.every((v) => v.w <= artistAsset.width) && r.srcset.includes('.webp'), 'WebP variants, none above the source width');
-      expect(r.pos === '48% 28%' && r.fit === 'cover', `object-position ${r.pos}, fit ${r.fit}`);
-      expect(r.filter === 'none' && r.radius === '0px', `no filter/rounding on the photo (filter ${r.filter}, radius ${r.radius})`);
-      expect(r.pillars === 2 && !r.inGuests, 'own Darbar frame with two gold pillars, separate from the chief-guest section');
-      expect(r.heading === (lang === 'kn' ? 'ಪ್ರಮುಖ ಕಲಾವಿದರು' : 'Headline artist'), `heading "${r.heading}"`);
-      return `alt "${r.alt}"; caption "${r.caption}"; ${r.natural.join('×')} px image (source ${artistAsset.width}), object-position ${r.pos}`;
-    });
+    }
   }
 
   await scenario('artist-on-banner-and-stop-en', async (errors) => {
     const page = await open(browser, 'en', 360, `/event?${noon}&mock=`, errors);
     const r = await page.evaluate(() => ({
       banner: document.querySelector('[data-testid=attraction-concert]')?.textContent ?? '',
-      artistLines: document.querySelectorAll('[data-testid=attraction-artist]').length,
+      artistLine: [...document.querySelectorAll('[data-testid=attraction-artist]')].map((e) => e.textContent),
+      stopArtist: document.querySelector('[data-testid=stop-1430] [data-testid=stop-artist]')?.textContent ?? '',
       stop: document.querySelector('[data-testid=stop-1430]')?.textContent ?? '',
       clubs: document.querySelector('[data-testid=attraction-clubs]')?.textContent ?? '',
       titles: [...document.querySelectorAll('[data-testid^=attraction-]:not([data-testid=attraction-artist]) h3')].map((h) => h.textContent),
     }));
     await page.browserContext().close();
-    expect(r.banner.includes('Remo & Team') && r.banner.includes('Music Concert & DJ') && r.banner.includes('2:30 PM'), `concert banner: ${r.banner}`);
-    expect(r.artistLines === 1, 'the artist appears on one banner only');
-    expect(r.stop.includes('Remo & Team') && r.stop.includes('Headline act'), `14:30 stop: ${r.stop}`);
+    expect(names('en') === 'Remo & Team · Tanmay Gururaj', `names "${names('en')}"`);
+    expect(r.artistLine.length === 1 && r.artistLine[0] === 'Remo & Team · Tanmay Gururaj', `banner artist line ${JSON.stringify(r.artistLine)} (one banner only)`);
+    expect(r.banner.includes('Music Concert & DJ') && r.banner.includes('2:30 PM'), `concert banner: ${r.banner}`);
+    expect(r.stopArtist === 'Remo & Team · Tanmay Gururaj' && r.stop.includes('Headline act'), `14:30 stop: ${r.stop}`);
     for (const c of ['Rangasthala', 'Rushaang', 'Tandava']) expect(r.clubs.includes(c), `clubs banner lacks ${c}`);
     expect(['drama', 'music', 'dance'].every((k) => r.clubs.toLowerCase().includes(k)), 'club kinds shown');
     expect(r.titles.join('|') === 'Dasara Procession|Rally|Fashion Show|Music Concert & DJ|Club performances', `banner titles ${r.titles.join('|')}`);
-    return 'Remo & Team on the 14:30 stop and the Music Concert & DJ banner; 5 banners incl. Rangasthala / Rushaang / Tandava';
+    return '"Remo & Team · Tanmay Gururaj" on the 14:30 stop and the Music Concert & DJ banner; 5 banners incl. Rangasthala / Rushaang / Tandava';
+  });
+
+  await scenario('artist-on-banner-and-stop-kn', async (errors) => {
+    const page = await open(browser, 'kn', 360, `/event?${noon}&mock=`, errors);
+    const r = await page.evaluate(() => ({
+      banner: document.querySelector('[data-testid=attraction-artist]')?.textContent ?? '',
+      stop: document.querySelector('[data-testid=stop-1430] [data-testid=stop-artist]')?.textContent ?? '',
+    }));
+    await page.browserContext().close();
+    expect(r.banner === names('kn') && r.stop === names('kn'), `kn names: banner "${r.banner}", stop "${r.stop}"`);
+    expect(names('kn') === 'ರೆಮೊ ಮತ್ತು ತಂಡ · ತನ್ಮಯ್ ಗುರುರಾಜ್', `kn names "${names('kn')}"`);
+    return `"${names('kn')}" on the 14:30 stop and the banner`;
   });
 
   // ---------- Tabs, ?day= and Day 1 ----------

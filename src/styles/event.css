@@ -67,6 +67,33 @@
     border-radius: 0 0 6px 6px;
     background: linear-gradient(180deg, #c98a1b, #7b520f);
   }
+  /* ---------- Headline artists: equal frames, stacked on phones, side by side from 640 px ---------- */
+  .artist-grid {
+    /* Frame width. Tanmay's photo is 200 px square and is drawn at the arch's height, so this sets how
+       far the browser enlarges it at 1x (keep ARTIST_IMG_SIZES in ArtistSection.tsx in step). */
+    --artist-w: 15rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 2.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .artist-item {
+    width: 100%;
+    min-width: 0;
+  }
+  .darbar.artist-frame {
+    width: min(100%, var(--artist-w));
+  }
+  @media (min-width: 640px) {
+    .artist-grid {
+      grid-template-columns: repeat(2, minmax(0, var(--artist-w)));
+      justify-content: center;
+      gap: 2rem 3rem;
+    }
+  }
   .darbar-empty {
     display: grid;
     height: 100%;

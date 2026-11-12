@@ -3,7 +3,7 @@ import { MapPin, Music } from 'lucide-react';
 import { AmbariElephant } from '../art/AmbariElephant';
 import { useLang } from '../../hooks/useLang';
 import { useNow } from '../../hooks/useNow';
-import { artist } from '../../lib/data';
+import { artistNames } from '../../lib/data';
 import { formatTime } from '../../lib/format';
 import { day2Position, day2Stops, stopState } from '../../lib/schedule';
 import { RouteStop } from './RouteStop';
@@ -34,7 +34,7 @@ export function Day2Timeline() {
           {s.headline && (
             <p className="route-meta m-0 mt-1 flex items-center gap-2 font-semibold text-gold-300" data-testid="stop-artist">
               <Music size={16} aria-hidden="true" />
-              {artist.name[lang]}
+              {artistNames(lang)}
             </p>
           )}
           <p className="route-meta m-0 mt-2 flex items-center gap-1.5 text-sm text-ivory-300">

@@ -49,10 +49,11 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 - [ ] Day 2 Dance / Music Competition (Students & Faculty) slots (12:05, 12:30): listed on Day 2 although competitions are on Day 1 — kept as listed, no registration link
 - [ ] Prize-distribution stop for Day 2 — add once its time is confirmed
 
-## Headline artist (`src/data/artist.json`, `public/artist/remo.jpg`)
+## Headline artists (`src/data/artist.json`, `public/artist/remo.jpg`, `public/artist/tanmay.jpg`)
 - [ ] Spelling of the name: "Remo & Team" (kn "ರೆಮೊ ಮತ್ತು ತಂಡ" — draft, for a Kannada speaker to check)
-- [ ] Permission to use the photo and the name publicly
-- [ ] A higher-resolution photo — the current one is 447 px wide, so it is shown without upscaling and looks soft on 2×/3× phones. Replace `public/artist/remo.jpg`, then run `npm run brand:images`
+- [ ] Spelling of the name: **"Tanmay Gururaj"** — confirm the English spelling with the artist / organisers, and the Kannada rendering "ತನ್ಮಯ್ ಗುರುರಾಜ್" (draft, for a Kannada speaker to check)
+- [ ] Permission to use **both** names and **both** photos publicly (Remo & Team, Tanmay Gururaj) — on the site, the timeline, the banner and the calendar file
+- [ ] **Higher-resolution photos for both**: Remo's is 447 px and Tanmay's only 200 px square, so neither is upscaled in the file. Because Tanmay's is so small, **both frames were reduced from 280 px to 240 px wide** (`--artist-w` in `src/styles/event.css`): at that size the browser still enlarges Tanmay's photo 1.3× at 1x and it looks soft on 2×/3× screens. Ideally get ≥ 800 px portraits, replace the files in `public/artist/`, run `npm run brand:images`, and the frames can go back to 280 px (also update `ARTIST_IMG_SIZES` in `ArtistSection.tsx` and `MAX_UPSCALE_1X` in `scripts/e2e-event.ts`)
 
 ## Kannada wording for the Day 2 programme (drafts — a Kannada speaker should check)
 - [ ] Stop titles (`src/data/schedule.json`): ರ‍್ಯಾಲಿ (Rally) · ಬಿಲ್‌ಬೋರ್ಡ್ (venue, Bill Board) · ಉದ್ಘಾಟನೆ ಮತ್ತು ಮೆರವಣಿಗೆ · ನೃತ್ಯ ಸ್ಪರ್ಧೆ / ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) · ರಂಗಸ್ಥಳ ಪ್ರದರ್ಶನ · ರುಶಾಂಗ್ ಪ್ರದರ್ಶನ · ತಾಂಡವ ಪ್ರದರ್ಶನ · ಫ್ಯಾಷನ್ ಶೋ · ಸಂಗೀತ ಕಚೇರಿ ಮತ್ತು ಡಿಜೆ

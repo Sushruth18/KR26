@@ -213,7 +213,7 @@
       "soonText": "Our chief guests will be announced shortly."
     },
     "artist": {
-      "title": "Headline artist",
+      "title": "Headline artists",
       "alt": "{{name}} — {{event}}",
       "caption": "{{event}} · {{date}} · {{time}}"
     },

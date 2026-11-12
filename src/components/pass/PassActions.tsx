@@ -1,7 +1,7 @@
 import { useState, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarPlus, Download, MessageCircle } from 'lucide-react';
-import { artist, getEvent, site } from '../../lib/data';
+import { artistNames, getEvent, site } from '../../lib/data';
 import { buildIcs } from '../../lib/ics';
 import { day2Stops } from '../../lib/schedule';
 import { downloadBlob } from '../../lib/download';
@@ -48,7 +48,7 @@ export function PassActions({ pass, exportRef }: { pass: PassData; exportRef: Re
       site,
       lang,
       stops: day2Stops,
-      artistName: artist.name[lang],
+      artistName: artistNames(lang),
       labels: {
         suffix: t('pass.icsSuffix'),
         day2Description: t('pass.icsDay2'),

@@ -82,16 +82,32 @@ export const attractionsSchema = z.array(
 );
 export type Attraction = z.infer<typeof attractionsSchema>[number];
 
-/** The headline artist. `caption` is the event label; the date and time are read from the headline schedule stop. */
+/**
+ * The headline artists, in the order they are shown (artist.json is a list). The shared caption's event label
+ * defaults to the headline schedule stop's title; `caption` overrides it for one artist's alt text. The date and
+ * time are always read from the headline stop.
+ */
 export const artistSchema = z
   .object({
+    /** Lower-case slug; keys src/data/artist.generated.json. */
+    id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
     name: bilingual,
     photo: z.string().regex(/^\/[^?#]+\.(jpe?g|png|webp)$/i, 'a path under public/, e.g. /artist/remo.jpg'),
     /** CSS object-position, so the face is not cut when the frame crops the photo. */
-    focus: z.string().regex(/^\d{1,3}% \d{1,3}%$/),
-    caption: bilingual,
+    focus: z.string().regex(/^\d{1,3}% \d{1,3}%$/).optional(),
+    caption: bilingual.optional(),
   })
   .strict();
+export const artistsSchema = z
+  .array(artistSchema)
+  .min(1)
+  .superRefine((list, ctx) => {
+    const seen = new Set<string>();
+    for (const [i, a] of list.entries()) {
+      if (seen.has(a.id)) ctx.addIssue({ code: 'custom', path: [i, 'id'], message: `duplicate artist id "${a.id}"` });
+      seen.add(a.id);
+    }
+  });
 export type Artist = z.infer<typeof artistSchema>;
 
 export const guestsSchema = z.array(z.object({ name: bilingual, title: bilingual, photo: z.string() }));
