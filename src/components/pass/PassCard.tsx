@@ -1,7 +1,8 @@
 import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getEvent, site } from '../../lib/data';
-import { formatDate, formatNumber, formatTime, isTodo } from '../../lib/format';
+import { eventTime } from '../../lib/eventDisplay';
+import { formatDate, formatNumber, isTodo } from '../../lib/format';
 import type { PassData } from '../../lib/passStore';
 import { useLang } from '../../hooks/useLang';
 import { BrandLogo } from '../ui/BrandLogo';
@@ -24,7 +25,7 @@ export const PassCard = forwardRef<HTMLDivElement, { pass: PassData; fixed?: boo
   const lang = useLang();
   const event = getEvent(pass.eventId);
   const tba = t('pass.tba');
-  const time = event && !isTodo(event.time) ? formatTime(event.time, lang) : tba;
+  const time = (event && eventTime(event, lang)) ?? tba;
   const venue = event && !isTodo(event.venue[lang]) ? event.venue[lang] : tba;
   const day1 = t('pass.day', { n: formatNumber(1, lang), date: formatDate(site.day1Date, lang) });
   const names = [pass.name, ...pass.members.filter(Boolean)];

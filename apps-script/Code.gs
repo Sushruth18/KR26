@@ -648,8 +648,9 @@ function buildEmail_(p, ev, regId, whatsappUrl) {
   var tba = 'TODO-CONFIRM';
   var day = Number(CONFIG.day1Date.slice(8, 10));
   var day2 = Number(CONFIG.day2Date.slice(8, 10));
-  var timeEn = ev.time === tba ? 'Time to be announced' : ev.time + ' IST';
-  var timeKn = ev.time === tba ? 'ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ' : knDigits_(ev.time);
+  var range = ev.time + (ev.endTime ? '–' + ev.endTime : ''); // 24 h, e.g. 12:30–16:30
+  var timeEn = ev.time === tba ? 'Time to be announced' : range + ' IST';
+  var timeKn = ev.time === tba ? 'ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ' : knDigits_(range);
   var venueEn = ev.venue.en === tba ? 'Venue to be announced' : ev.venue.en;
   var venueKn = ev.venue.kn === tba ? 'ಸ್ಥಳ ಶೀಘ್ರದಲ್ಲೇ' : ev.venue.kn;
 

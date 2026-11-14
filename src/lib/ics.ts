@@ -1,12 +1,12 @@
 /**
- * Minimal RFC 5545 calendar file: the competition (all-day when its time is still TBA) and one entry per
+ * Minimal RFC 5545 calendar file: the competition (start–endTime, e.g. 12:30–16:30 IST; all-day when its time is still TBA) and one entry per
  * Day 2 programme stop (same names and start times as the Event Details timeline). Lines are CRLF-terminated and folded at 75 octets without splitting UTF-8 characters.
  */
 import type { CompetitionEvent, ScheduleItem, SiteConfig } from './schemas';
 import { isTodo, type Lang } from './format';
 
 const CRLF = '\r\n';
-const COMPETITION_MINUTES = 120; // TODO-CONFIRM: per-event duration not in the data yet
+const COMPETITION_MINUTES = 120; // only for an event with a start time but no endTime
 
 function escapeText(s: string) {
   return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
@@ -63,7 +63,8 @@ export function buildIcs({ regId, event, site, lang, stops, artistName, labels }
     lines.push(`DTSTART;VALUE=DATE:${ymd(event.date)}`, `DTEND;VALUE=DATE:${ymd(nextDay(event.date))}`);
   } else {
     const start = Date.parse(`${event.date}T${event.time}:00+05:30`);
-    lines.push(`DTSTART:${utc(start)}`, `DTEND:${utc(start + COMPETITION_MINUTES * 60000)}`);
+    const end = event.endTime ? Date.parse(`${event.date}T${event.endTime}:00+05:30`) : start + COMPETITION_MINUTES * 60000;
+    lines.push(`DTSTART:${utc(start)}`, `DTEND:${utc(end)}`);
   }
   lines.push(
     `SUMMARY:${escapeText(`${event.name[lang]} — ${labels.suffix}`)}`,

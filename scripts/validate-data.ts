@@ -60,6 +60,13 @@ if (site && events) {
       errors.push(`events.json: ${e.id} deadline is after site registrationClose`);
     }
     if (e.teamSize.min > e.teamSize.max) errors.push(`events.json: ${e.id} teamSize.min > max`);
+    if (e.endTime && !/^\d{2}:\d{2}$/.test(e.time)) errors.push(`events.json: ${e.id} has an endTime but no start time`);
+    if (e.endTime && /^\d{2}:\d{2}$/.test(e.time) && e.endTime <= e.time) errors.push(`events.json: ${e.id} endTime must be after time`);
+    if (/^\d{2}:\d{2}$/.test(e.time)) {
+      const at = (hhmm: string) => Date.parse(`${e.date}T${hhmm}:00+05:30`);
+      if (at(e.time) < Date.parse(site.competitionsStart)) errors.push(`events.json: ${e.id} starts before site.json competitionsStart`);
+      if (at(e.endTime ?? e.time) > Date.parse(site.competitionsEnd)) errors.push(`events.json: ${e.id} ends after site.json competitionsEnd`);
+    }
     if (e.prizes.type === 'cash' && e.category === 'faculty') errors.push(`events.json: ${e.id} faculty events award mementos`);
     // The two languages show the same numbered list, so rule n must exist in both.
     if (e.rules.kn.length !== e.rules.en.length) {

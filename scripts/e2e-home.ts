@@ -457,13 +457,17 @@ async function main() {
   // ---------- Countdown phases (dev clock override) ----------
   const phases: [string, string, string, string][] = [
     ['2026-11-06T12:00:00+05:30', 'competitions', 'ಸ್ಪರ್ಧೆಗಳಿಗೆ', 'Competitions begin in'],
-    ['2026-11-20T11:00:00+05:30', 'competitionsOn', 'ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!', 'Competitions are on!'],
+    // Competitions run 12:30–16:30 on 20 Nov (site.json competitionsStart / competitionsEnd).
+    ['2026-11-20T12:29:00+05:30', 'competitions', 'ಸ್ಪರ್ಧೆಗಳಿಗೆ', 'Competitions begin in'],
+    ['2026-11-20T12:30:00+05:30', 'competitionsOn', 'ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!', 'Competitions are on!'],
+    ['2026-11-20T16:29:00+05:30', 'competitionsOn', 'ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!', 'Competitions are on!'],
+    ['2026-11-20T16:30:00+05:30', 'procession', 'ಮೆರವಣಿಗೆಗೆ', 'The procession begins in'],
     ['2026-11-20T19:00:00+05:30', 'procession', 'ಮೆರವಣಿಗೆಗೆ', 'The procession begins in'],
     ['2026-11-21T12:00:00+05:30', 'live', 'ಉತ್ಸವ ಆರಂಭವಾಗಿದೆ!', 'The festival has begun!'],
     ['2026-11-22T09:00:00+05:30', 'over', 'ಧನ್ಯವಾದಗಳು', 'Thank you'],
   ];
   for (const [iso, kind, kn, en] of phases) {
-    await scenario(`countdown-${kind}`, async (errors) => {
+    await scenario(`countdown-${kind}-${iso.slice(5, 16)}`, async (errors) => {
       const out: string[] = [];
       for (const lang of ['kn', 'en'] as const) {
         const page = await open(browser, lang, `/?${at(iso)}`, errors);

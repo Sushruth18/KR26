@@ -22,6 +22,8 @@ export const eventSchema = z.object({
   date: isoDate,
   /** HH:MM (IST) or TODO-CONFIRM */
   time: z.union([hhmm, z.literal(TODO)]),
+  /** Optional HH:MM (IST) end; shown as a range ("12:30 PM – 4:30 PM") and used as the .ics DTEND. Needs a real `time`. */
+  endTime: hhmm.optional(),
   venue: bilingual,
   teamSize: z.object({ min: z.number().int().min(1), max: z.number().int().min(1) }),
   deadline: isoDateTime,

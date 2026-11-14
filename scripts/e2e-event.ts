@@ -390,18 +390,52 @@ async function main() {
       details: [...document.querySelectorAll('[data-testid^=details-]')].map((a) => a.getAttribute('href')),
       register: [...document.querySelectorAll('[data-testid=timeline-day1] a[href^="/register"]')].map((a) => a.getAttribute('href')),
       times: document.querySelectorAll('[data-testid=timeline-day1] time').length,
+      ranges: [...document.querySelectorAll('[data-testid=timeline-day1] time')].map((x) => x.textContent),
     }));
     expect(r.stops === events.length, `${r.stops} Day 1 stops`);
-    expect(r.tbaLabel === 'Time to be announced', `group label "${r.tbaLabel}"`);
-    expect(r.times === 0, 'no time shown while every time is TODO-CONFIRM');
+    expect(r.tbaLabel === undefined, `no "Time to be announced" group once every time is set (got "${r.tbaLabel}")`);
+    expect(r.times === events.length, `${r.times} time ranges shown`);
+    expect(r.ranges.every((x) => x === '12:30 PM – 4:30 PM'), `ranges ${[...new Set(r.ranges)].join(', ')}`);
     expect(r.details.every((h, i) => h === `/competitions?for=${events[i]!.category}#${events[i]!.id}`), 'every stop links to its competition card');
     expect(r.register.length === events.length && r.register.every((h, i) => h === `/register?event=${events[i]!.id}`), 'every stop has its Register link');
     await page.click('[data-testid=register-s-quiz]');
     await page.waitForSelector('[data-testid=event-summary]');
     expect(new URL(page.url()).searchParams.get('event') === 's-quiz', 'Register opens the form preselected');
     await page.browserContext().close();
-    return `${r.stops} competitions under "Time to be announced", each with Details + Register`;
+    return `${r.stops} competitions, each 12:30 PM – 4:30 PM with Details + Register`;
   });
+
+  // Day 1 competitions all run 12:30–16:30 IST side by side: all "next" before, all "now" during (one Ambari), all past after.
+  const day1Cases: [string, string, string][] = [
+    ['12:29', 'next', 'before 12:30 every competition is up next'],
+    ['12:30', 'current', 'at 12:30 every competition is on'],
+    ['16:29', 'current', 'still on one minute before the end'],
+    ['16:30', 'past', 'over at 16:30'],
+  ];
+  for (const [hhmm, want, note] of day1Cases) {
+    await scenario(`day1-now-next-${hhmm}`, async (errors) => {
+      const out: string[] = [];
+      for (const lang of ['kn', 'en'] as const) {
+        const page = await open(browser, lang, 360, `/event?now=${ist(hhmm, site.day1Date)}&mock=`, errors);
+        await page.waitForSelector('[data-testid=timeline-day1]'); // Day 1 is the default tab on 20 Nov
+        const r = await page.evaluate(() => ({
+          states: [...document.querySelectorAll('[data-testid=timeline-day1] > ol > li')].map((li) => li.getAttribute('data-state')),
+          now: document.querySelectorAll('[data-testid=timeline-day1] [data-testid=pill-now]').length,
+          next: document.querySelectorAll('[data-testid=timeline-day1] [data-testid=pill-next]').length,
+          markers: document.querySelectorAll('[data-testid=timeline-day1] .route-node .ambari').length,
+          time: document.querySelector('[data-testid=timeline-day1] time')?.textContent ?? '',
+        }));
+        await page.browserContext().close();
+        expect(r.states.length === events.length && r.states.every((s) => s === want), `${lang}: states ${[...new Set(r.states)].join(',')}`);
+        expect(r.now === (want === 'current' ? events.length : 0) && r.next === (want === 'next' ? events.length : 0), `${lang}: ${r.now} now / ${r.next} next pills`);
+        expect(r.markers === (want === 'current' ? 1 : 0), `${lang}: ${r.markers} Ambari markers (one for the parallel stops)`);
+        const range = lang === 'kn' ? 'ಮಧ್ಯಾಹ್ನ ೧೨:೩೦ – ಸಂಜೆ ೪:೩೦' : '12:30 PM – 4:30 PM';
+        expect(r.time === range, `${lang}: time "${r.time}"`);
+        out.push(lang);
+      }
+      return `${note} (${out.join(', ')})`;
+    });
+  }
 
   // ---------- Map, reduced motion, banned terms ----------
   await scenario('map-lazy-and-directions', async (errors) => {

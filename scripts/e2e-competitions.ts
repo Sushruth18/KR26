@@ -157,7 +157,9 @@ async function main() {
   await scenario('cards-content-en', async (errors) => {
     const page = await open(browser, 'en', 1280, '/competitions?for=students&mock=', errors);
     const card = await page.$eval('[data-testid=card-s-essay]', (e) => e.textContent ?? '');
-    expect(card.includes('Time to be announced') && card.includes('To be announced'), 'TBA time + venue');
+    expect(card.includes('12:30 PM – 4:30 PM') && card.includes('BSN 422'), 'time range + venue');
+    const quiz = await page.$eval('[data-testid=card-s-quiz]', (e) => e.textContent ?? '');
+    expect(quiz.includes('12:30 PM – 4:30 PM') && quiz.includes('To be announced'), 'quiz: time known, venue TBA');
     const essay = events.find((e) => e.id === 's-essay')!;
     expect(card.includes('Coordinators') && essay.coordinators.every((c) => card.includes(c.name)), 'coordinator names from events.json');
     expect(card.includes('Day 1 · 20 November'), 'Day 1 date');

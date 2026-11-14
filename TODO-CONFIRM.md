@@ -2,10 +2,19 @@
 
 Placeholders are used in the site until these are filled in. Nothing here has been invented.
 
-## Competitions (`src/data/events.json`) — all 12 events
-- [ ] Start **time** (shown as "Time to be announced" until set)
-- [ ] **Venue** (kn + en)
-- Coordinators (1–3 per event, each with its own `tel:` link) and rules are now filled in for every event except the rules item below.
+## Competitions (`src/data/events.json`)
+- Time: every competition is on 20 Nov 2026, **12:30 PM – 4:30 PM** (`time` 12:30, `endTime` 16:30; `site.json` competitionsStart/End 12:30/16:30) — from the college schedule
+- Venues from the college schedule are filled in. Coordinators (1–3 per event, each with its own `tel:` link) and rules are filled in for every event except the items below.
+- [ ] **Venue still to be announced** (time is known): Quiz (`s-quiz`), Treasure Hunt (`s-treasure-hunt`), Rangoli (`s-rangoli`)
+
+### Kannada venue names — drafts for a Kannada speaker (`events.json → venue.kn`)
+Block names are transliterated; floors use Kannada numerals (numerals rule), the room number stays in Latin digits as on the door sign.
+- [ ] BSN Auditorium → ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ (Group Singing, Faculty Group Singing)
+- [ ] Visvesvaraya Auditorium (Architecture Block) → ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್) (Painting)
+- [ ] BSN 422 → ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422 ("room 422") (Essay Writing)
+- [ ] SJB 5th Floor Amphitheatre → ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್ (Group Dance, Faculty Group Dance)
+- [ ] SMV Block (Academic Block), 2nd Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೨ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Poem)
+- [ ] SMV Block (Academic Block), 1st Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Debate, Faculty Debate)
 
 ### Faculty Group Dance (`f-group-dance`)
 - [ ] **Rules** — the rules PDF has no faculty dance section; the card still says "Rules will be announced soon"
@@ -35,13 +44,11 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 - [ ] Rules keep the PDF's Latin digits inside Kannada text (3+1, 500–800, 15); say if they should become Kannada numerals
 
 ## Site (`src/data/site.json`)
-- [ ] `competitionsStart` 09:00 / `competitionsEnd` 18:00 on 20 Nov
 - [ ] `instagramUrl` — empty, footer icon hidden
 - [ ] `contactEmail` — empty, hidden
 - [ ] `madeBy` — empty, hidden
 - [ ] `departments` — draft list (CSE, ISE, AIML, ECE, EEE, ETE, Mech, Civil, MBA, MCA + Other)
 - [ ] `semesters` — odd semesters 1, 3, 5, 7 for engineering; **MBA/MCA 1, 3** (confirm). Lateral-entry students?
-- [ ] Competition duration for the calendar file — `.ics` uses 2 hours once a start time is set (`src/lib/ics.ts`)
 - [ ] Map pin — verify the embed for "BMS Institute of Technology and Management, Avalahalli, Yelahanka, Bengaluru"
 
 ## Event details

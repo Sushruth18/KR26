@@ -6,7 +6,7 @@ import { useLang } from '../../hooks/useLang';
 import { useNow } from '../../hooks/useNow';
 import { useResolvedEvents } from '../../hooks/useResolvedEvents';
 import { eventDisplay } from '../../lib/eventDisplay';
-import { day1Groups, day1Position, stopState, type StopState } from '../../lib/schedule';
+import { day1Groups, day1States, type StopState } from '../../lib/schedule';
 import type { CompetitionEvent } from '../../lib/schemas';
 import { RouteStop } from './RouteStop';
 
@@ -19,12 +19,21 @@ export function Day1Timeline() {
   const lang = useLang();
   const { resolved, loading } = useResolvedEvents();
   const { timed, tba } = day1Groups();
-  const { current, next } = day1Position(timed, useNow(30_000));
+  const states = day1States(timed, useNow(30_000));
+  // Competitions run side by side: every current one glows, but only the first carries the Ambari marker.
+  const marker = states.indexOf('current');
 
-  const stop = (e: CompetitionEvent, state: StopState) => {
+  const stop = (e: CompetitionEvent, state: StopState, i = -1) => {
     const d = eventDisplay(e, lang, t);
     return (
-      <RouteStop key={e.id} state={state} time={timedTime(e, d.time)} dateTime={e.time} testId={`stop-${e.id}`}>
+      <RouteStop
+        key={e.id}
+        state={state}
+        marker={i === marker}
+        time={timedTime(e, d.time)}
+        dateTime={e.time}
+        testId={`stop-${e.id}`}
+      >
         <h3 className="m-0 mt-1 text-xl text-ivory-50">{d.name}</h3>
         <p className="route-meta m-0 mt-1 flex items-center gap-1.5 text-sm text-ivory-300">
           <MapPin size={15} aria-hidden="true" />
@@ -53,7 +62,7 @@ export function Day1Timeline() {
     <div data-testid="timeline-day1">
       {timed.length > 0 && (
         <ol className="route" aria-label={t('eventPage.timeline.day1Label')}>
-          {timed.map((e, i) => stop(e, stopState(i, current, next)))}
+          {timed.map((e, i) => stop(e, states[i]!, i))}
         </ol>
       )}
       {tba.length > 0 && (
@@ -70,7 +79,7 @@ export function Day1Timeline() {
   );
 }
 
-/** Timed events show their start time on the card; "time to be announced" ones sit under the group heading instead. */
+/** Timed events show their time (a range when they have an end time) on the card; "time to be announced" ones sit under the group heading instead. */
 function timedTime(e: CompetitionEvent, formatted: string): string | undefined {
   return /^\d{2}:\d{2}$/.test(e.time) ? formatted : undefined;
 }

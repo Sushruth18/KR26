@@ -252,7 +252,9 @@ async function main() {
     const passText = await page.$eval('[data-testid=pass-card]', (e) => e.textContent ?? '');
     expect(passText.includes('ದಿನ ೧ · ೨೦ ನವೆಂಬರ್'), 'pass shows Day 1 in Kannada numerals');
     expect(passText.includes('ಪ್ರಬಂಧ ಬರಹ'), 'pass shows Kannada event name');
-    expect(passText.includes('TBA'), 'pass shows TBA for unconfirmed time/venue');
+    expect(passText.includes('ಮಧ್ಯಾಹ್ನ ೧೨:೩೦ – ಸಂಜೆ ೪:೩೦'), 'pass shows the Day 1 time range in Kannada');
+    expect(passText.includes('ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422'), 'pass shows the Essay venue in Kannada');
+    expect(!passText.includes('TBA'), 'no TBA once time and venue are set');
     expect(passText.includes('೨೧ ನವೆಂಬರ್'), 'pass invites to Day 2 (21 Nov)');
     await page.screenshot({ path: resolve(OUT, '01-pass-screen.png') });
 
@@ -270,7 +272,8 @@ async function main() {
     const lines = text.split('\r\n');
     expect(!/[^\r]\n/.test(text), 'all line breaks are CRLF');
     expect(lines.every((l) => Buffer.byteLength(l, 'utf8') <= 75), 'every line ≤ 75 octets (folded)');
-    expect(text.includes('DTSTART;VALUE=DATE:20261120') && text.includes('DTEND;VALUE=DATE:20261121'), 'Day 1 all-day (time TBA)');
+    expect(text.includes('DTSTART:20261120T070000Z\r\nDTEND:20261120T110000Z'),'Day 1 runs 12:30–16:30 IST (07:00–11:00 UTC), not all-day');
+    expect(!text.includes('VALUE=DATE'), 'no all-day entry');
     // Day 2: one VEVENT per schedule stop, same start time and kn name as the Event Details timeline.
     const utcOf = (hhmm: string) => new Date(`${siteData.day2Date}T${hhmm}:00+05:30`).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
     const unfolded = text.replace(/\r\n /g, '');
@@ -285,7 +288,7 @@ async function main() {
     await page.reload({ waitUntil: 'networkidle0' });
     const afterReload = await page.$eval('[data-testid=pass-reg-id]', (e) => e.textContent?.trim());
     expect(afterReload === 'KR26-ESY-0001', 'pass survives a page refresh (sessionStorage)');
-    return `regId ${r.regId}; filled in ${fill.fillMs} ms; no horizontal scroll: ${fill.overflowFree}; PNG ${w}×${h} (2× ${cardW}px card); .ics ${lines.length - 1} lines, CRLF, folded, all-day Day 1 + one timed entry per Day 2 stop; pass persists after refresh`;
+    return `regId ${r.regId}; filled in ${fill.fillMs} ms; no horizontal scroll: ${fill.overflowFree}; PNG ${w}×${h} (2× ${cardW}px card); .ics ${lines.length - 1} lines, CRLF, folded, Day 1 12:30–16:30 + one timed entry per Day 2 stop; pass persists after refresh`;
   });
 
   await scenario(browser, '02-success-team-exact-en', 'en', async (page) => {

@@ -9,10 +9,11 @@
     },
     "icon": "file-text",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422",
+      "en": "BSN 422"
     },
     "teamSize": {
       "min": 1,
@@ -70,10 +71,11 @@
     },
     "icon": "feather",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೨ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+      "en": "SMV Block (Academic Block), 2nd Floor Auditorium"
     },
     "teamSize": {
       "min": 1,
@@ -123,10 +125,11 @@
     },
     "icon": "palette",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್)",
+      "en": "Visvesvaraya Auditorium (Architecture Block)"
     },
     "teamSize": {
       "min": 1,
@@ -188,10 +191,11 @@
     },
     "icon": "mic",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+      "en": "SMV Block (Academic Block), 1st Floor Auditorium"
     },
     "teamSize": {
       "min": 1,
@@ -249,7 +253,8 @@
     },
     "icon": "brain",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
       "kn": "TODO-CONFIRM",
       "en": "TODO-CONFIRM"
@@ -308,10 +313,11 @@
     },
     "icon": "users",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
+      "en": "SJB 5th Floor Amphitheatre"
     },
     "teamSize": {
       "min": 4,
@@ -367,7 +373,8 @@
     },
     "icon": "search",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
       "kn": "TODO-CONFIRM",
       "en": "TODO-CONFIRM"
@@ -434,10 +441,11 @@
     },
     "icon": "music",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
+      "en": "BSN Auditorium"
     },
     "teamSize": {
       "min": 6,
@@ -496,7 +504,8 @@
     "icon": "flower",
     "ornament": "kolam",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
       "kn": "TODO-CONFIRM",
       "en": "TODO-CONFIRM"
@@ -549,10 +558,11 @@
     },
     "icon": "mic",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+      "en": "SMV Block (Academic Block), 1st Floor Auditorium"
     },
     "teamSize": {
       "min": 1,
@@ -608,10 +618,11 @@
     },
     "icon": "users",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
+      "en": "SJB 5th Floor Amphitheatre"
     },
     "teamSize": {
       "min": 4,
@@ -651,10 +662,11 @@
     },
     "icon": "music",
     "date": "2026-11-20",
-    "time": "TODO-CONFIRM",
+    "time": "12:30",
+    "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
+      "en": "BSN Auditorium"
     },
     "teamSize": {
       "min": 6,

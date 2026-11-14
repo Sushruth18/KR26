@@ -24,18 +24,20 @@ function Road() {
 
 interface Props {
   state: StopState;
-  /** Formatted start time; omitted for stops whose time is still to be announced. */
+  /** Formatted time (start, or start – end on Day 1); omitted for stops whose time is still to be announced. */
   time?: string;
   /** "HH:MM" for the <time> element. */
   dateTime?: string;
   highlight?: boolean;
   headline?: boolean;
+  /** Draw the Ambari marker on a current stop (default true; parallel Day 1 stops show it once). */
+  marker?: boolean;
   testId: string;
   children: ReactNode;
 }
 
 /** A stop on the procession route: road segment, node (the Ambari marker when current), and the card. */
-export function RouteStop({ state, time, dateTime, highlight, headline, testId, children }: Props) {
+export function RouteStop({ state, time, dateTime, highlight, headline, marker = true, testId, children }: Props) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   return (
@@ -48,7 +50,7 @@ export function RouteStop({ state, time, dateTime, highlight, headline, testId, 
     >
       <Road />
       <span className="route-node" aria-hidden="true">
-        {state === 'current' && <AmbariElephant walking={!reduced} />}
+        {state === 'current' && marker && <AmbariElephant walking={!reduced} />}
       </span>
       <div className="route-card">
         <div className="route-meta flex flex-wrap items-center gap-x-3 gap-y-1">

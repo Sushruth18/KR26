@@ -8,7 +8,8 @@ import site from '../src/data/site.json' with { type: 'json' };
 import artists from '../src/data/artist.json' with { type: 'json' };
 import events from '../src/data/events.json' with { type: 'json' };
 import { buildIcs } from '../src/lib/ics';
-import { day2Position, day2Stops, defaultDay, istInstant, parseDay, positionIn, stopState } from '../src/lib/schedule';
+import { day1Groups, day1States, day2Position, day2Stops, defaultDay, istInstant, parseDay, positionIn, stopState } from '../src/lib/schedule';
+import { eventTime } from '../src/lib/eventDisplay';
 import type { CompetitionEvent, SiteConfig } from '../src/lib/schemas';
 
 let n = 0;
@@ -111,6 +112,50 @@ ok('.ics: one entry per Day 2 stop with the same start and names; last stop ends
     assert.ok(!/\bDAP\b|Motor Head|Movie Promotion|Break/.test(text));
     assert.ok(ics.split('\r\n').every((l) => Buffer.byteLength(l) <= 75), 'folded');
   }
+});
+
+ok('Day 1: every competition 12:30–16:30 IST, shown as a range in both languages', () => {
+  for (const e of events) {
+    assert.equal(e.time, '12:30', e.id);
+    assert.equal((e as { endTime?: string }).endTime, '16:30', e.id);
+  }
+  assert.equal(site.competitionsStart, '2026-11-20T12:30:00+05:30');
+  assert.equal(site.competitionsEnd, '2026-11-20T16:30:00+05:30');
+  assert.equal(eventTime(events[0] as CompetitionEvent, 'en'), '12:30 PM – 4:30 PM');
+  assert.equal(eventTime(events[0] as CompetitionEvent, 'kn'), 'ಮಧ್ಯಾಹ್ನ ೧೨:೩೦ – ಸಂಜೆ ೪:೩೦');
+  assert.equal(eventTime({ time: '14:00' }, 'en'), '2:00 PM');
+  assert.equal(eventTime({ time: 'TODO-CONFIRM' }, 'en'), null);
+  const { timed, tba } = day1Groups();
+  assert.equal(timed.length, events.length);
+  assert.equal(tba.length, 0);
+});
+
+ok('Day 1 Now/Next: parallel competitions are all next, then all now, then all past', () => {
+  const { timed } = day1Groups();
+  const states = (hhmm: string, date = site.day1Date) => [...new Set(day1States(timed, at(hhmm, date)))].join();
+  assert.equal(states('10:00', '2026-11-14'), 'next');
+  assert.equal(states('12:29'), 'next');
+  assert.equal(states('12:30'), 'current');
+  assert.equal(states('16:29'), 'current');
+  assert.equal(states('16:30'), 'past');
+  assert.equal(states('09:00', site.day2Date), 'past');
+  // Mixed: an event without endTime runs until the next later start; the earliest start still ahead is next.
+  const mixed = [
+    { ...timed[0]!, time: '12:30', endTime: undefined },
+    { ...timed[1]!, time: '14:00', endTime: undefined },
+    { ...timed[2]!, time: '14:00', endTime: '15:00' },
+  ] as CompetitionEvent[];
+  assert.deepEqual(day1States(mixed, at('12:00', site.day1Date)), ['next', 'upcoming', 'upcoming']);
+  assert.deepEqual(day1States(mixed, at('13:00', site.day1Date)), ['current', 'next', 'next']);
+  assert.deepEqual(day1States(mixed, at('14:30', site.day1Date)), ['past', 'current', 'current']);
+  assert.deepEqual(day1States(mixed, at('15:00', site.day1Date)), ['past', 'current', 'past']);
+});
+
+ok('.ics: the Day 1 competition runs 12:30–16:30 IST (not all-day)', () => {
+  const labels = { suffix: 'KR 2026', day2Description: 'D2', description: 'Reg', location: 'BMSIT&M' };
+  const ics = buildIcs({ regId: 'KR26-ESY-0001', event: events[0] as CompetitionEvent, site: site as unknown as SiteConfig, lang: 'en', stops: day2Stops, artistName: 'x', labels });
+  assert.ok(ics.includes('DTSTART:20261120T070000Z\r\nDTEND:20261120T110000Z\r\n'));
+  assert.ok(!ics.includes('VALUE=DATE'));
 });
 
 console.log(`\n${n} groups passed.`);

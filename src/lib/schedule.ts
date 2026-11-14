@@ -1,7 +1,7 @@
 /**
  * Event Details timeline logic, pure functions of (data, now). Day 2 comes from schedule.json, Day 1 from
- * events.json. Stops carry a start time only: a stop is "current" from its start until the next stop starts,
- * and the last stop runs until the day's end (site.json → eventEnd / competitionsEnd).
+ * events.json. Day 2 stops carry a start time only: a stop is "current" from its start until the next stop starts,
+ * and the last stop runs until site.json → eventEnd. Day 1 competitions run in parallel (see day1States).
  */
 import { events, schedule, site } from './data';
 import { istParts } from './format';
@@ -48,12 +48,26 @@ export function day1Groups(): { timed: CompetitionEvent[]; tba: CompetitionEvent
   return { timed, tba };
 }
 
-export function day1Position(timed: CompetitionEvent[], t: number): Position {
-  return positionIn(
-    timed.map((e) => istInstant(e.date, e.time)),
-    Date.parse(site.competitionsEnd),
-    t,
-  );
+/**
+ * Day 1 competitions run side by side (all 12:30–16:30), so several can be "current" at once. Each one is current
+ * from its start until its endTime (without one: until the next later start, or competitionsEnd). Every competition
+ * with the earliest start still ahead is "next"; once it has ended it is "past".
+ */
+export function day1States(timed: CompetitionEvent[], t: number): StopState[] {
+  const dayEnd = Date.parse(site.competitionsEnd);
+  const starts = timed.map((e) => istInstant(e.date, e.time));
+  const ends = timed.map((e, i) => {
+    if (e.endTime) return istInstant(e.date, e.endTime);
+    const later = starts.filter((s) => s > starts[i]!);
+    return later.length ? Math.min(...later) : dayEnd;
+  });
+  const ahead = starts.filter((s) => s > t);
+  const nextStart = ahead.length ? Math.min(...ahead) : NaN;
+  return timed.map((_, i) => {
+    if (t >= ends[i]!) return 'past';
+    if (starts[i]! <= t) return 'current';
+    return starts[i] === nextStart ? 'next' : 'upcoming';
+  });
 }
 
 /** Day 2 is the default tab, except on Day 1 itself (IST). */

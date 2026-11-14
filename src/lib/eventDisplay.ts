@@ -1,6 +1,12 @@
 import type { TFunction } from 'i18next';
 import type { CompetitionEvent } from './schemas';
-import { formatDate, formatNumber, formatPrize, formatTime, isTodo, type Lang } from './format';
+import { formatDate, formatNumber, formatPrize, formatTime, formatTimeRange, isTodo, type Lang } from './format';
+
+/** "12:30 PM – 4:30 PM" (kn "ಮಧ್ಯಾಹ್ನ ೧೨:೩೦ – ಸಂಜೆ ೪:೩೦") when the event has an end time, the start alone otherwise; null while TBA. */
+export function eventTime(e: Pick<CompetitionEvent, 'time' | 'endTime'>, lang: Lang): string | null {
+  if (isTodo(e.time)) return null;
+  return e.endTime ? formatTimeRange(e.time, e.endTime, lang) : formatTime(e.time, lang);
+}
 
 /** Localised, TBA-aware strings for showing an event (cards, register summary, pass). */
 export function eventDisplay(e: CompetitionEvent, lang: Lang, t: TFunction) {
@@ -12,7 +18,7 @@ export function eventDisplay(e: CompetitionEvent, lang: Lang, t: TFunction) {
     name: e.name[lang],
     date: formatDate(e.date, lang),
     dateWithYear: formatDate(e.date, lang, { year: true, weekday: true }),
-    time: isTodo(e.time) ? t('common.timeTba') : formatTime(e.time, lang),
+    time: eventTime(e, lang) ?? t('common.timeTba'),
     venue: isTodo(e.venue[lang]) ? t('common.tba') : e.venue[lang],
     teamRange: range,
     team: e.teamSize.max === 1 ? t('register.summary.individual') : t('register.summary.people', { range }),

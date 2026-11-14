@@ -57,6 +57,7 @@ export function buildGasConfigSource(root = process.cwd()): string {
           teamSize: e.teamSize,
           date: e.date,
           time: e.time,
+          endTime: e.endTime ?? '',
           venue: e.venue,
           sheetName: sheetNameFor(e),
           deadline: e.deadline,

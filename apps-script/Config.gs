@@ -9,7 +9,7 @@
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
 var CONFIG_SCHEMA = 4;
-var CONFIG_VERSION = 'da9c17ad';
+var CONFIG_VERSION = '6781310e';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -96,10 +96,11 @@ var CONFIG = {
         "max": 1
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422",
+        "en": "BSN 422"
       },
       "sheetName": "ESY – Essay Writing",
       "deadline": "2026-11-18T23:59:00+05:30"
@@ -116,10 +117,11 @@ var CONFIG = {
         "max": 1
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೨ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+        "en": "SMV Block (Academic Block), 2nd Floor Auditorium"
       },
       "sheetName": "POM – Poem",
       "deadline": "2026-11-18T23:59:00+05:30"
@@ -136,10 +138,11 @@ var CONFIG = {
         "max": 1
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್)",
+        "en": "Visvesvaraya Auditorium (Architecture Block)"
       },
       "sheetName": "PNT – Painting",
       "deadline": "2026-11-18T23:59:00+05:30"
@@ -156,10 +159,11 @@ var CONFIG = {
         "max": 1
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+        "en": "SMV Block (Academic Block), 1st Floor Auditorium"
       },
       "sheetName": "DEB – Debate",
       "deadline": "2026-11-18T23:59:00+05:30"
@@ -176,7 +180,8 @@ var CONFIG = {
         "max": 1
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -196,10 +201,11 @@ var CONFIG = {
         "max": 12
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
+        "en": "SJB 5th Floor Amphitheatre"
       },
       "sheetName": "GDN – Group Dance",
       "deadline": "2026-11-18T23:59:00+05:30"
@@ -216,7 +222,8 @@ var CONFIG = {
         "max": 4
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -236,10 +243,11 @@ var CONFIG = {
         "max": 12
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
+        "en": "BSN Auditorium"
       },
       "sheetName": "GSG – Group Singing",
       "deadline": "2026-11-18T23:59:00+05:30"
@@ -256,7 +264,8 @@ var CONFIG = {
         "max": 5
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -276,10 +285,11 @@ var CONFIG = {
         "max": 1
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+        "en": "SMV Block (Academic Block), 1st Floor Auditorium"
       },
       "sheetName": "FDB – Faculty Debate",
       "deadline": "2026-11-18T23:59:00+05:30"
@@ -296,10 +306,11 @@ var CONFIG = {
         "max": 12
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
+        "en": "SJB 5th Floor Amphitheatre"
       },
       "sheetName": "FGD – Faculty Group Dance",
       "deadline": "2026-11-18T23:59:00+05:30"
@@ -316,10 +327,11 @@ var CONFIG = {
         "max": 12
       },
       "date": "2026-11-20",
-      "time": "TODO-CONFIRM",
+      "time": "12:30",
+      "endTime": "16:30",
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
+        "en": "BSN Auditorium"
       },
       "sheetName": "FGS – Faculty Group Singing",
       "deadline": "2026-11-18T23:59:00+05:30"
