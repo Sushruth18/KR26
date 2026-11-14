@@ -35,6 +35,21 @@ export interface GasRuntime {
   countRegs(eventId: string): number;
 }
 
+/**
+ * Utilities.formatDate(date, timeZone, pattern) for the patterns Code.gs uses (yyyy MM dd HH mm ss). Like Apps Script it
+ * formats in the given time zone, independent of the machine's zone.
+ */
+export function formatDate(date: Date, timeZone: string, pattern: string): string {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+    })
+      .formatToParts(date)
+      .map((p) => [p.type, p.value]),
+  );
+  return pattern.replace(/yyyy|MM|dd|HH|mm|ss/g, (t) => ({ yyyy: parts.year, MM: parts.month, dd: parts.day, HH: parts.hour, mm: parts.minute, ss: parts.second })[t] ?? t);
+}
+
 export function createGasRuntime(root = process.cwd()): GasRuntime {
   const code = readFileSync(resolve(root, 'apps-script/Code.gs'), 'utf8');
   const config = buildGasConfigSource(root);
@@ -51,6 +66,7 @@ export function createGasRuntime(root = process.cwd()): GasRuntime {
     LockService: { getScriptLock: () => lock },
     CacheService: { getScriptCache: () => cache },
     PropertiesService: { getScriptProperties: () => props },
+    Utilities: { formatDate },
     MailApp: mail,
     ContentService: {
       MimeType: { JSON: 'application/json' },

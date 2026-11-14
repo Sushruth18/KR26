@@ -1710,6 +1710,68 @@ t('findRegistrations() (editor diagnostic) lists every row holding an ID — as 
   assert.throws(() => (rt.ctx.findRegistrations as () => void)(), /FIND_REGISTRATIONS_ID/);
 });
 
+console.log('\nIST timestamps');
+const IST_RE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} IST$/;
+t('a new registration stores its timestamp as plain text "yyyy-MM-dd HH:mm:ss IST" in India time', () => {
+  const rt = createOpenRuntime();
+  const before = Date.now();
+  reg(rt);
+  const ts = cellOf(rt, 's-essay', 2, 'timestamp');
+  assert.match(ts, IST_RE);
+  // Read it back as IST (+05:30) and compare with the clock.
+  const ms = Date.parse(ts.replace(' IST', '+05:30').replace(' ', 'T'));
+  assert.ok(Math.abs(ms - before) < 5000, `${ts} is not now in IST`);
+  const sh = rt.tab('s-essay');
+  const col = (sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0] ?? []).indexOf('timestamp') + 1;
+  assert.equal(sh.formats[1]?.[col - 1], '@', 'plain-text cell');
+  assert.equal(typeof sh.get(2, col), 'string');
+});
+t('convertTimestampsToIST(): rewrites old "…Z" timestamps in every tab, skips IST ones, leaves anything else and every other cell alone', () => {
+  const rt = createOpenRuntime();
+  reg(rt); // already IST
+  reg(rt, { id: 'T2' });
+  reg(rt, { id: 'T3' });
+  reg(rt, { id: 'T4' });
+  reg(rt, { eventId: 's-poem', id: 'T5' });
+  const sh = rt.tab('s-essay');
+  const put = (row: number, v: string) => sh.getRange(row, 1, 1, 1).setValues([[v]]);
+  put(3, '2026-11-10T05:00:00.000Z'); // 10:30 IST
+  put(4, '2026-11-10T20:00:05Z'); // after 18:30 UTC → next day in IST
+  put(5, 'typed by hand');
+  rt.tab('s-poem').getRange(2, 1, 1, 1).setValues([['2026-11-12T23:59:59.999Z']]);
+  const otherCells = () => JSON.stringify(rt.ss.sheets.map((s) => s.cells.map((r) => r.slice(1))));
+  const others = otherCells();
+  const keep2 = cellOf(rt, 's-essay', 2, 'timestamp');
+  const logs = captureLogs(rt);
+  const n = (rt.ctx.convertTimestampsToIST as () => number)();
+  assert.equal(n, 3);
+  assert.equal(cellOf(rt, 's-essay', 2, 'timestamp'), keep2, 'already IST: unchanged');
+  assert.equal(cellOf(rt, 's-essay', 3, 'timestamp'), '2026-11-10 10:30:00 IST');
+  assert.equal(cellOf(rt, 's-essay', 4, 'timestamp'), '2026-11-11 01:30:05 IST');
+  assert.equal(cellOf(rt, 's-essay', 5, 'timestamp'), 'typed by hand');
+  assert.equal(cellOf(rt, 's-poem', 2, 'timestamp'), '2026-11-13 05:29:59 IST');
+  assert.equal(otherCells(), others, 'no other column changed');
+  assert.ok(logs.some((l) => /^s-essay \("ESY – Essay Writing"\): 2 converted, 1 already IST, 1 in another format left unchanged$/.test(l)), logs.join('\n'));
+  assert.ok(logs.some((l) => /^s-poem .*: 1 converted, 0 already IST$/.test(l)), logs.join('\n'));
+  assert.match(logs[logs.length - 1] ?? '', /^convertTimestampsToIST: 3 timestamp\(s\) converted to IST\.$/);
+  assert.equal(rt.lock.held, false);
+  // Running it again changes nothing.
+  const snap = rt.ss.snapshot();
+  assert.equal((rt.ctx.convertTimestampsToIST as () => number)(), 0);
+  assert.equal(rt.ss.snapshot(), snap);
+});
+t('nothing reads the timestamp column: any value there leaves register, duplicate, status, cap, lookup and IDs unaffected', () => {
+  const rt = createOpenRuntime();
+  const r = reg(rt);
+  rt.tab('s-essay').getRange(2, 1, 1, 1).setValues([['not a date at all']]);
+  assert.equal(reg(rt).code, 'DUPLICATE');
+  assert.equal(reg(rt, { id: 'Z2' }).regId, 'KR26-ESY-0002');
+  assert.equal(st(rt).events['s-essay']?.registeredCount, 2);
+  assert.equal((rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }) as { passes: { regId: string }[] }).passes[0]?.regId, r.regId);
+  const code = readFileSync('apps-script/Code.gs', 'utf8');
+  assert.equal((code.match(/\.timestamp\b|\['timestamp'\]/g) ?? []).length, 0, 'Code.gs never reads row.timestamp');
+});
+
 console.log('\nClient/server parity');
 t('normalisers in validation.ts and Code.gs give identical results', () => {
   const rt = createOpenRuntime();

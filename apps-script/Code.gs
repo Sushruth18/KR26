@@ -66,6 +66,12 @@ var REG_EXTRA_HEADERS = ['eligibility_confirmed', 'status'];
 // is never handed out twice — even if a coordinator deletes the row with the highest number.
 var REG_NO_PROP = 'regNo_';
 var LOCK_WAIT_MS = 20000;
+// Registration timestamps are plain text in India time, e.g. "2026-11-14 18:05:09 IST". Nothing in this script reads
+// the timestamp column back (it is for people); convertTimestampsToIST() rewrites older "…Z" (UTC) values once.
+var TZ = 'Asia/Kolkata';
+var IST_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+var IST_TS_RE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} IST$/;
+var UTC_TS_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 // Config.gs (generated) must declare CONFIG_SCHEMA with this exact number, or every request answers CONFIG_MISMATCH.
 // Keep equal to GAS_CONFIG_SCHEMA in scripts/gas-config.ts (npm run gas:config fails if they differ).
 var EXPECTED_CONFIG_SCHEMA = 6;
@@ -428,6 +434,11 @@ function safeCell_(v) {
 }
 
 /** Appends one row as plain text, placing values by header name (column order in the Sheet can change). */
+/** "2026-11-14 18:05:09 IST" — always India time, whatever the script project's own time zone is. */
+function istTimestamp_(date) {
+  return Utilities.formatDate(date, TZ, IST_FORMAT) + ' IST';
+}
+
 function appendByHeader_(sh, record) {
   var lastCol = sh.getLastColumn();
   var headers = sh.getRange(1, 1, 1, lastCol).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
@@ -576,7 +587,7 @@ function register_(b) {
 
     var regId = nextRegId_(ev.code, rows, p.eventId);
     appendByHeader_(tab, {
-      timestamp: new Date().toISOString(),
+      timestamp: istTimestamp_(new Date()),
       reg_id: regId,
       category: p.category,
       name: p.name,
@@ -947,6 +958,65 @@ function findRegistrations() {
     });
   });
   console.log(found ? found + ' row(s) found for ' + id + '.' : 'No row holds ' + id + ' in any event tab.');
+}
+
+/**
+ * ONE-OFF — run once from the editor after deploying this version (README "Updating the script"). Rewrites the old
+ * UTC timestamps ("2026-11-10T05:00:00.000Z") in the timestamp column of every event tab to the IST text format new
+ * rows use ("2026-11-10 10:30:00 IST"). Rows already in IST are skipped, anything else is left as it is and counted.
+ * Only the timestamp cells that change are written (as plain text); no other cell, row or column is touched.
+ * Safe to run again: a second run changes nothing. Holds the script lock so it never interleaves with a registration.
+ */
+function convertTimestampsToIST() {
+  assertConfig_();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var events = readEvents_();
+    var total = 0;
+    Object.keys(CONFIG.events).forEach(function (eventId) {
+      var tab = eventTabOrNull_(eventId, events);
+      if (!tab) {
+        console.warn(eventId + ': no usable tab — skipped');
+        return;
+      }
+      var lastRow = tab.getLastRow();
+      if (lastRow < 2) {
+        console.log(eventId + ' ("' + tab.getName() + '"): no rows');
+        return;
+      }
+      var headers = tab.getRange(1, 1, 1, tab.getLastColumn()).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
+      var col = headers.indexOf('timestamp') + 1;
+      var values = tab.getRange(2, col, lastRow - 1, 1).getDisplayValues();
+      var changed = 0;
+      var already = 0;
+      var other = 0;
+      values.forEach(function (v, i) {
+        var s = String(v[0]).trim();
+        if (s === '') return;
+        if (IST_TS_RE.test(s)) {
+          already++;
+          return;
+        }
+        if (!UTC_TS_RE.test(s)) {
+          other++;
+          return;
+        }
+        var cell = tab.getRange(i + 2, col);
+        cell.setNumberFormat('@');
+        cell.setValues([[istTimestamp_(new Date(s))]]);
+        changed++;
+      });
+      total += changed;
+      console.log(eventId + ' ("' + tab.getName() + '"): ' + changed + ' converted, ' + already + ' already IST' +
+        (other ? ', ' + other + ' in another format left unchanged' : ''));
+    });
+    SpreadsheetApp.flush();
+    console.log('convertTimestampsToIST: ' + total + ' timestamp(s) converted to IST.');
+    return total;
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /** Run from the editor to see which Config.gs this project is using (version, schema, events) without changing anything. */
