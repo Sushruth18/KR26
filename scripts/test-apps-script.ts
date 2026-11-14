@@ -1475,6 +1475,19 @@ t('an existing 13-column tab with live rows: setupSheet APPENDS the new column a
   assert.equal(cellOf(rt, 's-quiz', 4, 'notes'), '');
   assert.equal(cellOf(rt, 's-quiz', 4, 'usn_or_empid'), 'U3');
 });
+t("setupSheet formats only the script's own columns as plain text — a coordinator's own column keeps its format", () => {
+  const rt = createOpenRuntime();
+  const sh = rt.tab('s-quiz');
+  const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0]!;
+  const own = headers.length + 1;
+  sh.getRange(1, own, 1, 1).setValues([['attended']]);
+  sh.getRange(2, own, 5, 1).setNumberFormat('0.00');
+  setup(rt);
+  for (const row of [2, 6]) assert.equal(sh.formats[row - 1]?.[own - 1], '0.00', `row ${row}: the coordinator's column keeps its format`);
+  for (const h of ['phone', 'eligibility_confirmed', 'status']) {
+    assert.equal(sh.formats[9]?.[headers.indexOf(h)], '@', `${h} is plain text`);
+  }
+});
 t('an eligibility event whose tab lacks eligibility_confirmed → SERVER EVENT_TAB_COLUMN_MISSING, nothing written', () => {
   const rt = createOpenRuntime();
   const sh = rt.tab('s-elocution');

@@ -1011,9 +1011,16 @@ function setupSheet() {
     }
     var added = ensureHeaders_(sh, REG_HEADERS, REG_EXTRA_HEADERS);
     if (added.length) report[id].tab += '; column(s) ' + added.join(', ') + ' appended at the end';
-    // Plain text for every data column (phone numbers, USNs, leading zeros) — also for rows typed in by hand.
-    // Format only: no cell value is read or written here.
-    if (sh.getMaxRows() > 1) sh.getRange(2, 1, sh.getMaxRows() - 1, sh.getLastColumn()).setNumberFormat('@');
+    // Plain text for the script's own data columns (phone numbers, USNs, leading zeros) — also for rows typed in by
+    // hand. Format only: no cell value is read or written, and a coordinator's own columns keep their format.
+    if (sh.getMaxRows() > 1) {
+      sh.getRange(2, 1, sh.getMaxRows() - 1, REG_HEADERS.length).setNumberFormat('@');
+      var row1 = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
+      REG_EXTRA_HEADERS.forEach(function (h) {
+        var col = row1.indexOf(h) + 1;
+        if (col > 0) plainTextBelow_(sh, col);
+      });
+    }
     sh.setFrozenRows(1);
     console.log(id + ': Events row ' + report[id].row + '; ' + report[id].tab);
   });

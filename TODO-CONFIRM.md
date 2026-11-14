@@ -17,6 +17,12 @@ Placeholders are used in the site until these are filled in. Nothing here has be
   - Simple Kannada Debate rules 3–7 (drafts): 3 ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ನೀಡಲಾಗುವುದು; ಸಿದ್ಧತೆಗೆ 5 ನಿಮಿಷ ಸಿಗುತ್ತದೆ. · 4 ಯಾರು ಪರವಾಗಿ, ಯಾರು ವಿರುದ್ಧವಾಗಿ ಮಾತನಾಡಬೇಕು ಎಂದು ನ್ಯಾಯಾಧೀಶರು ನಿರ್ಧರಿಸುತ್ತಾರೆ. · 5 ಸರಳ ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ; ಪದ ಸಿಗದಿದ್ದರೆ ಕೆಲವು ಇಂಗ್ಲಿಷ್ ಪದಗಳನ್ನು ಬಳಸಬಹುದು. · 6 ಕನ್ನಡದಲ್ಲಿ ಮಾಡಿದ ಪ್ರಯತ್ನ, ವಿಚಾರಗಳ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆತ್ಮವಿಶ್ವಾಸದ ಆಧಾರದ ಮೇಲೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ. · 7 ಧರ್ಮ, ಜಾತಿ ಅಥವಾ ಭಾಷೆಯ ಬಗ್ಗೆ ವೈಯಕ್ತಿಕ ವಾದಗಳು ಬೇಡ; ಎಲ್ಲರನ್ನೂ ಗೌರವದಿಂದ ಕಾಣಿ.
 - Prize pool is now ₹45,000 (`site.json → prizePoolTotal`), 14 competitions
 
+### More Kannada drafts from the Nov 2026 batch (for a Kannada speaker)
+- [ ] Treasure Hunt cap (`kn.json`): "ಗರಿಷ್ಠ ೩೦ ತಂಡಗಳು" (Limited to 30 teams) · status "ಕೆಲವೇ ಸ್ಥಾನಗಳು ಉಳಿದಿವೆ" (Few seats left) · "ಭರ್ತಿಯಾಗಿದೆ" (Full) · card reason "ಈ ಸ್ಪರ್ಧೆಯ ಎಲ್ಲಾ ಸ್ಥಾನಗಳು ಭರ್ತಿಯಾಗಿವೆ." · Register message "ಕ್ಷಮಿಸಿ — ಈ ಸ್ಪರ್ಧೆಯ ಎಲ್ಲಾ ಸ್ಥಾನಗಳು ಭರ್ತಿಯಾಗಿವೆ. ಬೇರೆ ಸ್ಪರ್ಧೆಗಳನ್ನು ನೋಡಿ."
+- [ ] Withdrawn pass lookup (`kn.json → pass.lookup.WITHDRAWN`): "ಈ ನೋಂದಣಿಯನ್ನು (…) ಹಿಂಪಡೆಯಲಾಗಿದೆ, ಆದ್ದರಿಂದ ಇದಕ್ಕೆ ಪಾಸ್ ಇಲ್ಲ. ಇದು ತಪ್ಪಾಗಿದ್ದರೆ ಸ್ಪರ್ಧೆಯ ಸಂಯೋಜಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."
+- [ ] Debate notice email (`Code.gs → buildDebateNotice_`, sent once by `notifyDebateMediumChange`) — **check before running it**: subject "… — now in Kannada only / ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ"; "ನಮಸ್ಕಾರ <name>," · ""<event>" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು (ನೋಂದಣಿ ಐಡಿ: …)." · "ಒಂದು ಬದಲಾವಣೆ: ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ." · "ನೀವು ಹಿಂದೆ ಸರಿಯಲು ಬಯಸಿದರೆ, ದಯವಿಟ್ಟು ಸ್ಪರ್ಧೆಯ ಸಂಯೋಜಕರಿಗೆ ತಿಳಿಸಿ — ಅವರ ಸಂಖ್ಯೆಗಳು ಇಲ್ಲಿವೆ: <link>" · student Debate only: "ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲದಿದ್ದರೆ, ಕನ್ನಡೇತರರಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ" ಅಥವಾ "ಆಶುಭಾಷಣ" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಬಹುದು: <links>"
+- [ ] Site name "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ" everywhere on the website; the pass card, its PNG, the `.ics` and the confirmation email keep "ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ" / "Karnataka Rajyotsava" as asked — confirm that split is intended
+
 ### Kannada venue names — drafts for a Kannada speaker (`events.json → venue.kn`)
 Block names are transliterated; floors use Kannada numerals (numerals rule), the room number stays in Latin digits as on the door sign.
 - [ ] BSN Auditorium → ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ (Group Singing, Faculty Group Singing)
