@@ -37,6 +37,11 @@ Block names are transliterated; floors use Kannada numerals (numerals rule), the
 
 10. **Painting** rule 4 (Kannada): "ಪತ್ರಿಕೆಗಳನ್ನು" (newspapers) → "ಹಾಳೆಗಳನ್ನು" (A3 sheets), as the English says
 11. **Debate** rule 8 (both debates), **Poem** rule 1, **Essay** rule 1 (Kannada): the PDF said "in **both** Kannada and English" (… ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಎರಡರಲ್ಲಿಯೂ); changed to "Kannada **or** English" (ಕನ್ನಡ ಅಥವಾ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ) so it agrees with the English "English or Kannada"
+12. **Debate medium (Nov 2026):** both Debates (`s-debate`, `f-debate`) are now **Kannada only** — rule 8 replaced by "The debate will be in Kannada only." / "ಚರ್ಚೆ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ." (the "Kannada or English" change in 11 no longer applies to them). Ids, codes and Sheet tab names are unchanged
+
+### Debate notice — Kannada drafts for review (`kn.json → competitions.medium`)
+- [ ] "ಮಾಧ್ಯಮ: ಕನ್ನಡ ಮಾತ್ರ." (Medium: Kannada only.) — on both Debate cards and in the register summary
+- [ ] Student Debate only: "ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲವೇ? ಕನ್ನಡೇತರರಿಗಾಗಿ ಇರುವ **ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ** ಅಥವಾ **ಆಶುಭಾಷಣ** ಸ್ಪರ್ಧೆಯಲ್ಲಿ ಭಾಗವಹಿಸಿ." (Not a Kannada speaker? Try the Simple Kannada Debate or Elocution (for non-Kannadigas).)
 
 ### Differences between the Kannada and English PDF text — kept as written, please confirm
 - [ ] Painting rule 8 (Kannada) ends "ಅಚ್ಚುಕಟ್ಟಾಗಿ" where Rangoli rule 4 says "ಅಚ್ಚುಕಟ್ಟು"

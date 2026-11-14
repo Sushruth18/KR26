@@ -205,7 +205,17 @@
       "deadline": "The registration deadline has passed.",
       "completed": "This competition is over — see you at the next one!"
     },
-    "liveRetry": "Check again"
+    "liveRetry": "Check again",
+    "medium": {
+      "kannadaOnly": "Medium: Kannada only.",
+      "notSpeaker": "Not a Kannada speaker? Try the",
+      "or": "or",
+      "tail": " (for non-Kannadigas).",
+      "short": {
+        "s-simple-debate": "Simple Kannada Debate",
+        "s-elocution": "Elocution"
+      }
+    }
   },
   "eventPage": {
     "guests": {

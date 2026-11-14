@@ -5,6 +5,7 @@ import { formatNumber } from '../../lib/format';
 import type { CompetitionEvent } from '../../lib/schemas';
 import type { ResolvedEvent } from '../../lib/eventState';
 import { StatusPill } from '../ui/StatusPill';
+import { MediumNotice } from '../competitions/MediumNotice';
 
 interface Props {
   event: CompetitionEvent;
@@ -30,6 +31,7 @@ export function EventSummary({ event, resolved, loading }: Props) {
         <h3 className="text-xl text-gold-300">{d.name}</h3>
         {loading ? <span className="skeleton h-6 w-28" aria-hidden="true" /> : resolved && <StatusPill state={resolved.state} />}
       </div>
+      <MediumNotice event={event} className="mt-3" />
       <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
         {rows.map(([k, v]) => (
           <div key={k} className="contents">

@@ -25,6 +25,13 @@ export const eventSchema = z.object({
   /** Optional HH:MM (IST) end; shown as a range ("12:30 PM – 4:30 PM") and used as the .ics DTEND. Needs a real `time`. */
   endTime: hhmm.optional(),
   venue: bilingual,
+  /** "kannada" = the event is held in Kannada only; the card and the register summary show a notice. */
+  medium: z.literal('kannada').optional(),
+  /**
+   * Events to suggest to someone who cannot take part in Kannada (ids of other events, same category; shown as links in
+   * the medium notice). Checked by validate-data.
+   */
+  alternatives: z.array(z.string()).optional(),
   teamSize: z.object({ min: z.number().int().min(1), max: z.number().int().min(1) }),
   deadline: isoDateTime,
   prizes: z.discriminatedUnion('type', [

@@ -16,6 +16,7 @@ import { PrizeRow } from './PrizeRow';
 import { RegisterAction } from './RegisterAction';
 import { RulesDisclosure } from './RulesDisclosure';
 import { EventIcon } from './EventIcon';
+import { MediumNotice } from './MediumNotice';
 
 interface Props {
   event: CompetitionEvent;
@@ -59,6 +60,8 @@ export function TableauCard({ event, resolved, loading, index }: Props) {
         <div className="mt-2 flex min-h-[1.75rem] justify-center">
           {loading ? <span className="skeleton h-7 w-32 !rounded-full" aria-hidden="true" /> : <StatusPill state={resolved.state} />}
         </div>
+
+        <MediumNotice event={event} className="mt-4" />
 
         <dl className="tableau-meta">
           <Meta icon={<CalendarDays size={16} />} label={t('register.summary.date')}>

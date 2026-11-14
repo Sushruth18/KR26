@@ -60,6 +60,12 @@ if (site && events) {
       errors.push(`events.json: ${e.id} deadline is after site registrationClose`);
     }
     if (e.teamSize.min > e.teamSize.max) errors.push(`events.json: ${e.id} teamSize.min > max`);
+    if (e.alternatives && e.medium !== 'kannada') errors.push(`events.json: ${e.id} lists alternatives but is not medium "kannada"`);
+    for (const alt of e.alternatives ?? []) {
+      const other = events.find((x) => x.id === alt);
+      if (!other) errors.push(`events.json: ${e.id} alternative "${alt}" is not an event`);
+      else if (other.category !== e.category || alt === e.id) errors.push(`events.json: ${e.id} alternative "${alt}" must be another ${e.category} event`);
+    }
     if (e.endTime && !/^\d{2}:\d{2}$/.test(e.time)) errors.push(`events.json: ${e.id} has an endTime but no start time`);
     if (e.endTime && /^\d{2}:\d{2}$/.test(e.time) && e.endTime <= e.time) errors.push(`events.json: ${e.id} endTime must be after time`);
     if (/^\d{2}:\d{2}$/.test(e.time)) {

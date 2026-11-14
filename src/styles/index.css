@@ -506,6 +506,32 @@
     border-top: 1px solid rgba(201, 138, 27, 0.3);
     font-size: 0.925rem;
   }
+  /* "Medium: Kannada only" callout (MediumNotice): saffron-edged, readable ivory text, gold links. */
+  .medium-notice {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid rgba(232, 119, 46, 0.55);
+    border-left-width: 3px;
+    border-radius: 0.75rem;
+    background: rgba(74, 14, 24, 0.55);
+    color: var(--ivory-50);
+    font-size: 0.925rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .medium-link {
+    color: var(--gold-300);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    /* tall enough to tap comfortably inside a paragraph */
+    padding-block: 0.35rem;
+  }
+  .medium-link:hover {
+    color: var(--ivory-50);
+  }
   .tableau-base {
     position: absolute;
     left: 0;

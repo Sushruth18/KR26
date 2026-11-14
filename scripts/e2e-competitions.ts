@@ -226,6 +226,41 @@ async function main() {
       return `all ${events.length} rule lists render exactly as in events.json (${lang}), numbered, no raw TODO`;
     });
 
+    // Both Debates are Kannada only: a notice on each card (and in the register summary), rule 8 says so.
+    await scenario(`debate-medium-kannada-only-${lang}-360`, async (errors) => {
+      const only = lang === 'kn' ? 'ಮಾಧ್ಯಮ: ಕನ್ನಡ ಮಾತ್ರ' : 'Medium: Kannada only';
+      const rule = lang === 'kn' ? 'ಚರ್ಚೆ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ.' : 'The debate will be in Kannada only.';
+      const out: string[] = [];
+      for (const id of ['s-debate', 'f-debate'] as const) {
+        const ev = events.find((e) => e.id === id)!;
+        expect(ev.rules[lang][7] === rule, `${id}: rule 8 is "${ev.rules[lang][7]}"`);
+        expect(!ev.rules.en.some((r) => /English or Kannada/.test(r)), `${id}: an old "English or Kannada" rule is left`);
+        const page = await open(browser, lang, 360, `/competitions?for=${ev.category}&mock=`, errors, true);
+        const m = await page.$eval(`[data-testid=medium-${id}]`, (n) => {
+          const r = n.getBoundingClientRect();
+          return {
+            text: n.textContent ?? '',
+            role: n.getAttribute('role'),
+            links: [...n.querySelectorAll('a')].map((a) => a.getAttribute('href')),
+            fits: r.left >= 0 && r.right <= document.documentElement.clientWidth,
+          };
+        });
+        expect(m.text.includes(only), `${id}: notice "${m.text}"`);
+        expect(m.role === 'note' && m.fits, `${id}: role ${m.role}, fits ${m.fits}`);
+        const want = ((ev as { alternatives?: string[] }).alternatives ?? []).map((a) => `/competitions?for=students#${a}`);
+        expect(m.links.join() === want.join(), `${id}: links ${m.links.join()} (want ${want.join() || 'none'})`);
+        const others = await page.$$eval('[data-testid^=medium-]:not([data-testid^=medium-link])', (n) => n.map((x) => x.getAttribute('data-testid')));
+        expect(others.every((x) => x === 'medium-s-debate' || x === 'medium-f-debate'), `only the debates have a notice: ${others.join()}`);
+        await page.browserContext().close();
+        out.push(`${id} ${m.links.length} link(s)`);
+      }
+      const reg = await open(browser, lang, 360, '/competitions?for=faculty&mock=', errors);
+      await reg.goto(`${BASE}/register?event=f-debate&mock=`, { waitUntil: 'networkidle0' });
+      await reg.waitForSelector('[data-testid=event-summary] [data-testid=medium-f-debate]');
+      await reg.browserContext().close();
+      return `${out.join(', ')}; register summary shows it too`;
+    });
+
     await scenario(`treasure-hunt-three-coordinators-${lang}-360`, async (errors) => {
       const page = await open(browser, lang, 360, '/competitions?for=students&mock=', errors);
       const hunt = events.find((e) => e.id === 's-treasure-hunt')!;

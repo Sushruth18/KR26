@@ -197,6 +197,7 @@
       "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
       "en": "SMV Block (Academic Block), 1st Floor Auditorium"
     },
+    "medium": "kannada",
     "teamSize": {
       "min": 1,
       "max": 1
@@ -216,7 +217,7 @@
         "ಪರವಾಗಿ ಅಥವಾ ವಿರುದ್ಧವಾಗಿ ನ್ಯಾಯಾಧೀಶರು ಸ್ವತಃ ನಿರ್ಧರಿಸುತ್ತಾರೆ ಮತ್ತು ಭಾಗವಹಿಸುವವರು ಎರಡಕ್ಕೂ ಸಿದ್ಧರಾಗಿರಬೇಕು. ಪಕ್ಷಗಳ ಅದಲು-ಬದಲು ಕೂಡ ಇರುತ್ತದೆ, ಆದ್ದರಿಂದ ಚೆನ್ನಾಗಿ ಸಿದ್ಧರಾಗಿ ಬನ್ನಿ.",
         "ಪ್ರಸ್ತುತಪಡಿಸಿದ ವಿಚಾರಗಳು ಮತ್ತು ಆಲೋಚನೆಗಳು ಬಹಳ ಸ್ಪಷ್ಟವಾಗಿರಬೇಕು ಮತ್ತು ಬಿಂದುವಾಗಿರಬೇಕು.",
         "ಭಾಗವಹಿಸುವವರು ಚೆನ್ನಾಗಿ ವರ್ತಿಸಬೇಕು ಮತ್ತು ಸಭ್ಯ ಭಾಷೆಯನ್ನು ಬಳಸಬೇಕು.",
-        "ಚರ್ಚೆಯ ವಿಧಾನವು ಕನ್ನಡ ಅಥವಾ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ ಇರುತ್ತದೆ.",
+        "ಚರ್ಚೆ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ.",
         "ಭಾಗವಹಿಸುವವರು ಧರ್ಮ, ಜಾತಿ, ಭಾಷೆಯಂತಹ ವೈಯಕ್ತಿಕ ವಾದಗಳನ್ನು ಚರ್ಚೆಗೆ ತರಬಾರದು."
       ],
       "en": [
@@ -227,7 +228,7 @@
         "For or against will be decided by the judges themselves, and participants should be ready for both. Also, there will be swapping of sides, so be well prepared.",
         "Ideas and thoughts presented should be very clear and to the point.",
         "Participants must be well-behaved and use decent language.",
-        "The mode of discussion will be in English or Kannada.",
+        "The debate will be in Kannada only.",
         "Participants shouldn't bring personal arguments such as religion, caste or language into the debate."
       ]
     },
@@ -564,6 +565,7 @@
       "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
       "en": "SMV Block (Academic Block), 1st Floor Auditorium"
     },
+    "medium": "kannada",
     "teamSize": {
       "min": 1,
       "max": 1
@@ -581,7 +583,7 @@
         "ಪರವಾಗಿ ಅಥವಾ ವಿರುದ್ಧವಾಗಿ ನ್ಯಾಯಾಧೀಶರು ಸ್ವತಃ ನಿರ್ಧರಿಸುತ್ತಾರೆ ಮತ್ತು ಭಾಗವಹಿಸುವವರು ಎರಡಕ್ಕೂ ಸಿದ್ಧರಾಗಿರಬೇಕು. ಪಕ್ಷಗಳ ಅದಲು-ಬದಲು ಕೂಡ ಇರುತ್ತದೆ, ಆದ್ದರಿಂದ ಚೆನ್ನಾಗಿ ಸಿದ್ಧರಾಗಿ ಬನ್ನಿ.",
         "ಪ್ರಸ್ತುತಪಡಿಸಿದ ವಿಚಾರಗಳು ಮತ್ತು ಆಲೋಚನೆಗಳು ಬಹಳ ಸ್ಪಷ್ಟವಾಗಿರಬೇಕು ಮತ್ತು ಬಿಂದುವಾಗಿರಬೇಕು.",
         "ಭಾಗವಹಿಸುವವರು ಚೆನ್ನಾಗಿ ವರ್ತಿಸಬೇಕು ಮತ್ತು ಸಭ್ಯ ಭಾಷೆಯನ್ನು ಬಳಸಬೇಕು.",
-        "ಚರ್ಚೆಯ ವಿಧಾನವು ಕನ್ನಡ ಅಥವಾ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ ಇರುತ್ತದೆ.",
+        "ಚರ್ಚೆ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ.",
         "ಭಾಗವಹಿಸುವವರು ಧರ್ಮ, ಜಾತಿ, ಭಾಷೆಯಂತಹ ವೈಯಕ್ತಿಕ ವಾದಗಳನ್ನು ಚರ್ಚೆಗೆ ತರಬಾರದು."
       ],
       "en": [
@@ -592,7 +594,7 @@
         "For or against will be decided by the judges themselves, and participants should be ready for both. Also, there will be swapping of sides, so be well prepared.",
         "Ideas and thoughts presented should be very clear and to the point.",
         "Participants must be well-behaved and use decent language.",
-        "The mode of discussion will be in English or Kannada.",
+        "The debate will be in Kannada only.",
         "Participants shouldn't bring personal arguments such as religion, caste or language into the debate."
       ]
     },
