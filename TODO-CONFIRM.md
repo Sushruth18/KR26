@@ -88,6 +88,7 @@ Block names are transliterated; floors use Kannada numerals (numerals rule), the
 
 The block between the `team-import` markers further down is rewritten by `npm run team:import`; everything outside it is hand-written and is kept. (The importer used to write a separate `TODO-CONFIRM-team.md`; it now writes here, so this stays one file.)
 
+- [ ] **Cultural group (Nov 2026)** replaces Drama in the same place: Arya K Hirematha (Drama / ನಾಟಕ) and **Samith Reddy S** (Fashion / ಫ್ಯಾಷನ್). Samith is not in the form export, so he was added by hand and his photo processed with `npm run team:photo -- --photos <folder> --id samith-reddy-s` (mapped in `scripts/team-photo-map.json` by the piece of the file name before " - ", `IMG_8231 (1)` — the full name contains his USN, which must not be committed). Please check: his Kannada name **ಸಮಿತ್ ರೆಡ್ಡಿ ಎಸ್** (draft), the label **ಸಾಂಸ್ಕೃತಿಕ**, the sub-role **ಫ್ಯಾಷನ್**, his consent to the photo, and the crop (4:5, zoom 1.35 from a 2250×4000 full-length shot)
 - [ ] **Confirm the 2026 team list** (35 people imported from the form) and review everything in the generated block below
 - Files: `src/data/team-config.json` (troupe labels, icons and **page order** — reorder the array to reorder the page), `src/data/team-role-map.json` (role text → troupe; add aliases here), `src/data/team-photos.generated.json` (sizes and blur-up, written by the importer), `scripts/team-photo-map.json` (per-person photo decisions), `public/team/` (processed WebP copies)
 - Commands: `npm run team:import -- --csv <responses.csv> --photos <folder> [--regen-photos] [--dry-run]` (never commit the CSV or the photo folder), `npm run e2e:team` (needs `npm run build` first for the dist scan, plus the dev server; set `E2E_BASE`, and `TEAM_CSV` to also scan dist for the real CSV values)
@@ -193,7 +194,7 @@ Fix by editing `name.kn` in `src/data/team.json`; a re-import never overwrites i
 - Stalls & Shops → ಮಳಿಗೆಗಳು ಮತ್ತು ಅಂಗಡಿಗಳು
 - Stage & Security → ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ
 - Anchoring → ನಿರೂಪಣೆ
-- Drama → ನಾಟಕ
+- Cultural → ಸಾಂಸ್ಕೃತಿಕ (sub-roles shown on the cards: Drama → ನಾಟಕ, Fashion → ಫ್ಯಾಷನ್)
 - Technical → ತಾಂತ್ರಿಕ
 
 ## Last import
@@ -212,7 +213,7 @@ Fix by editing `name.kn` in `src/data/team.json`; a re-import never overwrites i
 - **Stalls & Shops**: Vinyas KT, Deepashree C, Tejas Gowda L, Nishan Babu
 - **Stage & Security**: Rohit Sundar, Swaroop B H, Dhanush Rajakumar, Sacheth Kumar P N
 - **Anchoring**: Tejas S
-- **Drama**: Arya K Hirematha
+- **Cultural**: Arya K Hirematha (Drama), Samith Reddy S (Fashion — added by hand, not in the form export)
 
 <!-- team-import:end -->
 

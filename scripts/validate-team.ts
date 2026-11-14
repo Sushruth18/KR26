@@ -26,6 +26,13 @@ export function validateTeam(team: TeamGroup[] | null, errors: string[]): void {
     errors.push((e as Error).message);
   }
 
+  // The photo map is committed: it may name a photo only by a piece of its file name, never by a USN, e-mail or phone.
+  const mapText = readFileSync(resolve(process.cwd(), 'scripts/team-photo-map.json'), 'utf8');
+  // USN without word boundaries on purpose: in a file name it is often glued to other characters ("x_1BY24CS029").
+  if (/[\w.+-]+@[\w-]+\.[\w.]+|\b[6-9]\d{9}\b|1[A-Z]{2}\d{2}[A-Z]{2}\d{3}|\b[A-Z]:[\\/]/i.test(mapText)) {
+    errors.push('scripts/team-photo-map.json contains personal data or an absolute path (USN, e-mail, phone, drive letter) — use the piece of the file name before " - "');
+  }
+
   if (!team) return;
   const manifestPath = resolve(process.cwd(), 'src/data/team-photos.generated.json');
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Record<string, TeamPhoto>;
@@ -42,6 +49,11 @@ export function validateTeam(team: TeamGroup[] | null, errors: string[]): void {
       if (m.linkedin && cleanLinkedin(m.linkedin) !== m.linkedin) errors.push(`team.json: ${m.id}.linkedin is not a canonical LinkedIn profile URL (${m.linkedin})`);
       if (m.instagram && cleanInstagram(m.instagram) !== m.instagram) errors.push(`team.json: ${m.id}.instagram is not a canonical Instagram profile URL (${m.instagram})`);
       if (g.id === 'head' && !['Head', 'Co-Head'].includes(m.role.en)) errors.push(`team.json: ${m.id} is in the first group but its role is "${m.role.en}"`);
+      // A group with sub-roles (Cultural: Drama / Fashion) shows the member's own role, so it must be one of them.
+      const cfgGroup = config.groups.find((x) => x.id === g.id) as { roles?: Record<string, { kn: string; en: string }> } | undefined;
+      if (cfgGroup?.roles && !Object.values(cfgGroup.roles).some((r) => r.en === m.role.en && r.kn === m.role.kn)) {
+        errors.push(`team.json: ${m.id} role "${m.role.en}" / "${m.role.kn}" is not one of the ${g.id} roles in team-config.json`);
+      }
       if (!m.photo) continue;
       const photo = manifest[m.photo];
       if (!photo) {

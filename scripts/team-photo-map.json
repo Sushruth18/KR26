@@ -1,5 +1,5 @@
 {
-  "_comment": "Per-person photo decisions for npm run team:import. `file` = the photo's exact file name or its path inside the photo folder (e.g. \"ambiguous/Asha.jpg\"; subfolders are searched too), or a unique piece of the original file name BEFORE the \" - \" (e.g. \"WA0064\") — use it when the importer lists a photo as ambiguous. `focus` = where the 4:5 crop should be centred ({ \"x\": 0.5, \"y\": 0.35 }, fractions of the photo) when the automatic crop cuts a head. `zoom` = crop tighter than the full 4:5 window (never upscales: a crop narrower than 480 px gives one smaller copy). Keys are member ids from team.json.",
+  "_comment": "Per-person photo decisions for npm run team:import. `file` = the photo's exact file name or its path inside the photo folder (e.g. \"ambiguous/Asha.jpg\"; subfolders are searched too), or a unique piece of the original file name BEFORE the \" - \" (e.g. \"WA0064\") — use it when the importer lists a photo as ambiguous. `focus` = where the 4:5 crop should be centred ({ \"x\": 0.5, \"y\": 0.35 }, fractions of the photo) when the automatic crop cuts a head. `zoom` = crop tighter than the full 4:5 window (never upscales: a crop narrower than 480 px gives one smaller copy). Keys are member ids from team.json. Never write a USN, e-mail or phone number here (this file is committed; validate-data rejects them) — use the piece before \" - \", which is the camera's own name for the file.",
   "people": {
     "s-nishitha": {
       "focus": {
@@ -73,6 +73,14 @@
         "y": 0.3
       },
       "zoom": 1.7
+    },
+    "samith-reddy-s": {
+      "file": "IMG_8231 (1)",
+      "focus": {
+        "x": 0.5,
+        "y": 0.35
+      },
+      "zoom": 1.35
     }
   }
 }

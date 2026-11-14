@@ -1,5 +1,5 @@
 {
-  "_comment": "Display order of the troupes on /team: reorder the objects in `groups` and that is the page order. Groups with no members are hidden. `label.kn` values are DRAFTS for a Kannada speaker to check (see TODO-CONFIRM-team.md). `icon` picks the folk icon in src/components/team/TeamGroupIcon.tsx. In the first group, members are shown in the order of `roles` (Heads before Co-Heads); every other group shows its members in the order of src/data/team.json. `excludeIds`: ids of people removed from team.json on purpose — the importer never adds them back.",
+  "_comment": "Display order of the troupes on /team: reorder the objects in `groups` and that is the page order. Groups with no members are hidden. `label.kn` values are DRAFTS for a Kannada speaker to check (see TODO-CONFIRM-team.md). `icon` picks the folk icon in src/components/team/TeamGroupIcon.tsx. A group with `roles` shows each member's own sub-role on the card and orders members by `roles` (first group: Heads before Co-Heads; Cultural: Drama, Fashion); every other group shows its label as the role and keeps the order of src/data/team.json. `excludeIds`: ids of people removed from team.json on purpose — the importer never adds them back.",
   "excludeIds": [],
   "groups": [
     {
@@ -93,12 +93,22 @@
       "icon": "conch"
     },
     {
-      "id": "drama",
+      "id": "cultural",
       "label": {
-        "kn": "ನಾಟಕ",
-        "en": "Drama"
+        "kn": "ಸಾಂಸ್ಕೃತಿಕ",
+        "en": "Cultural"
       },
-      "icon": "mask"
+      "icon": "mask",
+      "roles": {
+        "drama": {
+          "kn": "ನಾಟಕ",
+          "en": "Drama"
+        },
+        "fashion": {
+          "kn": "ಫ್ಯಾಷನ್",
+          "en": "Fashion"
+        }
+      }
     },
     {
       "id": "technical",

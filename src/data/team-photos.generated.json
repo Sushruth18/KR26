@@ -535,5 +535,24 @@
         "src": "/team/krishna-charan-p-1600w.40172688.webp"
       }
     ]
+  },
+  "samith-reddy-s": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRsAAAABXRUJQVlA4ILQAAAAQBQCdASoQABQAPt1apkyopSOiMAgBEBuJbACdMoMEA6AAcrpDS+WU1zDNJ+pRWo0AAP4F9lWtAttjxgauHnpYUUghPDbVR+wy22nYTm6dzbD31EUXrJqrioFwZHM1X/sfh70MxInoD1y4PhxGLoBVFleV153l7DXvFs06TZVmo6aBam8Rj6Zwf20lBxQrJJ99Q3LBHtTo9WofwvsT/SHocuIMnhEhqo0YrseD6xgNFUgoAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/samith-reddy-s-480w.12033053.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/samith-reddy-s-960w.252ec9cf.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/samith-reddy-s-1600w.248f3421.webp"
+      }
+    ]
   }
 }

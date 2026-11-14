@@ -458,7 +458,7 @@
     ]
   },
   {
-    "id": "drama",
+    "id": "cultural",
     "members": [
       {
         "id": "arya-k-hirematha",
@@ -471,6 +471,18 @@
           "en": "Drama"
         },
         "photo": "arya-k-hirematha"
+      },
+      {
+        "id": "samith-reddy-s",
+        "name": {
+          "kn": "ಸಮಿತ್ ರೆಡ್ಡಿ ಎಸ್",
+          "en": "Samith Reddy S"
+        },
+        "role": {
+          "kn": "ಫ್ಯಾಷನ್",
+          "en": "Fashion"
+        },
+        "photo": "samith-reddy-s"
       }
     ]
   }

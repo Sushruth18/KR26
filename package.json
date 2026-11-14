@@ -30,7 +30,8 @@
     "perf:home": "tsx scripts/perf-home.ts",
     "team:import": "tsx scripts/import-team.ts",
     "e2e:team": "tsx --tsconfig tsconfig.node.json scripts/e2e-team.ts",
-    "e2e:rename": "tsx scripts/e2e-rename.ts"
+    "e2e:rename": "tsx scripts/e2e-rename.ts",
+    "team:photo": "tsx scripts/team-photo.ts"
   },
   "dependencies": {
     "@fontsource/baloo-tamma-2": "^5.3.0",

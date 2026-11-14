@@ -92,7 +92,9 @@ const ROLE_CASES: [string, string, string?][] = [
   ['Order and Discipline coordinator ', 'stage-security'],
   ['Committee member for stage and security ', 'stage-security'],
   ['Hosting Head', 'anchoring'],
-  ['Cultural(Drama) ', 'drama'],
+  ['Cultural(Drama) ', 'cultural'],
+  ['Fashion', 'cultural'],
+  ['Cultural', 'cultural'],
   ['Co-Head of Media', 'media'],
 ];
 
@@ -349,8 +351,19 @@ async function main() {
     expect(roles.join() === [...roles].sort((a, b) => (a === 'Head' ? -1 : b === 'Head' ? 1 : 0)).join(), `Heads must precede Co-Heads: ${roles}`);
     for (const g of buildTroupes(team as never)) {
       if (g.id === 'head') continue;
-      for (const m of g.members) expect(m.role.en === g.label.en && !/head/i.test(m.role.en), `${m.id}: role "${m.role.en}" must be the general label "${g.label.en}"`);
+      // Groups with sub-roles (Cultural: Drama / Fashion) show each member's own role; every other group its label.
+      const sub = (groupConfig.find((c) => c.id === g.id)?.roles ?? null) as Record<string, { en: string }> | null;
+      for (const m of g.members) {
+        const ok = sub ? Object.values(sub).some((r) => r.en === m.role.en) : m.role.en === g.label.en;
+        expect(ok && !/head/i.test(m.role.en), `${m.id}: role "${m.role.en}" must be ${sub ? 'one of the group roles' : `the general label "${g.label.en}"`}`);
+      }
     }
+    // Cultural replaces Drama in the same place, with Arya (Drama) then Samith (Fashion).
+    const cultural = buildTroupes(team as never).find((t) => t.id === 'cultural');
+    expect(cultural && cultural.label.en === 'Cultural' && cultural.label.kn === 'ಸಾಂಸ್ಕೃತಿಕ', 'Cultural group label');
+    expect(cultural?.members.map((m) => `${m.name.en}:${m.role.en}`).join() === 'Arya K Hirematha:Drama,Samith Reddy S:Fashion', `Cultural members ${cultural?.members.map((m) => m.name.en)}`);
+    expect(order.indexOf('cultural') === order.indexOf('anchoring') + 1 && !order.includes('drama'), 'Cultural sits where Drama was (after Anchoring), and Drama is gone');
+    expect(!!cultural?.members.find((m) => m.id === 'samith-reddy-s')?.photo, 'Samith has a processed photo');
     // a reordered config reorders the page
     const reversed = [...groupConfig].reverse();
     expect(reversed[0]!.id !== groupConfig[0]!.id, 'config order is a plain array');
