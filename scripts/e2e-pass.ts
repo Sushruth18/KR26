@@ -197,9 +197,13 @@ async function checkPng(page: Page, label: string) {
 }
 
 async function main() {
+  // This test registers far more than 30 Treasure Hunt teams: lift the cap (Events → max_teams blank = no limit) after
+  // the reset below. The cap itself is tested by npm run test:server and npm run e2e:competitions.
+  const uncap = () => fetch(`${BASE}/mock-api/__set?id=s-treasure-hunt&header=max_teams&value=`);
   await fetch(`${BASE}/mock-api/__reset`, { method: 'POST' }).catch(() => {
     throw new Error(`Dev server not reachable at ${BASE} — run "npm run dev" first.`);
   });
+  await uncap();
   const browser: Browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox'] });
   const consoleErrors: string[] = [];
   const pngHeights: Record<string, Set<number>> = { kn: new Set(), en: new Set() };

@@ -14,7 +14,7 @@ When something here conflicts with your defaults, this file wins. When something
   - **Day 1 — Competitions:** **20 November 2026** (Friday). All 14 competitions (students + faculty) happen this day, 12:30 PM – 4:30 PM.
   - **Day 2 — Kannada Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — rally, inauguration & Dasara procession, club performances, fashion show, music concert & DJ.
   - All dates (both days, countdown targets, registration window, per-event `deadline`) come from `src/data/site.json` / `events.json` — never hard-code a date in a component.
-- **Registration:** **open from now** (no opening date, no seat limits); closes **18 Nov 2026, 23:59 IST** (one day of buffer before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
+- **Registration:** **open from now** (no opening date; no seat limits except **Treasure Hunt: max 30 teams**); closes **18 Nov 2026, 23:59 IST** (one day of buffer before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
 - **Source of event data:** `Kannada_Rajyotsava_26_Budget_Proposal.docx` (schedule + prize breakdown) — §5.3 and §6 below are taken from it.
 - **Predecessor:** https://kr2k25-bmsit.netlify.app/ — keep every tab it had, redesign everything else.
 - **Audience:** students and faculty, ~90% on mobile phones, many on mid/low-end Android. Kannada is the default language.
@@ -162,7 +162,7 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 - Segmented toggle **ವಿದ್ಯಾರ್ಥಿಗಳು / ಅಧ್ಯಾಪಕರು** (Students / Faculty), synced to `?for=students|faculty`.
 - Grid of **TableauCards** (1 col mobile, 2 tablet, 3 desktop). Each card:
   - icon, name, date, time, venue, team size, 1st/2nd prize — or a "ಸ್ಮರಣಿಕೆ / Memento" badge when `prizes.type === "memento"` (all faculty events)
-  - status pill: **Open** (green) · **Closed** (a coordinator switched it off) · **Deadline passed** · **Completed** — there are no seat counts, "few seats" or "full" states
+  - status pill: **Open** (green) · **Closed** (a coordinator switched it off) · **Deadline passed** · **Completed** · **Few seats left** (amber, ≤ 4 places left) · **Full** (Register disabled) — the last two only for a capped event (Treasure Hunt); its card also says "Limited to 30 teams"
   - the Sheet's `is_open` is the coordinators' manual close switch; an event is open unless it is `FALSE` or its deadline has passed
   - "ನಿಯಮಗಳು / Rules" expandable (accessible disclosure, animated height)
   - coordinator name + `tel:` link
@@ -220,7 +220,7 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 
 ### 5.6 Register `/register`
 See §7 for the backend contract. The page is a styled multi-step form ("Join the procession"):
-1. **Choose event** — preselected from `?event=`; shows the event summary and its open/closed status (no seat count).
+1. **Choose event** — preselected from `?event=`; shows the event summary and its open/closed status (no seat count; "Few seats left" / "Full" for a capped event).
 2. **Your details** — category (student/faculty), name, USN or employee ID, department, semester (students), phone, email.
 3. **Team** (only if `teamSize.max > 1`) — dynamic member rows (name, USN, phone), min/max enforced per event; team name.
 4. **Review & submit** — summary, consent checkboxes (rules agreement; photo/video consent), submit.
@@ -261,7 +261,7 @@ All content lives in JSON; components never hard-code event data.
   }
 ]
 ```
-Events have **no `seats` field** — registration is unlimited. `prizes` is either `{ "type": "cash", "first": n, "second": n }` or `{ "type": "memento" }`.
+Registration is unlimited except where an event has **`seats`** (only Treasure Hunt: 30) — the fallback for the Sheet's `max_teams` cell, see §7. `prizes` is either `{ "type": "cash", "first": n, "second": n }` or `{ "type": "memento" }`.
 The prize-pool plaque sums only cash prizes. Add a build-time check in `validate-data.ts` that the cash
 total equals `site.json → prizePoolTotal` (45000) and fails the build if not.
 
@@ -320,7 +320,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 ## 7. Registration backend — Google Apps Script + Sheet
 
 ### Sheet layout (one spreadsheet, one tab per event)
-- **`Events`** tab (coordinators control this): `id | code | name_en | sheet_name | deadline_iso | is_open (TRUE/FALSE)`. The server reads the deadline, the open switch and the event's tab name from here — coordinators can close an event (`is_open` FALSE), move its deadline or rename its tab without redeploying the site. There is **no seats column**.
+- **`Events`** tab (coordinators control this): `id | code | name_en | sheet_name | deadline_iso | is_open (TRUE/FALSE) | whatsapp_url | max_teams`. The server reads the deadline, the open switch and the event's tab name from here — coordinators can close an event (`is_open` FALSE), move its deadline or rename its tab without redeploying the site. `max_teams` (appended at the end; blank = no limit, a whole number = cap on non-withdrawn registrations; seeded once with 30 for Treasure Hunt when `setupSheet` creates the column, never overwritten afterwards).
 - **One tab per event** (14), named by `sheet_name`, default `<CODE> – <English name>` (e.g. `ESY – Essay Writing`), created by `setupSheet` with a frozen, bold header row and plain-text data columns: `timestamp | reg_id | category | name | usn_or_empid | department | semester | phone | email | team_name | members_json | member_ids | consent_photo` (no `event_id` — the tab is the event), then the later columns `eligibility_confirmed` (… see Registration architecture) — `setupSheet` **appends** any missing later column at the END of an existing tab and never moves, renames or clears anything. **There is no shared `Registrations` tab**; an old one is never read, written or deleted by the script (the README tells coordinators to delete it by hand).
 - `Code.gs` finds an event's tab **only through the `sheet_name` cell**. If the cell is empty, the tab is missing, two events share a tab, or the tab's header row is not the layout above → `SERVER` (logged with the event id and tab name) and **nothing is written anywhere**. It never falls back to another tab. The status endpoint reports such an event as closed.
 - `setupSheet` is idempotent: it only adds a missing Events tab/row/column, event tab or header (new event rows start with `is_open` = **TRUE**); it never deletes, clears or overwrites data, and keeps coordinator edits. An older Events tab (with `seats`, no `sheet_name`) is upgraded in place.
@@ -330,14 +330,14 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - `doPost(e)` with JSON body (sent as `Content-Type: text/plain` to avoid CORS preflight) → register.
 - Register flow, all inside `LockService.getScriptLock().waitLock(20000)`:
   1. Parse + re-validate every field server-side (same rules as the client). Reject honeypot.
-  2. Check event exists, `is_open` is TRUE and now < deadline. There is no seat limit.
+  2. Check event exists, `is_open` is TRUE and now < deadline. Then (step 3) duplicate check, then the cap: if `max_teams` is set and the non-withdrawn rows already reach it → `{ ok:false, code:"FULL" }` — inside the lock, so two people can never both take the last place.
   3. Resolve the event's own tab (via `sheet_name`), then duplicate check inside that tab only: the same USN/emp ID (main registrant or any team member) already registered for that event → return `{ ok:false, code:"DUPLICATE", regId }`.
   4. Generate `reg_id` = `KR26-<CODE>-<4-digit number>` = highest existing number **in that tab** + 1.
   5. Append the row to that tab, release lock.
   6. Send confirmation email with `MailApp` (wrapped in try/catch — failure must not fail the registration). Mention in README that consumer Gmail accounts have a daily email quota.
   7. Return `{ ok:true, regId, event, name }`.
 - `lookup` searches **every event tab** and returns every pass found.
-- Error codes: `VALIDATION`, `CLOSED`, `DUPLICATE`, `SERVER` (there is no `FULL`). Always return JSON via `ContentService` with `MimeType.JSON`.
+- Error codes: `VALIDATION`, `CLOSED`, `FULL` (capped event), `DUPLICATE`, `SERVER`. Always return JSON via `ContentService` with `MimeType.JSON`.
 - Normalise: trim, collapse spaces, remove all spaces in and uppercase USN/employee ID, strip `+91`/spaces from phone, lowercase email.
 
 ### Validation rules (shared: `src/lib/validation.ts` and mirrored in `Code.gs`)
@@ -416,7 +416,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - **TODO values** (`TODO-CONFIRM` in data) render as "To be announced": hide `tel:` links, all-day `.ics`, "TBA" on the pass; Day 1 events with unknown time go in the "Time TBA" group.
 - **Backend** adds `action=lookup` — requires USN/employee ID **and** the full phone to match; returns only `regId`, `event`, `name`. Used on the pass page when local data is lost.
 - **BMSIT-only.** One person may register for several events; duplicates are checked per event only. Category is derived from the event and locked. Team member rows take a USN (student events) or employee ID (faculty events); the duplicate check covers both.
-- **Sheet wins** over `events.json` / `site.json` at runtime (deadline, is_open, tab name). **Registration is open from the start** — there is no `registrationOpen` and no "Opens soon" state; `setupSheet` creates every event with `is_open` TRUE and `is_open` is the coordinators' manual close switch. **No seat limits**: no `seats` anywhere (data, schema, Sheet, status, UI), no `FULL` code. Force plain-text writes (formula-injection guard).
+- **Sheet wins** over `events.json` / `site.json` at runtime (deadline, is_open, tab name). **Registration is open from the start** — there is no `registrationOpen` and no "Opens soon" state; `setupSheet` creates every event with `is_open` TRUE and `is_open` is the coordinators' manual close switch. **Seat limits only where `max_teams` is set** (Treasure Hunt, 30): status returns `seatsLeft` for capped events only, register returns `FULL`; every other event is unlimited. Force plain-text writes (formula-injection guard).
 - **Spam guards:** honeypot `website` + minimum time on form (> 3 s, `site.json → minFormSeconds`). `user_agent` is dropped from the Sheet (or stored as client-supplied only).
 - **Departments** (draft, TODO-CONFIRM): CSE, ISE, AIML, ECE, EEE, ETE, Mech, Civil, MBA, MCA, Other (free text).
 - **Kannada time words:** ಬೆಳಿಗ್ಗೆ (<12), ಮಧ್ಯಾಹ್ನ (12–16), ಸಂಜೆ (16–19), ರಾತ್ರಿ (19+). Own digit mapper; Latin digits stay in reg IDs, phone and USN.

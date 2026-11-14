@@ -41,6 +41,8 @@
   },
   "state": {
     "open": "Open",
+    "few": "Few seats left",
+    "full": "Full",
     "closed": "Closed",
     "deadline": "Deadline passed",
     "completed": "Completed",
@@ -140,6 +142,7 @@
     "BUSY": "Lots of people are registering right now. Please try again in a few seconds.",
     "NOT_OPEN": "Registration for this competition is not open right now.",
     "DEADLINE": "The registration deadline for this competition has passed.",
+    "FULL": "Sorry — this competition is full: all places have been taken. Have a look at the other competitions.",
     "DUPLICATE": "You (or someone in your team) are already registered for this competition.",
     "existingId": "Existing registration ID",
     "VALIDATION": "Some details aren't right. Fix the highlighted field and submit again.",
@@ -190,6 +193,7 @@
     "faculty": "Faculty",
     "count": "{{n}} competitions",
     "deadline": "Register by",
+    "capacity": "Limited to {{n}} teams",
     "prizes": "Prizes",
     "mementoBadge": "Memento",
     "mementoNote": "Winners receive a memento",
@@ -204,6 +208,7 @@
     "checking": "Checking registration status…",
     "reason": {
       "closed": "Registration for this competition is closed.",
+      "full": "This competition is full — all places have been taken.",
       "deadline": "The registration deadline has passed.",
       "completed": "This competition is over — see you at the next one!"
     },

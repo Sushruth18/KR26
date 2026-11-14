@@ -58,7 +58,7 @@ export function TableauCard({ event, resolved, loading, index }: Props) {
           {d.name}
         </h3>
         <div className="mt-2 flex min-h-[1.75rem] justify-center">
-          {loading ? <span className="skeleton h-7 w-32 !rounded-full" aria-hidden="true" /> : <StatusPill state={resolved.state} />}
+          {loading ? <span className="skeleton h-7 w-32 !rounded-full" aria-hidden="true" /> : <StatusPill state={resolved.state} few={resolved.few} />}
         </div>
 
         <MediumNotice event={event} className="mt-4" />
@@ -75,6 +75,11 @@ export function TableauCard({ event, resolved, loading, index }: Props) {
           </Meta>
           <Meta icon={<Users size={16} />} label={t('register.summary.team')}>
             {d.team}
+            {event.seats && (
+              <span className="block text-sm text-ivory-300" data-testid={`capacity-${event.id}`}>
+                {t('competitions.capacity', { n: formatNumber(event.seats, lang) })}
+              </span>
+            )}
           </Meta>
           <Meta icon={<Hourglass size={16} />} label={t('competitions.deadline')} showLabel>
             {formatDeadline(resolved.deadline, lang)}

@@ -8,8 +8,8 @@
 
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
-var CONFIG_SCHEMA = 5;
-var CONFIG_VERSION = '9a51ddee';
+var CONFIG_SCHEMA = 6;
+var CONFIG_VERSION = '4d8d0965';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -99,6 +99,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422",
         "en": "BSN 422"
@@ -121,6 +122,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೨ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 2nd Floor Auditorium"
@@ -143,6 +145,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್)",
         "en": "Visvesvaraya Auditorium (Architecture Block)"
@@ -165,6 +168,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 1st Floor Auditorium"
@@ -187,6 +191,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -209,6 +214,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
         "en": "SJB 5th Floor Amphitheatre"
@@ -231,6 +237,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 30,
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -253,6 +260,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
         "en": "BSN Auditorium"
@@ -275,6 +283,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -297,6 +306,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "nonKannadiga",
+      "maxTeams": 0,
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -319,6 +329,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "nonKannadiga",
+      "maxTeams": 0,
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -341,6 +352,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 1st Floor Auditorium"
@@ -363,6 +375,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
         "en": "SJB 5th Floor Amphitheatre"
@@ -385,6 +398,7 @@ var CONFIG = {
       "time": "12:30",
       "endTime": "16:30",
       "eligibility": "",
+      "maxTeams": 0,
       "venue": {
         "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
         "en": "BSN Auditorium"

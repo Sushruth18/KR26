@@ -29,7 +29,7 @@ export function EventSummary({ event, resolved, loading }: Props) {
     <div className="card mt-4 p-4 sm:p-5" data-testid="event-summary">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-xl text-gold-300">{d.name}</h3>
-        {loading ? <span className="skeleton h-6 w-28" aria-hidden="true" /> : resolved && <StatusPill state={resolved.state} />}
+        {loading ? <span className="skeleton h-6 w-28" aria-hidden="true" /> : resolved && <StatusPill state={resolved.state} few={resolved.few} />}
       </div>
       <MediumNotice event={event} className="mt-3" />
       <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">

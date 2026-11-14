@@ -5,23 +5,25 @@
  * website's data — never edit Config.gs by hand). Setup steps: apps-script/README.md.
  *
  * Layout of the spreadsheet
- *   Events tab        one row per competition: id | code | name_en | sheet_name | deadline_iso | is_open | whatsapp_url
+ *   Events tab        one row per competition: id | code | name_en | sheet_name | deadline_iso | is_open | whatsapp_url | max_teams
  *                     (whatsapp_url is optional and private: it is only ever returned to someone who just registered
  *                     for that event, or who looked their pass up — never by ?action=status.)
  *   one tab per event named by that row's sheet_name (e.g. "ESY – Essay Writing"), holding only that
  *                     event's registrations. There is no shared "Registrations" tab.
  *
  * Endpoints
- *   GET  ?action=status                         -> { ok, events: { [id]: { isOpen, deadline, registeredCount } }, serverTime, configVersion }
+ *   GET  ?action=status                         -> { ok, events: { [id]: { isOpen, deadline, registeredCount, seatsLeft? } }, serverTime, configVersion }
+ *                                                  (seatsLeft only for events with a max_teams number)
  *   POST { action: "register", ...fields }      -> { ok:true, regId, event, name, whatsappUrl? } | { ok:false, code, reason?, field?, regId? }
  *   POST { action: "lookup", id, phone }        -> (id = USN / employee ID, or a registration ID like KR26-ESY-0042) { ok:true, passes:[{ regId, event, name, whatsappUrl? }] } | { ok:false, code }
  * whatsappUrl is present only when the event's whatsapp_url cell holds a valid https://chat.whatsapp.com/<code> (or
  * https://whatsapp.com/channel/<code>) link; any other value is ignored and logged (never returned).
  * The browser sends POST bodies as Content-Type text/plain so no CORS preflight is needed.
  *
- * Registration is open unless the event's is_open cell is not TRUE or its deadline has passed. There is no
- * seat limit. Error codes: VALIDATION, CLOSED (reason NOT_OPEN = closed by a coordinator | DEADLINE), DUPLICATE,
- * SERVER, NOT_FOUND and RATE_LIMITED (lookup only).
+ * Registration is open unless the event's is_open cell is not TRUE or its deadline has passed. An event whose
+ * max_teams cell holds a number takes at most that many non-withdrawn registrations (FULL after that; blank = no
+ * limit -- only Treasure Hunt is capped, at 30). Error codes: VALIDATION, CLOSED (reason NOT_OPEN = closed by a
+ * coordinator | DEADLINE), FULL, DUPLICATE, SERVER, NOT_FOUND and RATE_LIMITED (lookup only).
  *
  * Every SERVER answer carries a short machine-readable "reason" (never a secret, stack trace or sheet content):
  *   EVENTS_TAB_MISSING                  the Events tab does not exist
@@ -42,7 +44,10 @@
 var SHEET_EVENTS = 'Events';
 var SHEET_OLD_REGS = 'Registrations'; // retired shared tab — never read or written; setupSheet only mentions it in the log
 // whatsapp_url is optional: coordinators paste a group/channel invite link there (setupSheet adds the empty column).
-var EVENT_HEADERS = ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open', 'whatsapp_url'];
+// max_teams: blank = no limit; a whole number = at most that many registrations (teams, or people for individual
+// events) that are not WITHDRAWN. When setupSheet first adds the column it seeds it once from Config.gs (Treasure Hunt
+// 30); after that it is the coordinators' cell and is never overwritten.
+var EVENT_HEADERS = ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open', 'whatsapp_url', 'max_teams'];
 // Columns of every event tab (no event_id: the tab is the event). These 13 are always the first 13, in this order.
 var REG_HEADERS = [
   'timestamp', 'reg_id', 'category', 'name', 'usn_or_empid', 'department', 'semester',
@@ -55,11 +60,11 @@ var REG_EXTRA_HEADERS = ['eligibility_confirmed'];
 var LOCK_WAIT_MS = 20000;
 // Config.gs (generated) must declare CONFIG_SCHEMA with this exact number, or every request answers CONFIG_MISMATCH.
 // Keep equal to GAS_CONFIG_SCHEMA in scripts/gas-config.ts (npm run gas:config fails if they differ).
-var EXPECTED_CONFIG_SCHEMA = 5;
+var EXPECTED_CONFIG_SCHEMA = 6;
 
 // Registration ID format: KR26-<event code>-<4 digits> (the same shape the website shows on the pass).
 var REG_ID_RE = /^KR26-([A-Z]{3})-(\d{4})$/;
-var STATUS_CACHE_KEY = 'status_v3';
+var STATUS_CACHE_KEY = 'status_v4';
 var STATUS_CACHE_S = 10;
 var LOOKUP_MAX_FAILS = 5;
 var LOOKUP_WINDOW_S = 600;
@@ -307,10 +312,32 @@ function readEvents_() {
       sheetName: String(r.sheet_name || '').trim(),
       deadline: Date.parse(String(r.deadline_iso).trim()), // NaN if a coordinator broke the format
       isOpen: String(r.is_open).trim().toUpperCase() === 'TRUE',
-      whatsappRaw: String(r.whatsapp_url || '').trim() // private: only read through whatsappFor_(), never put in a response as is
+      whatsappRaw: String(r.whatsapp_url || '').trim(), // private: only read through whatsappFor_(), never put in a response as is
+      maxTeams: parseMaxTeams_(r.max_teams, id)
     };
   });
   return out;
+}
+
+/** max_teams cell -> a limit (0, 1, 2 ...) or null for "no limit". Anything that is not a whole number is ignored (logged). */
+function parseMaxTeams_(v, eventId) {
+  var s = String(v == null ? '' : v).trim();
+  if (s === '') return null;
+  if (!/^\d{1,5}$/.test(s)) {
+    console.warn('Ignoring max_teams "' + s + '" of event "' + eventId + '": it must be a whole number (or empty for no limit).');
+    return null;
+  }
+  return Number(s);
+}
+
+/** A row a coordinator marked as withdrawn (status column). It no longer counts anywhere. */
+function isWithdrawn_(row) {
+  return String(row.status || '').trim().toUpperCase() === 'WITHDRAWN';
+}
+
+/** Registrations that count: have a reg_id and are not withdrawn. */
+function activeRows_(rows) {
+  return rows.filter(function (r) { return String(r.reg_id || '').trim() !== '' && !isWithdrawn_(r); });
 }
 
 /**
@@ -461,12 +488,15 @@ function getStatus_() {
     }
     var validDeadline = !isNaN(e.deadline);
     var tab = eventTabOrNull_(id, sheetEvents);
+    var count = tab ? activeRows_(readTable_(tab)).length : 0;
     events[id] = {
       // Open = switched on in the Sheet, deadline not passed, and a tab exists to take the registration.
       isOpen: e.isOpen && validDeadline && now < e.deadline && tab !== null,
       deadline: validDeadline ? new Date(e.deadline).toISOString() : null,
-      registeredCount: tab ? readTable_(tab).filter(function (r) { return r.reg_id !== ''; }).length : 0
+      registeredCount: count // non-withdrawn registrations
     };
+    // Capped events only (max_teams set): places left, never negative. The website shows "Few seats left" / "Full".
+    if (e.maxTeams !== null) events[id].seatsLeft = Math.max(0, e.maxTeams - count);
   });
   var out = { ok: true, events: events, serverTime: new Date(now).toISOString(), configVersion: CONFIG_VERSION };
   cache.put(STATUS_CACHE_KEY, JSON.stringify(out), STATUS_CACHE_S);
@@ -507,6 +537,8 @@ function register_(b) {
     var ids = [p.id].concat(p.members.map(function (m) { return m.id; }));
     var dup = findDuplicate_(rows, ids);
     if (dup) return { ok: false, code: 'DUPLICATE', regId: dup };
+    // Cap (max_teams), counted inside the lock: two people can never both take the last place.
+    if (live.maxTeams !== null && activeRows_(rows).length >= live.maxTeams) return { ok: false, code: 'FULL' };
 
     var regId = nextRegId_(ev.code, rows);
     appendByHeader_(tab, {
@@ -764,7 +796,7 @@ function setupSheet() {
 
   var ss = ss_();
   var evSheet = ss.getSheetByName(SHEET_EVENTS) || ss.insertSheet(SHEET_EVENTS);
-  ensureEventsHeaders_(evSheet);
+  var newColumns = ensureEventsHeaders_(evSheet);
 
   // 1. One row per competition. New rows start OPEN (is_open TRUE); existing rows keep whatever the coordinators set.
   var existing = {};
@@ -776,12 +808,19 @@ function setupSheet() {
     report[id] = { row: 'already there', tab: '' };
     if (!row) {
       appendByHeader_(evSheet, {
-        id: id, code: e.code, name_en: e.name.en, sheet_name: e.sheetName, deadline_iso: e.deadline, is_open: 'TRUE'
+        id: id, code: e.code, name_en: e.name.en, sheet_name: e.sheetName, deadline_iso: e.deadline, is_open: 'TRUE',
+        max_teams: e.maxTeams ? String(e.maxTeams) : ''
       });
       report[id].row = 'ADDED';
     } else if (!String(row.sheet_name || '').trim()) {
       setCellByHeader_(evSheet, row._row, 'sheet_name', e.sheetName); // e.g. a pre-tab-per-event Events tab
       report[id].row = 'sheet_name filled in';
+    }
+    // max_teams is seeded ONCE, in the run that creates the column (so the cell was just created empty); later runs
+    // never touch it, so a coordinator's change (or blank = no limit) stays.
+    if (row && newColumns.indexOf('max_teams') !== -1 && e.maxTeams) {
+      setCellByHeader_(evSheet, row._row, 'max_teams', String(e.maxTeams));
+      report[id].row += '; max_teams set to ' + e.maxTeams;
     }
   });
   evSheet.setFrozenRows(1);
@@ -842,14 +881,19 @@ function checkConfig() {
     ' events: ' + Object.keys(CONFIG.events).join(', '));
 }
 
-/** Events tab: create the header row, or append any required column that is missing. Extra columns are left alone. */
+/**
+ * Events tab: create the header row, or APPEND any column that is missing after the last one. Extra columns are left
+ * alone, nothing moves. Returns the names of the columns appended to an existing tab ([] for a brand-new tab).
+ */
 function ensureEventsHeaders_(sh) {
   if (sh.getLastRow() < 1 || sh.getLastColumn() < 1) {
     sh.getRange(1, 1, 1, EVENT_HEADERS.length).setValues([EVENT_HEADERS]);
     sh.getRange(1, 1, 1, EVENT_HEADERS.length).setFontWeight('bold');
     plainTextBelow_(sh, EVENT_HEADERS.indexOf('whatsapp_url') + 1);
-    return;
+    plainTextBelow_(sh, EVENT_HEADERS.indexOf('max_teams') + 1);
+    return [];
   }
+  var added = [];
   var current = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
   EVENT_HEADERS.forEach(function (h) {
     if (current.indexOf(h) !== -1) return;
@@ -858,7 +902,9 @@ function ensureEventsHeaders_(sh) {
     sh.getRange(1, col).setFontWeight('bold');
     plainTextBelow_(sh, col); // format only — existing cells keep their values
     current.push(h);
+    added.push(h);
   });
+  return added;
 }
 
 /** Makes the cells under a header plain text, so a pasted link is stored as typed. Changes the format only, never a value. */

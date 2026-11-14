@@ -38,6 +38,11 @@ export const eventSchema = z.object({
    */
   eligibility: z.literal('nonKannadiga').optional(),
   teamSize: z.object({ min: z.number().int().min(1), max: z.number().int().min(1) }),
+  /**
+   * Maximum registrations (teams; people for individual events). Only Treasure Hunt has one (30). The live limit is
+   * the Sheet's Events -> max_teams cell (seeded from this); the site uses this value when live status is unavailable.
+   */
+  seats: z.number().int().positive().optional(),
   deadline: isoDateTime,
   prizes: z.discriminatedUnion('type', [
     z.object({ type: z.literal('cash'), first: z.number().int().positive(), second: z.number().int().positive() }),

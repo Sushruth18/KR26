@@ -74,7 +74,7 @@ const st = (rt: GasRuntime) => {
   return rt.get({ action: 'status' }) as unknown as {
     ok: boolean;
     serverTime: string;
-    events: Record<string, { isOpen: boolean; deadline: string | null; registeredCount: number }>;
+    events: Record<string, { isOpen: boolean; deadline: string | null; registeredCount: number; seatsLeft?: number }>;
   };
 };
 const ids = (rt: GasRuntime) => Object.keys((rt.ctx.CONFIG as { events: Record<string, unknown> }).events);
@@ -140,7 +140,7 @@ t('event tabs: header row frozen and bold, data columns are plain text', () => {
     }
   }
 });
-t('status reports isOpen/deadline/registeredCount per event — and no seats anywhere', () => {
+t('status reports isOpen/deadline/registeredCount per event — seatsLeft only for the capped Treasure Hunt', () => {
   const rt = createOpenRuntime();
   reg(rt);
   reg(rt, { id: '1BY23CS002' });
@@ -148,10 +148,11 @@ t('status reports isOpen/deadline/registeredCount per event — and no seats any
   const s0 = st(rt);
   assert.equal(s0.ok, true);
   assert.deepEqual(s0.events['s-essay'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 2 });
-  assert.deepEqual(s0.events['s-treasure-hunt'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 1 });
+  assert.deepEqual(s0.events['s-treasure-hunt'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 1, seatsLeft: 29 });
   assert.deepEqual(s0.events['s-poem'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 0 });
   assert.ok(!Number.isNaN(Date.parse(s0.serverTime)));
-  assert.doesNotMatch(JSON.stringify(s0), /seat/i);
+  const capped = Object.keys(s0.events).filter((id) => 'seatsLeft' in s0.events[id]!);
+  assert.deepEqual(capped, ['s-treasure-hunt'], 'no other event has a cap');
 });
 t('setupSheet is safe to run again: a second run changes nothing', () => {
   const rt = createOpenRuntime();
@@ -197,7 +198,7 @@ t('setupSheet upgrades an older Events tab (seats column, no sheet_name): adds s
   evs.getRange(2, 1, 1, 6).setValues([['s-essay', 'ESY', 'Essay Writing', '100', '2026-11-18T23:59:00+05:30', 'FALSE']]);
   setup(rt);
   const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
-  assert.deepEqual(headers, ['id', 'code', 'name_en', 'seats', 'deadline_iso', 'is_open', 'sheet_name', 'whatsapp_url']);
+  assert.deepEqual(headers, ['id', 'code', 'name_en', 'seats', 'deadline_iso', 'is_open', 'sheet_name', 'whatsapp_url', 'max_teams']);
   assert.equal(rt.eventField('s-essay', 'sheet_name'), 'ESY – Essay Writing');
   assert.equal(rt.eventField('s-essay', 'is_open'), 'FALSE'); // existing value kept
   assert.equal(rt.eventField('s-poem', 'is_open'), 'TRUE');
@@ -1077,7 +1078,7 @@ t('a new Events tab has the whatsapp_url column (last), empty for every event an
   const rt = createGasRuntime();
   setup(rt);
   const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
-  assert.equal(headers[headers.length - 1], 'whatsapp_url');
+  assert.deepEqual(headers.slice(-2), ['whatsapp_url', 'max_teams']);
   for (const id of ids(rt)) assert.equal(rt.eventField(id, 'whatsapp_url'), '', id);
   const col = headers.indexOf('whatsapp_url') + 1;
   for (const row of [2, 13, 50]) assert.equal(rt.events().formats[row - 1]?.[col - 1], '@', `row ${row} is plain text`);
@@ -1091,7 +1092,7 @@ t('setupSheet adds a missing whatsapp_url column to an existing Events tab witho
   const logs = captureLogs(rt);
   setup(rt);
   const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
-  assert.deepEqual(headers, ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open', 'whatsapp_url']);
+  assert.deepEqual(headers, ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open', 'whatsapp_url', 'max_teams']);
   assert.equal(rt.eventField('s-essay', 'is_open'), 'FALSE', 'coordinator close kept');
   assert.equal(rt.eventField('s-poem', 'sheet_name'), 'My renamed poem tab');
   assert.equal(rt.eventField('s-poem', 'deadline_iso'), '2026-11-17T10:00:00+05:30');
@@ -1480,6 +1481,120 @@ t('an eligibility event whose tab lacks eligibility_confirmed → SERVER EVENT_T
   const r = rt.post(elo);
   assert.deepEqual(r, { ok: false, code: 'SERVER', reason: 'EVENT_TAB_COLUMN_MISSING:s-elocution:eligibility_confirmed' });
   assert.equal(sh.getLastRow(), 1);
+});
+
+console.log('\nTreasure Hunt cap: max_teams (30), FULL inside the lock');
+let huntN = 0;
+/** A fresh 4-person Treasure Hunt team nobody else uses. */
+const huntTeam = () => {
+  const n = ++huntN;
+  const id = (k: number) => `1BY26TH${String(n).padStart(3, '0')}${k}`;
+  return {
+    ...hunt,
+    id: id(0),
+    phone: `93${String(n * 10).padStart(8, '0')}`,
+    members: [1, 2, 3].map((k) => ({ name: `Hunter ${String.fromCharCode(64 + k)}`, id: id(k), phone: `94${String(n * 10 + k).padStart(8, '0')}` })),
+  };
+};
+const fillHunt = (rt: GasRuntime, n: number) => {
+  for (let i = 0; i < n; i++) assert.equal(rt.post(huntTeam()).ok, true, `team ${i + 1}`);
+};
+t('a new Events tab: max_teams is 30 for Treasure Hunt and blank (no limit) for every other event', () => {
+  const rt = createOpenRuntime();
+  for (const id of ids(rt)) assert.equal(rt.eventField(id, 'max_teams'), id === 's-treasure-hunt' ? '30' : '', id);
+});
+t('the live Events tab (no max_teams column, coordinator edits): setupSheet appends max_teams at the end, seeds 30 once, changes nothing else', () => {
+  const rt = createOpenRuntime();
+  // Recreate the live layout: 7 columns, no max_teams, a coordinator's close and WhatsApp link.
+  const evs = rt.events();
+  evs.cells = evs.cells.map((row) => row.slice(0, 7));
+  rt.setEventField('s-debate', 'is_open', 'FALSE');
+  rt.setEventField('s-quiz', 'whatsapp_url', 'https://chat.whatsapp.com/AbCdEfGhIj1234');
+  fillHunt(rt, 2);
+  const cellsBefore = JSON.stringify(evs.cells.map((row) => row.slice(0, 7)));
+  setup(rt);
+  const headers = evs.getRange(1, 1, 1, evs.getLastColumn()).getDisplayValues()[0]!;
+  assert.deepEqual(headers, ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open', 'whatsapp_url', 'max_teams']);
+  assert.equal(JSON.stringify(evs.cells.map((row) => row.slice(0, 7))), cellsBefore, 'no existing Events cell changed');
+  assert.equal(rt.eventField('s-treasure-hunt', 'max_teams'), '30');
+  assert.equal(rt.eventField('s-essay', 'max_teams'), '');
+  assert.equal(st(rt).events['s-treasure-hunt']?.seatsLeft, 28);
+  // Later runs never overwrite the coordinators' value — a raised cap, or blank = no limit.
+  rt.setEventField('s-treasure-hunt', 'max_teams', '35');
+  setup(rt);
+  assert.equal(rt.eventField('s-treasure-hunt', 'max_teams'), '35');
+  rt.setEventField('s-treasure-hunt', 'max_teams', '');
+  setup(rt);
+  assert.equal(rt.eventField('s-treasure-hunt', 'max_teams'), '');
+});
+t('the 30th team gets in, the 31st gets FULL (nothing written); status says seatsLeft 0', () => {
+  const rt = createOpenRuntime();
+  fillHunt(rt, 29);
+  assert.equal(st(rt).events['s-treasure-hunt']?.seatsLeft, 1);
+  assert.equal(rt.post(huntTeam()).regId, 'KR26-TRH-0030');
+  const before = rt.tab('s-treasure-hunt').getLastRow();
+  assert.deepEqual(rt.post(huntTeam()), { ok: false, code: 'FULL' });
+  assert.equal(rt.tab('s-treasure-hunt').getLastRow(), before, 'FULL writes nothing');
+  const s = st(rt).events['s-treasure-hunt']!;
+  assert.equal(s.seatsLeft, 0);
+  assert.equal(s.registeredCount, 30);
+  assert.equal(s.isOpen, true, 'still open — the website shows "Full" from seatsLeft');
+  assert.equal(rt.lock.held, false, 'lock released after FULL');
+});
+t('two simultaneous registrations for the 30th place: exactly one succeeds, the other gets FULL', () => {
+  const rt = createOpenRuntime();
+  fillHunt(rt, 29);
+  const a = huntTeam();
+  const b = huntTeam();
+  // Both arrive while one place is left (both passed validation, both saw seatsLeft 1 in status). A reaches
+  // waitLock first, but B's execution holds the script lock and finishes first; only then does A get the lock.
+  assert.equal(st(rt).events['s-treasure-hunt']?.seatsLeft, 1);
+  const lock = rt.lock;
+  const waitLock = lock.waitLock.bind(lock);
+  let resB: Record<string, unknown> | null = null;
+  let bStarted = false;
+  lock.waitLock = () => {
+    if (!bStarted) {
+      bStarted = true; // set first: B's own waitLock call comes back through here
+      resB = rt.post(b); // B runs to completion (it takes and releases the lock itself)
+    }
+    waitLock();
+  };
+  const resA = rt.post(a);
+  lock.waitLock = waitLock;
+  const results = [resA, resB!];
+  assert.equal(results.filter((r) => r.ok).length, 1, JSON.stringify(results));
+  assert.deepEqual(results.find((r) => !r.ok), { ok: false, code: 'FULL' });
+  assert.equal((results.find((r) => r.ok) as { regId: string }).regId, 'KR26-TRH-0030');
+  assert.equal(rt.countRegs('s-treasure-hunt'), 30, 'exactly 30 rows — the cap is never overshot');
+});
+t('a team already registered gets DUPLICATE (with its ID), not FULL, when the event is full', () => {
+  const rt = createOpenRuntime();
+  const first = huntTeam();
+  const r1 = rt.post(first);
+  fillHunt(rt, 29);
+  assert.deepEqual(rt.post(first), { ok: false, code: 'DUPLICATE', regId: r1.regId });
+});
+t('coordinators control the cap from the Events tab: raise it, blank = no limit, 0 = full, junk is ignored', () => {
+  const rt = createOpenRuntime();
+  fillHunt(rt, 30);
+  assert.equal(rt.post(huntTeam()).code, 'FULL');
+  rt.setEventField('s-treasure-hunt', 'max_teams', '31');
+  assert.equal(rt.post(huntTeam()).ok, true, 'raised to 31');
+  assert.equal(rt.post(huntTeam()).code, 'FULL');
+  rt.setEventField('s-treasure-hunt', 'max_teams', '');
+  assert.equal(rt.post(huntTeam()).ok, true, 'blank = no limit');
+  assert.equal('seatsLeft' in st(rt).events['s-treasure-hunt']!, false);
+  rt.setEventField('s-treasure-hunt', 'max_teams', 'thirty');
+  assert.equal(rt.post(huntTeam()).ok, true, 'not a number → ignored (no limit)');
+  rt.setEventField('s-essay', 'max_teams', '0');
+  assert.deepEqual(reg(rt), { ok: false, code: 'FULL' }, '0 = no places');
+  assert.equal(st(rt).events['s-essay']?.seatsLeft, 0);
+});
+t('the cap applies to Treasure Hunt only: other events stay unlimited', () => {
+  const rt = createOpenRuntime();
+  for (let i = 0; i < 40; i++) assert.equal(reg(rt, { id: `1BY26ES${String(i).padStart(3, '0')}` }).ok, true);
+  assert.equal('seatsLeft' in st(rt).events['s-essay']!, false);
 });
 
 console.log('\nClient/server parity');

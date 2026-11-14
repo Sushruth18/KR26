@@ -377,6 +377,55 @@ async function main() {
     }
   });
 
+  // Treasure Hunt is capped (Events → max_teams 30): "Limited to 30 teams" always, "Few seats left" at ≤ 4, "Full" at 0.
+  for (const lang of ['en', 'kn'] as const) {
+    await scenario(`treasure-hunt-cap-${lang}-360`, async (errors) => {
+      const set = (value: string) => fetch(`${BASE}/mock-api/__set?id=s-treasure-hunt&header=max_teams&value=${value}`);
+      const status = (await (await fetch(`${BASE}/mock-api?action=status`)).json()) as { events: Record<string, { registeredCount: number; seatsLeft?: number }> };
+      const used = status.events['s-treasure-hunt']!.registeredCount;
+      expect(typeof status.events['s-treasure-hunt']!.seatsLeft === 'number', 'status reports seatsLeft for Treasure Hunt');
+      expect(!('seatsLeft' in status.events['s-essay']!), 'and not for other events');
+      const W = lang === 'kn'
+        ? { cap: 'ಗರಿಷ್ಠ ೩೦ ತಂಡಗಳು', few: 'ಕೆಲವೇ ಸ್ಥಾನಗಳು ಉಳಿದಿವೆ', full: 'ಭರ್ತಿಯಾಗಿದೆ', open: 'ನೋಂದಣಿ ತೆರೆದಿದೆ' }
+        : { cap: 'Limited to 30 teams', few: 'Few seats left', full: 'Full', open: 'Open' };
+      const read = async () => {
+        const page = await open(browser, lang, 360, '/competitions?for=students&mock=', errors, true);
+        const r = await page.$eval('[data-testid=card-s-treasure-hunt]', (c) => ({
+          state: c.getAttribute('data-state'),
+          pill: c.querySelector('[data-testid=status-pill]')?.textContent ?? '',
+          pillState: c.querySelector('[data-testid=status-pill]')?.getAttribute('data-state'),
+          cap: c.querySelector('[data-testid=capacity-s-treasure-hunt]')?.textContent ?? '',
+          disabled: (c.querySelector('[data-testid=register-s-treasure-hunt]') as HTMLButtonElement | null)?.disabled ?? false,
+          reason: c.querySelector('[data-testid=reason-s-treasure-hunt]')?.textContent ?? '',
+          caps: document.querySelectorAll('[data-testid^=capacity-]').length,
+        }));
+        await page.browserContext().close();
+        return r;
+      };
+      try {
+        await set('30');
+        const normal = await read();
+        expect(normal.cap === W.cap && normal.caps === 1, `capacity line "${normal.cap}" on Treasure Hunt only (${normal.caps})`);
+        expect(used > 26 || (normal.pillState === 'open' && normal.pill.includes(W.open)), `30 places: pill ${normal.pillState} "${normal.pill}"`);
+        await set(String(used + 3));
+        const few = await read();
+        expect(few.state === 'open' && few.pillState === 'few' && few.pill.includes(W.few) && !few.disabled, `3 left: ${JSON.stringify(few)}`);
+        await set(String(used));
+        const full = await read();
+        expect(full.state === 'full' && full.pillState === 'full' && full.pill.includes(W.full), `0 left: ${JSON.stringify(full)}`);
+        expect(full.disabled && full.reason.length > 0, `Register disabled with a reason: "${full.reason}"`);
+        // The Register page: event summary says Full, and a forced FULL answer shows the friendly message.
+        const page = await open(browser, lang, 360, '/competitions?for=students&mock=', errors);
+        await page.goto(`${BASE}/register?event=s-treasure-hunt&mock=`, { waitUntil: 'networkidle0' });
+        await page.waitForSelector('[data-testid=cannot-register]');
+        await page.browserContext().close();
+        return `"${W.cap}"; ${used + 3} → "${W.few}"; ${used} → "${W.full}" (Register disabled: "${full.reason}")`;
+      } finally {
+        await set('30');
+      }
+    });
+  }
+
   await scenario('reduced-motion-kn', async (errors) => {
     const page = await open(browser, 'kn', 360, '/competitions?mock=', errors, true);
     // Cards must be visible immediately (no reveal animation) — check the last one without scrolling.

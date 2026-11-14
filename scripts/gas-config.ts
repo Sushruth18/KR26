@@ -12,7 +12,7 @@ import { RULES } from '../src/lib/rules.ts';
  * Format of Config.gs that apps-script/Code.gs understands (its EXPECTED_CONFIG_SCHEMA must equal this — checked by
  * `npm run gas:config` and `npm run test:server`). Bump BOTH when Code.gs starts reading new/renamed CONFIG fields.
  */
-export const GAS_CONFIG_SCHEMA = 5;
+export const GAS_CONFIG_SCHEMA = 6;
 
 /** Short content hash of the whole config (events, rules, departments, semesters, dates…): a stale paste shows a different value. */
 export function computeConfigVersion(config: unknown): string {
@@ -60,6 +60,8 @@ export function buildGasConfigSource(root = process.cwd()): string {
           endTime: e.endTime ?? '',
           /** "nonKannadiga": registration needs eligibilityConfirmed (stored in eligibility_confirmed). */
           eligibility: e.eligibility ?? '',
+          /** Seeds the Events tab's max_teams (once, when setupSheet creates the column or the row); 0 = no limit. */
+          maxTeams: e.seats ?? 0,
           venue: e.venue,
           sheetName: sheetNameFor(e),
           deadline: e.deadline,

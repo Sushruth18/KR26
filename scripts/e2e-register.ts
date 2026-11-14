@@ -369,6 +369,8 @@ async function main() {
     ['closed', 'kn', (r) => r.kind === 'error' && r.code === 'CLOSED' && r.text.includes('ತೆರೆದಿಲ್ಲ'), 'CLOSED (not open), Kannada message'],
     ['deadline', 'en', (r) => r.kind === 'error' && r.code === 'CLOSED' && r.text.includes('deadline'), 'CLOSED (deadline) message'],
     ['server', 'en', (r) => r.kind === 'error' && r.code === 'SERVER', 'SERVER with Retry'],
+    ['full', 'kn', (r) => r.kind === 'error' && r.code === 'FULL' && r.text.includes('ಭರ್ತಿಯಾಗಿವೆ'), 'FULL, friendly Kannada message'],
+    ['full', 'en', (r) => r.kind === 'error' && r.code === 'FULL' && r.text.includes('all places have been taken'), 'FULL, friendly message'],
   ];
   for (const [i, [mock, lang, check, label]] of forced.entries()) {
     // A SERVER answer logs its machine-readable reason to the console (and shows visitors nothing extra).

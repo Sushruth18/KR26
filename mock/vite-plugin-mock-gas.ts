@@ -6,6 +6,7 @@
  *   duplicate  register the same body first, then again → real DUPLICATE with the real regId
  *   closed     is_open := FALSE                           → real CLOSED / NOT_OPEN (a coordinator closed it)
  *   deadline   deadline_iso := 2020                       → real CLOSED / DEADLINE
+ *   full       max_teams := 0 (no places)                 → real FULL
  *   validation phone := 5555555555 (fails the phone rule) → real VALIDATION field "phone"
  *   server     the event's own tab throws                 → real SERVER
  *   network    submit: socket destroyed, no response      → fetch() rejects in the browser
@@ -69,6 +70,8 @@ export function handlePost(rt: GasRuntime, raw: string, mock: string | null) {
       return withEventField(rt, eventId, 'is_open', 'FALSE', () => rt.post(body));
     case 'deadline':
       return withEventField(rt, eventId, 'deadline_iso', '2020-01-01T00:00:00+05:30', () => rt.post(body));
+    case 'full':
+      return withEventField(rt, eventId, 'max_teams', '0', () => rt.post(body));
     case 'validation':
       return rt.post({ ...body, phone: '5555555555' });
     case 'server': {

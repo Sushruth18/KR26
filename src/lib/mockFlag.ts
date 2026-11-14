@@ -6,7 +6,7 @@
 import { getItem, removeItem, setItem } from './storage';
 
 export const MOCK_KEY = 'kr26.mock';
-export const MOCK_STATES = ['duplicate', 'closed', 'deadline', 'validation', 'server', 'network', 'slow', 'statusdown'] as const;
+export const MOCK_STATES = ['duplicate', 'closed', 'deadline', 'full', 'validation', 'server', 'network', 'slow', 'statusdown'] as const;
 export type MockState = (typeof MOCK_STATES)[number];
 
 export function getMockState(): MockState | null {

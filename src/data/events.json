@@ -388,6 +388,7 @@
       "min": 4,
       "max": 4
     },
+    "seats": 30,
     "deadline": "2026-11-18T23:59:00+05:30",
     "prizes": {
       "type": "cash",
