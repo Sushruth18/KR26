@@ -63,6 +63,27 @@ export class FakeRange {
   setFontWeight(): this {
     return this;
   }
+
+  /** Like Sheets: each value must be a formula string ("=…"); stored as a formula cell. */
+  setFormulas(values: string[][]): this {
+    if (values.length !== this.nr || values.some((r) => r.length !== this.nc)) {
+      throw new Error('The number of rows/columns in the data does not match the range.');
+    }
+    values.forEach((line, i) =>
+      line.forEach((v, j) => {
+        if (!String(v).startsWith('=')) throw new Error(`setFormulas: "${v}" is not a formula`);
+        (this.sheet.cells[this.row + i - 1] ??= [])[this.col + j - 1] = { formula: String(v) };
+      }),
+    );
+    return this;
+  }
+
+  getFormulas(): string[][] {
+    return this.each((r, c) => {
+      const v = this.sheet.get(r, c);
+      return typeof v === 'object' && v !== null && 'formula' in v ? v.formula : '';
+    });
+  }
 }
 
 export class FakeSheet {
@@ -142,7 +163,19 @@ export class FakeSheet {
     this.formats.splice(r - 1, 1);
   }
 
-  setFrozenRows() {
+  frozenRows = 0;
+  frozenColumns = 0;
+  columnWidths: Record<number, number> = {};
+  setFrozenRows(n = 0) {
+    this.frozenRows = n;
+    return this;
+  }
+  setFrozenColumns(n = 0) {
+    this.frozenColumns = n;
+    return this;
+  }
+  setColumnWidth(col: number, w: number) {
+    this.columnWidths[col] = w;
     return this;
   }
 

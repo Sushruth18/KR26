@@ -92,7 +92,8 @@ t('setupSheet creates the Events tab and one tab per event — all of them — a
   assert.equal(rt.events().getLastRow(), N + 1);
   assert.equal(ids(rt).length, N);
   const names = rt.ss.getSheets().map((x) => x.getName());
-  assert.equal(names.length, N + 1, `tabs: ${names.join(', ')}`);
+  assert.equal(names.length, N + 2, `tabs (Events + one per event + Summary): ${names.join(', ')}`);
+  assert.equal(names[names.length - 1], 'Summary', 'Summary is added last');
   assert.equal(names.includes('Registrations'), false);
   for (const id of ids(rt)) {
     const tab = rt.tab(id);
@@ -1770,6 +1771,96 @@ t('nothing reads the timestamp column: any value there leaves register, duplicat
   assert.equal((rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }) as { passes: { regId: string }[] }).passes[0]?.regId, r.regId);
   const code = readFileSync('apps-script/Code.gs', 'utf8');
   assert.equal((code.match(/\.timestamp\b|\['timestamp'\]/g) ?? []).length, 0, 'Code.gs never reads row.timestamp');
+});
+
+console.log('\nSummary tab (formulas)');
+const summaryOf = (rt: GasRuntime) => rt.ss.getSheetByName('Summary')!;
+t('setupSheet creates a Summary tab: short headers, a totals row, one formula row per Events row (40), header + totals frozen', () => {
+  const rt = createOpenRuntime();
+  const sh = summaryOf(rt);
+  assert.deepEqual(sh.getRange(1, 1, 1, 8).getDisplayValues()[0], ['Code', 'Event', 'For', 'Regs', 'People', 'Cap', 'Left', 'Open']);
+  const totals = sh.getRange(2, 1, 1, 8).getFormulas()[0]!;
+  assert.deepEqual(totals, [
+    '="TOTAL"',
+    '=COUNTIF(A3:A42,"?*")&" events"',
+    '=""',
+    '=SUM(D3:D42)',
+    '=SUM(E3:E42)',
+    '=""',
+    '=IF(COUNT(G3:G42)=0,"",SUM(G3:G42))',
+    '=SUMPRODUCT(--(UPPER(TRIM(H3:H42))="TRUE"))&" open"',
+  ]);
+  assert.equal(sh.getLastRow(), 42);
+  assert.equal(sh.getLastColumn(), 8);
+  for (let r = 3; r <= 42; r++) {
+    const f = sh.getRange(r, 1, 1, 8).getFormulas()[0]!;
+    assert.ok(f.every((x) => x.startsWith('=')), `row ${r}: every cell is a formula`);
+  }
+  assert.equal(sh.frozenRows, 2);
+  assert.equal(sh.frozenColumns, 1);
+  const widths = Object.values(sh.columnWidths).reduce((a, b) => a + b, 0);
+  assert.ok(widths <= 560, `fits a phone screen at a glance (${widths}px)`);
+});
+t('Summary formulas: Events looked up by header name (INDEX/MATCH), event tabs through sheet_name (INDIRECT), WITHDRAWN excluded, team members counted', () => {
+  const sh = summaryOf(createOpenRuntime());
+  const [code, name, cat, regs, people, cap, left, open] = sh.getRange(5, 1, 1, 8).getFormulas()[0]!;
+  const ev = (h: string) => `IFERROR(INDEX(Events!$A:$Z,ROW()-1,MATCH("${h}",Events!$1:$1,0))&"","")`;
+  assert.equal(code, `=${ev('code')}`);
+  assert.equal(name, `=${ev('name_en')}`);
+  assert.equal(cat, `=IF(${ev('id')}="","",IF(LEFT(${ev('id')},2)="f-","faculty","students"))`);
+  assert.equal(cap, `=${ev('max_teams')}`);
+  assert.equal(open, `=${ev('is_open')}`);
+  assert.equal(left, '=IFERROR(IF(F5="","",MAX(0,VALUE(F5)-D5)),"")', 'places left uses its own row');
+  const tab = `"'"&SUBSTITUTE(${ev('sheet_name')},"'","''")&"'"`;
+  for (const f of [regs!, people!]) {
+    assert.ok(f.startsWith(`=IF(${ev('sheet_name')}="","",IFERROR(SUMPRODUCT(`), f);
+    assert.ok(f.includes(`INDIRECT(${tab}&"!B2:B")<>""`), 'counts rows with a reg_id');
+    assert.ok(f.includes(`UPPER(TRIM(OFFSET(INDIRECT(${tab}&"!A2"),0,MATCH("status",INDIRECT(${tab}&"!1:1"),0)-1,ROWS(INDIRECT(${tab}&"!B2:B")),1)))<>"WITHDRAWN"`), 'skips WITHDRAWN, status found by name');
+    // Balanced parentheses and quotes — a cheap syntax check, since there is no Sheets engine here.
+    assert.equal([...f].filter((ch) => ch === '(').length, [...f].filter((ch) => ch === ')').length, 'balanced ()');
+    assert.equal(([...f].filter((ch) => ch === '"').length) % 2, 0, 'balanced quotes');
+  }
+  assert.ok(people!.includes(`(1+(LEN(INDIRECT(${tab}&"!L2:L"))>0)*(LEN(INDIRECT(${tab}&"!L2:L"))-LEN(SUBSTITUTE(INDIRECT(${tab}&"!L2:L"),",",""))+1))`), 'registrant + members from member_ids');
+  // Every row is the same formula apart from its own row number in "Left".
+  const row = (r: number) => sh.getRange(r, 1, 1, 8).getFormulas()[0]!;
+  assert.deepEqual(row(3).filter((_, i) => i !== 6), row(42).filter((_, i) => i !== 6));
+});
+t('the event tabs keep reg_id in column B and member_ids in column L (what the Summary formulas rely on)', () => {
+  const rt = createOpenRuntime();
+  for (const id of ids(rt)) {
+    const h = rt.tab(id).getRange(1, 1, 1, 13).getDisplayValues()[0]!;
+    assert.equal(h[1], 'reg_id', id);
+    assert.equal(h[11], 'member_ids', id);
+  }
+});
+t('Summary is created once: setupSheet never rewrites it (even if coordinators edited it), registrations never touch it', () => {
+  const rt = createOpenRuntime();
+  const sh = summaryOf(rt);
+  sh.getRange(1, 2, 1, 1).setValues([['Competition']]); // a coordinator renames a heading
+  const before = JSON.stringify(sh.cells);
+  setup(rt);
+  reg(rt);
+  rt.post(huntTeam());
+  rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' });
+  st(rt);
+  assert.equal(JSON.stringify(sh.cells), before);
+  assert.equal(rt.ss.getSheets().filter((s) => s.getName() === 'Summary').length, 1);
+});
+t('an event whose sheet_name is "Summary" is refused (SERVER EVENT_TAB_RESERVED), nothing written', () => {
+  const rt = createOpenRuntime();
+  rt.setEventField('s-essay', 'sheet_name', 'Summary');
+  const before = JSON.stringify(summaryOf(rt).cells);
+  assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'EVENT_TAB_RESERVED:s-essay' });
+  assert.equal(JSON.stringify(summaryOf(rt).cells), before);
+  assert.throws(() => setup(rt), /must not be "Summary"/);
+});
+t('setupSheet on the live spreadsheet (no Summary yet) adds it at the END, after all existing tabs, without reordering them', () => {
+  const rt = createOpenRuntime();
+  rt.ss.sheets = rt.ss.sheets.filter((s) => s.getName() !== 'Summary');
+  rt.ss.insertSheet('Coordinator notes');
+  const order = rt.ss.getSheets().map((s) => s.getName());
+  setup(rt);
+  assert.deepEqual(rt.ss.getSheets().map((s) => s.getName()), [...order, 'Summary']);
 });
 
 console.log('\nClient/server parity');

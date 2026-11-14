@@ -45,6 +45,11 @@
 
 var SHEET_EVENTS = 'Events';
 var SHEET_OLD_REGS = 'Registrations'; // retired shared tab — never read or written; setupSheet only mentions it in the log
+// Summary tab: created once by setupSheet, filled with formulas that update by themselves. The script never writes to
+// it again and nothing reads it. It has SUMMARY_ROWS formula rows, one per Events-tab row (Events rows 2..41).
+var SHEET_SUMMARY = 'Summary';
+var SUMMARY_ROWS = 40;
+var SUMMARY_HEADERS = ['Code', 'Event', 'For', 'Regs', 'People', 'Cap', 'Left', 'Open'];
 // whatsapp_url is optional: coordinators paste a group/channel invite link there (setupSheet adds the empty column).
 // max_teams: blank = no limit; a whole number = at most that many registrations (teams, or people for individual
 // events) that are not WITHDRAWN. When setupSheet first adds the column it seeds it once from Config.gs (Treasure Hunt
@@ -391,7 +396,9 @@ function eventTab_(eventId, events) {
   var ev = events[eventId];
   var name = ev ? ev.sheetName : '';
   if (!name) throw fail_('EVENT_SHEET_NAME_MISSING:' + eventId, 'Event "' + eventId + '" has no sheet_name in the ' + SHEET_EVENTS + ' tab — run setupSheet().');
-  if (name === SHEET_EVENTS) throw fail_('EVENT_TAB_RESERVED:' + eventId, 'Event "' + eventId + '": sheet_name must not be "' + SHEET_EVENTS + '".');
+  if (name === SHEET_EVENTS || name === SHEET_SUMMARY) {
+    throw fail_('EVENT_TAB_RESERVED:' + eventId, 'Event "' + eventId + '": sheet_name must not be "' + name + '".');
+  }
   Object.keys(events).forEach(function (other) {
     if (other !== eventId && events[other].sheetName === name) {
       throw fail_('EVENT_TAB_SHARED:' + eventId,
@@ -887,7 +894,7 @@ function setupSheet() {
   ids.forEach(function (id) {
     var name = events[id] ? events[id].sheetName : '';
     if (!name) throw new Error('Event "' + id + '" has no sheet_name in the ' + SHEET_EVENTS + ' tab — the row could not be written.');
-    if (name === SHEET_EVENTS) throw new Error('Event "' + id + '": sheet_name must not be "' + SHEET_EVENTS + '".');
+    if (name === SHEET_EVENTS || name === SHEET_SUMMARY) throw new Error('Event "' + id + '": sheet_name must not be "' + name + '".');
     if (used[name]) throw new Error('Events "' + used[name] + '" and "' + id + '" use the same sheet_name "' + name + '".');
     used[name] = id;
     var sh = ss.getSheetByName(name);
@@ -916,6 +923,15 @@ function setupSheet() {
   }
   if (readTable_(ss.getSheetByName(SHEET_EVENTS)).length < 1) {
     throw new Error('Setup failed: the Events tab has no event rows after setup.');
+  }
+
+  // 4. The Summary tab — only if it does not exist yet. An existing one is never touched (coordinators may format it).
+  var summary = ss.getSheetByName(SHEET_SUMMARY);
+  if (!summary) {
+    createSummary_(ss.insertSheet(SHEET_SUMMARY));
+    console.log('Summary tab CREATED (formulas; it updates by itself).');
+  } else {
+    console.log('Summary tab already exists — left as it is.');
   }
 
   if (ss.getSheetByName(SHEET_OLD_REGS)) {
@@ -1088,6 +1104,63 @@ function ensureHeaders_(sh, headers, extras) {
   });
   sh.getRange(1, 1, 1, lastCol).setFontWeight('bold');
   return added;
+}
+
+/**
+ * The Summary tab's formulas. Row 1 headers, row 2 totals (both frozen, so they stay on screen on a phone), then one
+ * row per Events-tab row: Summary row r shows Events row r - 1. Everything is looked up by HEADER NAME in the Events
+ * tab (INDEX/MATCH) and the event's own tab is reached through its sheet_name cell with INDIRECT, so a renamed tab, a
+ * moved Events column or a new event row shows up without touching this tab.
+ *   Regs   = rows of the event tab with a reg_id whose status is not WITHDRAWN
+ *   People = the same rows, counting the registrant + every team member (member_ids is a comma-separated list)
+ *   Cap / Left only where max_teams is set; Open = the is_open cell. For = from the id ("f-" = faculty).
+ * Event tabs keep their first 13 columns in a fixed order (reg_id = B, member_ids = L); status is found by name.
+ */
+function summaryRowFormulas_(r) {
+  var ev = function (h) {
+    return 'IFERROR(INDEX(Events!$A:$Z,ROW()-1,MATCH("' + h + '",Events!$1:$1,0))&"","")';
+  };
+  var sn = ev('sheet_name');
+  var q = '"\'"&SUBSTITUTE(' + sn + ',"\'","\'\'")&"\'"';
+  var regIds = 'INDIRECT(' + q + '&"!B2:B")';
+  var statusCol = 'MATCH("status",INDIRECT(' + q + '&"!1:1"),0)';
+  var status = 'OFFSET(INDIRECT(' + q + '&"!A2"),0,' + statusCol + '-1,ROWS(' + regIds + '),1)';
+  var members = 'INDIRECT(' + q + '&"!L2:L")';
+  var active = '(' + regIds + '<>"")*(UPPER(TRIM(' + status + '))<>"WITHDRAWN")';
+  var people = '(1+(LEN(' + members + ')>0)*(LEN(' + members + ')-LEN(SUBSTITUTE(' + members + ',",",""))+1))';
+  return [
+    '=' + ev('code'),
+    '=' + ev('name_en'),
+    '=IF(' + ev('id') + '="","",IF(LEFT(' + ev('id') + ',2)="f-","faculty","students"))',
+    '=IF(' + sn + '="","",IFERROR(SUMPRODUCT(' + active + '),"?"))',
+    '=IF(' + sn + '="","",IFERROR(SUMPRODUCT(' + active + '*' + people + '),"?"))',
+    '=' + ev('max_teams'),
+    '=IFERROR(IF(F' + r + '="","",MAX(0,VALUE(F' + r + ')-D' + r + ')),"")',
+    '=' + ev('is_open')
+  ];
+}
+
+function createSummary_(sh) {
+  var last = SUMMARY_ROWS + 2;
+  sh.getRange(1, 1, 1, SUMMARY_HEADERS.length).setValues([SUMMARY_HEADERS]);
+  sh.getRange(2, 1, 1, SUMMARY_HEADERS.length).setFormulas([[
+    '="TOTAL"',
+    '=COUNTIF(A3:A' + last + ',"?*")&" events"',
+    '=""',
+    '=SUM(D3:D' + last + ')',
+    '=SUM(E3:E' + last + ')',
+    '=""',
+    '=IF(COUNT(G3:G' + last + ')=0,"",SUM(G3:G' + last + '))',
+    '=SUMPRODUCT(--(UPPER(TRIM(H3:H' + last + '))="TRUE"))&" open"'
+  ]]);
+  var rows = [];
+  for (var r = 3; r <= last; r++) rows.push(summaryRowFormulas_(r));
+  sh.getRange(3, 1, SUMMARY_ROWS, SUMMARY_HEADERS.length).setFormulas(rows);
+  sh.getRange(1, 1, 2, SUMMARY_HEADERS.length).setFontWeight('bold');
+  sh.setFrozenRows(2);
+  sh.setFrozenColumns(1);
+  // Narrow columns so the whole table fits a phone screen; only the event name is wide.
+  [52, 190, 66, 48, 56, 44, 44, 52].forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
 }
 
 /** Writes one cell, found by header name, as plain text. */
