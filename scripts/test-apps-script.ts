@@ -1768,7 +1768,7 @@ t('nothing reads the timestamp column: any value there leaves register, duplicat
   assert.equal(reg(rt).code, 'DUPLICATE');
   assert.equal(reg(rt, { id: 'Z2' }).regId, 'KR26-ESY-0002');
   assert.equal(st(rt).events['s-essay']?.registeredCount, 2);
-  assert.equal((rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }) as { passes: { regId: string }[] }).passes[0]?.regId, r.regId);
+  assert.equal((rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }) as unknown as { passes: { regId: string }[] }).passes[0]?.regId, r.regId);
   const code = readFileSync('apps-script/Code.gs', 'utf8');
   assert.equal((code.match(/\.timestamp\b|\['timestamp'\]/g) ?? []).length, 0, 'Code.gs never reads row.timestamp');
 });
@@ -1861,6 +1861,75 @@ t('setupSheet on the live spreadsheet (no Summary yet) adds it at the END, after
   const order = rt.ss.getSheets().map((s) => s.getName());
   setup(rt);
   assert.deepEqual(rt.ss.getSheets().map((s) => s.getName()), [...order, 'Summary']);
+});
+
+console.log('\nOne-off: notifyDebateMediumChange()');
+const notify = (rt: GasRuntime) => (rt.ctx.notifyDebateMediumChange as () => { sent: number; failed: number; skipped: number })();
+/** A runtime with 3 student debaters (one withdrawn), 1 faculty debater and an essay registrant; confirmation mails cleared. */
+const debateRuntime = () => {
+  const rt = createOpenRuntime();
+  reg(rt, { eventId: 's-debate', id: 'D1', name: 'Kavya N', email: 'kavya@example.com' });
+  reg(rt, { eventId: 's-debate', id: 'D2', name: 'Rohit S', email: 'Rohit@Example.com' });
+  reg(rt, { eventId: 's-debate', id: 'D3', name: 'Withdrawn One', email: 'gone@example.com' });
+  reg(rt, { eventId: 'f-debate', id: 'EMP7', name: 'Prof Anand', email: 'anand@example.com', semester: null, department: 'ECE' });
+  reg(rt, { id: 'E1', email: 'essay@example.com' });
+  setStatus(rt, 's-debate', 4, 'WITHDRAWN');
+  rt.mail.sent = [];
+  return rt;
+};
+t('emails every non-withdrawn Debate registrant (student + faculty) once — no one else', () => {
+  const rt = debateRuntime();
+  const logs = captureLogs(rt);
+  assert.deepEqual({ ...notify(rt) }, { sent: 3, failed: 0, skipped: 0 });
+  assert.deepEqual(rt.mail.sent.map((m) => m.to), ['kavya@example.com', 'rohit@example.com', 'anand@example.com']);
+  assert.match(logs[logs.length - 1] ?? '', /^notifyDebateMediumChange: 3 sent, 0 failed, 0 skipped/);
+});
+t('the note is bilingual: Kannada only + withdraw via a coordinator; only the student Debate mentions the non-Kannadiga events', () => {
+  const rt = debateRuntime();
+  notify(rt);
+  const [student, , faculty] = rt.mail.sent;
+  for (const m of [student!, faculty!]) {
+    assert.match(m.subject, /now in Kannada only \/ ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ/);
+    assert.ok(m.body.includes('ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ') && m.body.includes('the Debate will now be in Kannada only'));
+    assert.ok(m.body.includes('ಸಂಯೋಜಕರಿಗೆ ತಿಳಿಸಿ') && m.body.includes('please tell a coordinator'));
+    assert.ok(m.htmlBody!.includes('ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ'));
+    assert.ok(!/\d{10}/.test(m.body), 'no phone numbers in the mail (they live only in events.json → the site)');
+  }
+  assert.ok(student!.body.includes('KR26-DEB-0001') && student!.body.includes('Kavya N'));
+  assert.ok(student!.body.includes('Simple Kannada Debate or Elocution') && student!.body.includes('ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ'));
+  assert.ok(student!.body.includes('https://kr2k26-bmsit.netlify.app/register?event=s-simple-debate'));
+  assert.ok(student!.body.includes('https://kr2k26-bmsit.netlify.app/register?event=s-elocution'));
+  assert.ok(student!.body.includes('https://kr2k26-bmsit.netlify.app/competitions?for=students#s-debate'));
+  assert.ok(faculty!.body.includes('https://kr2k26-bmsit.netlify.app/competitions?for=faculty#f-debate'));
+  assert.ok(!/Simple Kannada|Elocution|ಆಶುಭಾಷಣ/.test(faculty!.body), 'faculty are not pointed at the student-only events');
+});
+t('never emails the same address twice: a second run sends nothing; duplicate addresses in the tab get one mail', () => {
+  const rt = debateRuntime();
+  reg(rt, { eventId: 's-debate', id: 'D4', name: 'Kavya Again', email: ' KAVYA@example.com ' });
+  rt.mail.sent = [];
+  assert.deepEqual({ ...notify(rt) }, { sent: 3, failed: 0, skipped: 1 });
+  assert.deepEqual({ ...notify(rt) }, { sent: 0, failed: 0, skipped: 4 });
+  assert.equal(rt.mail.sent.length, 3);
+  assert.deepEqual(JSON.parse(rt.props.getProperty('notified_debateMedium')!).sort(), ['anand@example.com', 'kavya@example.com', 'rohit@example.com']);
+});
+t('a failed send is counted, not recorded, and retried on the next run; the quota running out stops sending', () => {
+  const rt = debateRuntime();
+  rt.mail.fail = true;
+  assert.deepEqual({ ...notify(rt) }, { sent: 0, failed: 3, skipped: 0 });
+  rt.mail.fail = false;
+  rt.mail.quota = 1;
+  const logs = captureLogs(rt);
+  assert.deepEqual({ ...notify(rt) }, { sent: 1, failed: 2, skipped: 0 });
+  assert.match(logs[logs.length - 1] ?? '', /quota used up — run it again tomorrow/);
+  rt.mail.quota = 100;
+  assert.deepEqual({ ...notify(rt) }, { sent: 2, failed: 0, skipped: 1 });
+  assert.equal(new Set(rt.mail.sent.map((m) => m.to)).size, 3);
+});
+t('notifyDebateMediumChange never changes the spreadsheet', () => {
+  const rt = debateRuntime();
+  const before = rt.ss.snapshot();
+  notify(rt);
+  assert.equal(rt.ss.snapshot(), before);
 });
 
 console.log('\nClient/server parity');
