@@ -3,7 +3,7 @@
  *   1. npm run dev          (in another terminal)
  *   2. npm run e2e:event    (E2E_BASE, E2E_OUT, CHROME_PATH env vars optional)
  * kn/en × 320/360/768/1280 px: no clipped or overflowing element, footer once, one h1, no console errors,
- * Day 2 timeline = schedule.json (order, start times only, per-language numerals, no Break), Now/Next from the
+ * Day 2 timeline = schedule.json (order, start times only, Latin digits in both languages, no Break), Now/Next from the
  * dev clock, headline artists section (both artists, equal frames, stacked / side by side) + stop + banner, day tabs and ?day=, Day 1 stops, lazy map, reduced
  * motion, and no banned programme names in the rendered text, alt or aria text.
  */
@@ -109,7 +109,8 @@ async function main() {
         const page = await open(browser, lang, width, `/event?day=2&${noon}&mock=`, errors);
         await revealAll(page);
         const plaques = await page.$$eval('main li .brass-plaque, main section li', (n) => n.map((x) => x.textContent ?? '').join(' '));
-        expect(plaques.includes(lang === 'kn' ? '₹೪೫,೦೦೦' : '₹45,000'), `prize plaque shows the ₹45,000 pool (${lang})`);
+        expect(plaques.includes('₹45,000'), `prize plaque shows the ₹45,000 pool (${lang})`);
+        expect(!/[೦-೯]/.test(plaques), `plaques use Latin digits (${lang})`);
         const m = await page.evaluate(() => {
           const vw = document.documentElement.clientWidth;
           // body has overflow-x: clip, so scrollWidth cannot see clipped content: measure element rects instead.
@@ -176,8 +177,7 @@ async function main() {
         expect(!/[–—]/.test(got.text) && !/\d\s?h\b|\d\s?m\b|ಗಂ|ನಿ\b/.test(got.text), `${s.start}: looks like an end time or duration: ${got.text}`);
         expect(got.links === 0, `${s.start}: has ${got.links} link/button (no registration on Day 2)`);
       });
-      if (lang === 'kn') expect(/^[^0-9]*$/.test(stops.map((s) => s.time).join('')), 'kn times use Kannada numerals only');
-      else expect(!/[೦-೯]/.test(stops.map((s) => s.time).join('')), 'en times use Latin numerals only');
+      expect(!/[೦-೯]/.test(stops.map((s) => s.time).join('')), `${lang} times use Latin digits only`);
       expect(!stops.some((s) => /Break|ವಿರಾಮ/.test(s.text)), 'no Break stop');
       const proc = stops.find((s) => s.id === 'stop-1000')!;
       expect(proc.text.includes(day2[1]!.description![lang]), 'procession keeps "with Veeragase & Tamate troupes"');
@@ -185,7 +185,7 @@ async function main() {
       expect(rally.text.includes(lang === 'kn' ? 'ಬಿಲ್‌ಬೋರ್ಡ್' : 'Bill Board'), 'rally venue is Bill Board');
       const concert = stops[stops.length - 1]!;
       expect(artists.every((a) => concert.text.includes(a.name[lang])), `headline stop shows ${artists.map((a) => a.name[lang]).join(' · ')}`);
-      return `9 stops match schedule.json; ${lang} numerals; single start time per card; no links; both artists on the 14:30 stop`;
+      return `9 stops match schedule.json; Latin digits; single start time per card; no links; both artists on the 14:30 stop`;
     });
   }
 
@@ -319,7 +319,7 @@ async function main() {
         // one shared caption read from the 14:30 stop
         const want = `${headline.title[lang]} · ${formatDate(site.day2Date, lang, { short: true })} · ${formatTime(headline.start, lang)}`;
         expect(r.captions.length === 1 && r.captions[0] === want, `captions ${JSON.stringify(r.captions)} ≠ "${want}"`);
-        expect(lang === 'en' ? r.captions[0] === 'Music Concert & DJ · 21 Nov · 2:30 PM' : r.captions[0]!.includes('೨೧') && r.captions[0]!.includes('೨:೩೦'), `caption wording "${r.captions[0]}"`);
+        expect(lang === 'en' ? r.captions[0] === 'Music Concert & DJ · 21 Nov · 2:30 PM' : r.captions[0] === 'ಸಂಗೀತ ಕಚೇರಿ ಮತ್ತು ಡಿಜೆ · 21 ನವೆಂಬರ್ · ಮಧ್ಯಾಹ್ನ 2:30', `caption wording "${r.captions[0]}"`);
         expect(r.heading === (lang === 'kn' ? 'ಪ್ರಮುಖ ಕಲಾವಿದರು' : 'Headline artists') && r.sectionH2 === 1 && !r.inGuests, `heading "${r.heading}"`);
         const scales = r.items.map((i, k) => `${i.id} ${Math.max(i.box[0]! / artistAssets[artists[k]!.id as keyof typeof artistAssets].width, i.box[1]! / artistAssets[artists[k]!.id as keyof typeof artistAssets].height).toFixed(2)}×`);
         return `${width >= 640 ? 'side by side' : 'stacked'}, frames ${f1![2]}×${f1![3]}; caption "${r.captions[0]}"; 1x scale ${scales.join(', ')}`;
@@ -378,7 +378,7 @@ async function main() {
     const bad = await open(browser, 'kn', 360, `/event?day=9&${noon}&mock=`, errors);
     expect((await pressed(bad)) === 'tab-day2', 'unknown ?day= falls back');
     const knLabels = await bad.$$eval('[data-testid^=tab-day]', (t) => t.map((x) => (x as HTMLElement).innerText.replace(/\s+/g, ' ')));
-    expect(knLabels[0] === 'ದಿನ ೧ · ೨೦ ನವೆಂಬರ್ ಸ್ಪರ್ಧೆಗಳು' && knLabels[1] === 'ದಿನ ೨ · ೨೧ ನವೆಂಬರ್ ರಾಜ್ಯೋತ್ಸವ', `kn labels ${knLabels.join(' | ')}`);
+    expect(knLabels[0] === 'ದಿನ 1 · 20 ನವೆಂಬರ್ ಸ್ಪರ್ಧೆಗಳು' && knLabels[1] === 'ದಿನ 2 · 21 ನವೆಂಬರ್ ರಾಜ್ಯೋತ್ಸವ', `kn labels ${knLabels.join(' | ')}`);
     for (const p of [a, b, c, bad]) await p.browserContext().close();
     return 'Day 1 on 20 Nov, Day 2 otherwise, ?day= wins and syncs (replace), unknown value ignored; kn/en tab labels';
   });
@@ -431,7 +431,7 @@ async function main() {
         expect(r.states.length === events.length && r.states.every((s) => s === want), `${lang}: states ${[...new Set(r.states)].join(',')}`);
         expect(r.now === (want === 'current' ? events.length : 0) && r.next === (want === 'next' ? events.length : 0), `${lang}: ${r.now} now / ${r.next} next pills`);
         expect(r.markers === (want === 'current' ? 1 : 0), `${lang}: ${r.markers} Ambari markers (one for the parallel stops)`);
-        const range = lang === 'kn' ? 'ಮಧ್ಯಾಹ್ನ ೧೨:೩೦ – ಸಂಜೆ ೪:೩೦' : '12:30 PM – 4:30 PM';
+        const range = lang === 'kn' ? 'ಮಧ್ಯಾಹ್ನ 12:30 – ಸಂಜೆ 4:30' : '12:30 PM – 4:30 PM';
         expect(r.time === range, `${lang}: time "${r.time}"`);
         out.push(lang);
       }

@@ -80,9 +80,10 @@ No UI kits (no MUI/Chakra/shadcn defaults). Everything is custom-styled to the t
 - Kannada needs more line-height (≥1.6 body, ≥1.25 headings) — conjuncts (ಒತ್ತಕ್ಷರ) must never clip. Never use `overflow:hidden` on a single-line Kannada heading without testing.
 
 ### Numerals rule
-- Kannada mode: dates **and** times use Kannada numerals consistently (೨೧ ನವೆಂಬರ್ ೨೦೨೬, ಬೆಳಿಗ್ಗೆ ೯:೦೦). Prize amounts use `₹` with Indian grouping (₹೩,೦೦೦).
-- English mode: Latin numerals everywhere (21 November 2026, 9:00 AM, ₹3,000).
-- Implement one `formatNumber/formatDate/formatTime/formatPrize(lang)` util and use it everywhere. Never hard-code a number in a component.
+> **Override (approved, Nov 2026):** Kannada numerals are dropped site-wide. Both languages use **Latin digits**.
+- **Latin digits in both languages, everywhere:** dates, times, prizes, counts, the countdown, rules text, venues, the pass card and its PNG, the `.ics`, the confirmation email, page titles. Kannada mode keeps the Kannada **words** around them: "21 ನವೆಂಬರ್ 2026", "ಮಧ್ಯಾಹ್ನ 12:30", "₹45,000", "ದಿನ 2". English mode: "21 November 2026", "9:00 AM", "₹45,000".
+- Prize amounts use `₹` with Indian grouping (₹3,000 · ₹1,00,000) in both languages.
+- One `formatNumber/formatDate/formatTime/formatPrize(lang)` util (`src/lib/format.ts`) is used everywhere; it still takes `lang` for the words (month names, the part-of-day word, units). Never hard-code a number in a component, and never type a Kannada digit (೦–೯) into data, i18n strings, Code.gs or tests' expected text. `test:schedule`, `test:server` (email) and the e2e suites (pass, plaques, timeline, countdown, banner) fail on any Kannada digit.
 
 ### Motifs & components
 - **PalaceSilhouette** — SVG of a Mysore-palace-style facade (domes, arches, central tower) drawn with outline "bulb" dots along the edges. Bulbs light up row by row (staggered), then gently twinkle.
@@ -90,7 +91,7 @@ No UI kits (no MUI/Chakra/shadcn defaults). Everything is custom-styled to the t
 - **TableauCard** — competition card shaped like a procession float: arched top, decorative border, small wheels at the bottom.
 - **FolkDivider** — section divider pattern (temple-border / kasuti-style geometric band) as an SVG repeat.
 - **Torch** — CSS flame (gradient + flicker keyframes) used in the footer and final CTA.
-- **BrassPlaque** — stat card with brushed-gold gradient border.
+- **BrassPlaque** — stat card with brushed-gold gradient border (layout rules under "Brass plaques" below).
 - Corner ornaments on major cards; arch (`border-radius: 999px 999px 12px 12px` style) frames for portraits.
 
 **Art assets:** if `public/art/` contains licensed vector files (palace, elephant, troupes), use and animate them.
@@ -145,13 +146,13 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 ### 5.1 Home `/`
 - College logo + "ಬಿ.ಎಂ.ಎಸ್. ತಾಂತ್ರಿಕ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನಾ ಮಹಾವಿದ್ಯಾಲಯ" row; Honnudi logo (assets in `public/brand/`).
 - Hero: lit palace at night, parallax layers (sky → palace → crowd silhouettes → Ambari elephant walking across the foreground).
-- Eyebrow "ಪ್ರಸ್ತುತಪಡಿಸುತ್ತಿರುವ", title "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ" with gold glow, subtitle "೨೦೨೬", tagline "ದಸರಾ ಮೆರವಣಿಗೆ" / "The Dasara Procession".
-- **Countdown** (days/hours/mins/secs in plaque tiles; numerals per language) that moves through phases automatically:
+- Eyebrow "ಪ್ರಸ್ತುತಪಡಿಸುತ್ತಿರುವ", title "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ" with gold glow, subtitle "2026", tagline "ದಸರಾ ಮೆರವಣಿಗೆ" / "The Dasara Procession".
+- **Countdown** (days/hours/mins/secs in plaque tiles; Latin digits in both languages) that moves through phases automatically:
   1. Before 20 Nov 09:00 → "ಸ್ಪರ್ಧೆಗಳಿಗೆ" / "Competitions begin in" → `site.json → competitionsStart`.
   2. During 20 Nov → "ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!" / "Competitions are on!" + "Main event in" countdown to `eventStart`.
   3. Before 21 Nov 09:00 → "ಮೆರವಣಿಗೆಗೆ" / "The procession begins in" → `eventStart`.
   4. During 21 Nov → "ಉತ್ಸವ ಆರಂಭವಾಗಿದೆ!"; after `eventEnd` → "ಧನ್ಯವಾದಗಳು" + link to gallery.
-- A small **two-day strip** under the title: "೨೦ ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು" ‖ "೨೧ ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ ಮೆರವಣಿಗೆ" (Day 1 Competitions / Day 2 Rajyotsava Procession).
+- A small **two-day strip** under the title: "20 ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು" ‖ "21 ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ ಮೆರವಣಿಗೆ" (Day 1 Competitions / Day 2 Rajyotsava Procession).
 - CTAs: primary **"ಮೆರವಣಿಗೆಗೆ ಸೇರಿ — ನೋಂದಾಯಿಸಿ"** → `/competitions`; secondary "ನಮ್ಮ ತಂಡ" → `/team`.
 - 3 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · number of competitions (computed from data — 14) · cash prize pool (computed from data — **₹45,000**; shown as "₹45,000 + mementos" because faculty events award mementos).
 - "Procession preview" strip: horizontally scrolling row of mini tableau cards for the competitions (auto-scroll, pauses on hover/touch, reduced-motion = static).
@@ -171,10 +172,10 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 - Skeleton shimmer while status loads.
 
 ### 5.3 Event Details `/event`
-- Title "ಕಾರ್ಯಕ್ರಮ ವಿವರಗಳು", subtitle "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ ೨೦೨೬".
+- Title "ಕಾರ್ಯಕ್ರಮ ವಿವರಗಳು", subtitle "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ 2026".
 - **Chief guest(s)** in Darbar-hall arch frames with gold pillars. Single clean image — no reflected/duplicated image. (TODO-CONFIRM guest names, titles, photos; if unconfirmed, show a tasteful "ಶೀಘ್ರದಲ್ಲೇ ಘೋಷಣೆ / Announcing soon" frame.)
 - 4 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · time (Day 2: 9:00 AM – 5:45 PM) · venue (BMSIT&M campus) · cash prize pool (₹45,000 + mementos).
-- **Day tabs** above the timeline: **ದಿನ ೧ · ೨೦ ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು** / **ದಿನ ೨ · ೨೧ ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ** (Day 1 · Competitions / Day 2 · Rajyotsava). Default to Day 2 except on 20 Nov, when Day 1 is default. Synced to `?day=1|2`.
+- **Day tabs** above the timeline: **ದಿನ 1 · 20 ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು** / **ದಿನ 2 · 21 ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ** (Day 1 · Competitions / Day 2 · Rajyotsava). Default to Day 2 except on 20 Nov, when Day 1 is default. Synced to `?day=1|2`.
 - **Procession-route timeline**: a winding SVG road; each stop is a schedule item (**start time**, title, venue — no end times or durations anywhere in the timeline). Vertical on mobile, winding horizontal/zigzag on desktop. Generated from `src/data/schedule.json` (entries carry a `day` field). Highlight the "Inauguration & Procession" stop as the Day 2 centrepiece (Ambari icon) — it IS the Dasara theme.
   - **Day 1** is generated from `events.json` (all competitions, sorted by time, each stop links to its competition card and Register button). Events with unknown time sit in an "ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ / Time to be announced" group at the end.
 - **"Now / Next" indicator** on each day: the current stop glows and a small Ambari marker sits on it (computed from the client clock in IST). A stop is "current" from its start until the next stop starts; the last stop runs until `site.json → eventEnd` (17:45).
@@ -230,7 +231,7 @@ See §7 for the backend contract. The page is a styled multi-step form ("Join th
 - Error states with a friendly message and retry: network failure, event closed by a coordinator, deadline passed, duplicate registration (show the existing registration ID), validation error from server.
 
 ### 5.7 Pass `/register/success`
-- A "procession pass" card: Ambari motif, event name, participant name(s), registration ID (e.g. `KR26-DEB-0042`), "ದಿನ ೧ · ೨೦ ನವೆಂಬರ್" / "Day 1 · 20 Nov" with event time/venue, "Show this at the venue", plus a line inviting them to the Day 2 procession on 21 Nov.
+- A "procession pass" card: Ambari motif, event name, participant name(s), registration ID (e.g. `KR26-DEB-0042`), "ದಿನ 1 · 20 ನವೆಂಬರ್" / "Day 1 · 20 Nov" with event time/venue, "Show this at the venue", plus a line inviting them to the Day 2 procession on 21 Nov.
 - Buttons: **Download pass** (PNG via html-to-image, 2x pixel ratio), **Add to calendar** (.ics download), **Back to competitions**.
 - Pass data comes from router state; if missing (e.g. page refresh), read last pass from sessionStorage, else show a lookup message.
 
@@ -299,7 +300,7 @@ Rangoli is new this year and fits the theme perfectly — give its card a kolam-
 
 **Competitions data notes (Nov 2026):**
 - **Debate medium:** both Debates are **Kannada only** (`medium: "kannada"` in events.json, rule 8 says so). `competitions/MediumNotice` shows "Medium: Kannada only" on their cards and in the register summary; `alternatives` (event ids, same category, checked by `validate-data`) adds links to those cards — the student Debate points to the Simple Kannada Debate and Elocution. Ids, codes and Sheet tabs unchanged.
-- **Time & venue (college schedule):** every competition is on 20 Nov, **12:30–16:30 IST** — `time` "12:30" + optional `endTime` "16:30" (schema; `validate-data` checks end > start and that both sit inside `site.json` competitionsStart 12:30 / competitionsEnd 16:30). Shown as a range ("12:30 PM – 4:30 PM" / "ಮಧ್ಯಾಹ್ನ ೧೨:೩೦ – ಸಂಜೆ ೪:೩೦", `eventTime()` in `lib/eventDisplay.ts`) on cards, register summary/review, the Day 1 timeline and the pass; the `.ics` Day 1 entry is 12:30–16:30 (no longer all-day); the email shows "12:30–16:30 IST". Day 1 competitions run in parallel: `day1States()` marks them all next / now / past together and only the first current stop carries the Ambari marker. Venues from the college schedule (Kannada = drafts in `TODO-CONFIRM.md`); Quiz, Treasure Hunt, Rangoli, Elocution and Simple Kannada Debate venues are TBA.
+- **Time & venue (college schedule):** every competition is on 20 Nov, **12:30–16:30 IST** — `time` "12:30" + optional `endTime` "16:30" (schema; `validate-data` checks end > start and that both sit inside `site.json` competitionsStart 12:30 / competitionsEnd 16:30). Shown as a range ("12:30 PM – 4:30 PM" / "ಮಧ್ಯಾಹ್ನ 12:30 – ಸಂಜೆ 4:30", `eventTime()` in `lib/eventDisplay.ts`) on cards, register summary/review, the Day 1 timeline and the pass; the `.ics` Day 1 entry is 12:30–16:30 (no longer all-day); the email shows "12:30–16:30 IST". Day 1 competitions run in parallel: `day1States()` marks them all next / now / past together and only the first current stop carries the Ambari marker. Venues from the college schedule (Kannada = drafts in `TODO-CONFIRM.md`); Quiz, Treasure Hunt, Rangoli, Elocution and Simple Kannada Debate venues are TBA.
 - `coordinators`: 1–3 `{ name, phone }` per event; `phone` is 10 digits matching `RULES.phone` (`^[6-9]\d{9}$`) — `validate-data` fails otherwise. Each person gets their own `tel:+91…` link on the card (`competitions/Coordinators.tsx`). The numbers live **only** in `events.json` (tests read them from there; never copy them into docs, tests or Config.gs).
 - `rules` come from the organisers' `RULES_AND_REGULATIONS_final.pdf` (Kannada and English sections, same numbering — `validate-data` checks both lists have the same length); adaptations are listed in `TODO-CONFIRM.md`. `site.json → generalRules` holds the "General instructions" shown at the top of /competitions and in the Register review step.
 - **Rules are not in the entry chunk:** `scripts/vite-plugin-split-rules.ts` serves the browser `events.json` without `rules` and `site.json` without `generalRules`, and exposes both through `virtual:competition-rules` (imported only by `RulesDisclosure` / `GeneralInstructions`). Browser types: `CompetitionEvent` / `SiteConfig` omit those fields; scripts use `EventRecord` / `SiteRecord`.
@@ -373,7 +374,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 ## 10. Known bugs from the 2025 site — must NOT happen here
 1. Footer rendered 2–3 times per page, and page content repeated below the footer → single Layout, Footer only in Layout. Add a dev-only check that warns if more than one `<footer>` exists.
 2. Chief-guest image showed a mirrored duplicate below it → plain single image in a frame.
-3. Kannada dates with Latin times → numeral rule in §3.
+3. Kannada dates with Latin times (mixed numerals) → numeral rule in §3 (now: Latin digits throughout, consistently).
 4. Competition cards with no rules/registration → §5.2.
 
 ## 11. Deployment
@@ -420,7 +421,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - **Sheet wins** over `events.json` / `site.json` at runtime (deadline, is_open, tab name). **Registration is open from the start** — there is no `registrationOpen` and no "Opens soon" state; `setupSheet` creates every event with `is_open` TRUE and `is_open` is the coordinators' manual close switch. **Seat limits only where `max_teams` is set** (Treasure Hunt, 30): status returns `seatsLeft` for capped events only, register returns `FULL`; every other event is unlimited. Force plain-text writes (formula-injection guard).
 - **Spam guards:** honeypot `website` + minimum time on form (> 3 s, `site.json → minFormSeconds`). `user_agent` is dropped from the Sheet (or stored as client-supplied only).
 - **Departments** (draft, TODO-CONFIRM): CSE, ISE, AIML, ECE, EEE, ETE, Mech, Civil, MBA, MCA, Other (free text).
-- **Kannada time words:** ಬೆಳಿಗ್ಗೆ (<12), ಮಧ್ಯಾಹ್ನ (12–16), ಸಂಜೆ (16–19), ರಾತ್ರಿ (19+). Own digit mapper; Latin digits stay in reg IDs, phone and USN.
+- **Kannada time words:** ಬೆಳಿಗ್ಗೆ (<12), ಮಧ್ಯಾಹ್ನ (12–16), ಸಂಜೆ (16–19), ರಾತ್ರಿ (19+), followed by Latin digits ("ಸಂಜೆ 5:45"); reg IDs, phone and USN are Latin as always.
 - **Contact email, Instagram URL, "Made by"** are empty in `site.json` and hidden when empty — never invent them.
 - **Day 2 Dance/Music slots** stay as listed in the confirmed schedule, with no registration link.
 - **Map:** embed by searching the `site.json → mapQuery`; verify the pin before launch.
@@ -456,6 +457,13 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - **Measured** (`npm run perf:home`, 11 Nov 2026, after the CLS/zod pass): Home CLS ≤ 0.01; LCP en 2.5–2.6 s, kn 2.9–3.1 s in a *noisy* lab (applied 4× CPU + Slow 4G, headless software raster; the same machine measured 2.4 / 2.7 s a day earlier — compare only A/B on the same run). **Fonts are not the bottleneck**: aborting every font request leaves FCP unchanged (first paint is gated by JS parse/execute), so font preload/subsetting would not help; hiding the palace or the preview strip did not help either. Done: runtime zod removed from the entry (`lib/data.ts` casts the JSON; `scripts/validate-data.ts` still validates every build) ≈ −0.1 s (A/B). Left: the ~68 KB-gzip entry (i18n + both languages' strings, router) and the react chunk; confirm with Lighthouse on the deployed URL before doing more.
 - **Competitions CLS** was 0.05–0.058 (toggle height changed by 3 px when the Kannada font swapped in; the "status unavailable" note wrapped to two lines on phones). Fixed: `.segmented-btn` has a fixed 44 px height, the status row reserves two lines under 480 px. Now ≤ 0.015 with the endpoint down, ≤ 0.001 with a working endpoint (measured against a build with `VITE_REGISTRATION_ENDPOINT` set and the status request intercepted at 1.2 s).
 - **Tests**: `npm run e2e:home` (31 checks: kn/en × 320/360/768/1280, splash (≈ 5 s, timeline, Skip at frame 1 / Tab+Enter / Esc, Home only, `?intro=1`, 320 px + landscape, low-end), reduced motion, low-end, parallax, all countdown phases, deadline banner, SVG budgets, marquee a11y, mobile menu), `npm run perf:home` (needs `npm run build && npm run preview`; `PERF_PATH=competitions` for another route), `npm run shot -- / [--full --reduced --lowend --intro --now=ISO --el=css]` for review screenshots.
+
+### Brass plaques (Nov 2026 — refines §3, §5.1, §5.3)
+- `ui/BrassPlaque` takes a **string** `value` (+ optional `unit`, `caption`, `icon`) and is used by `home/HomePlaques` (3) and `event/EventPlaques` (4). The main value must fit inside its card in both languages from 320 to 1920 px, with no overflow or overlap.
+- **Sizing:** the value's font size is `clamp(1rem, var(--fit) × 1cqi, 3rem)`, in container query units of the card's own content box (`.plaque-body` has `container-type: inline-size`); `--fit` comes from `lib/textFit.ts → fitCqi()`, an em-width estimate (calibrated against Baloo Tamma 2 / Cinzel, a little generous) of the value's **longest unbreakable piece**. Without container queries: `var(--fit) × 1.75px` (the narrowest card content box, ~175 px). The unit is sized the same way (max 1.25rem) and never wraps.
+- **Wrapping only at sensible points:** a value wraps only at a normal space or a zero-width space (U+200B); use `noBreak()` / `breakableRange()` (`lib/textFit.ts`) to build values. Time ranges break only after the dash ("9:00 AM –" / "5:45 PM"); the Kannada venue `eventPage.plaques.venueValue` carries a U+200B after "ಬಿ.ಎಂ.ಎಸ್." (keep it when editing that string — it is invisible in editors).
+- **Equal heights and alignment:** the list is a `.plaque-grid`; with subgrid every card (`li.plaque-cell` → Reveal `.plaque-cell` → `.plaque` → `.plaque-face`) spans three shared row tracks (icon · value · caption). The value tracks are `1fr`, so every card on the page is the same height, and icons, value blocks and the first caption line line up in each row. The caption keeps two lines reserved (`min-height: 2lh`). Without subgrid: equal-height rows (`grid-auto-rows: 1fr`) and the same three rows inside each card.
+- **Test:** `npm run e2e:plaques` (22 checks: Home + Event Details × kn/en × 320/360/768/1280/1920). For every plaque: `scrollWidth <= clientWidth` on the face, line, value, unit and caption; every piece's rect inside the card face; no overlap with neighbours; equal card heights; icons and captions aligned per row; value ≥ 16 px and ≤ 2 lines; no Kannada digits. It also checks the time breaks only after the dash and the Kannada venue only at "ಬಿ.ಎಂ.ಎಸ್.". Screenshots are written to `e2e-output/plaques`. Home's `--cv-h` placeholder (840 px phones / 310 px from md) was re-measured for the equal-height cards.
 
 ### Brand logos (refines §5.1, §9)
 - **Masters** live in `public/brand/` exactly as supplied (never recolour or edit them) and are named in `site.json → logos` (four keys: `college`, `club`, `jubilee` = `25-logo.png`, `cultural` = `cultural.png`). `npm run brand:images` (sharp; dev-only, not part of the build, so deploys never depend on it) writes content-hashed WebP copies to `public/brand/web/` (cached for a year in `netlify.toml`) and `src/data/logos.generated.json`. `validate-data` fails the build if a master changes without regenerating.

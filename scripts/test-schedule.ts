@@ -10,6 +10,7 @@ import events from '../src/data/events.json' with { type: 'json' };
 import { buildIcs } from '../src/lib/ics';
 import { day1Groups, day1States, day2Position, day2Stops, defaultDay, istInstant, parseDay, positionIn, stopState } from '../src/lib/schedule';
 import { eventTime } from '../src/lib/eventDisplay';
+import { formatDate, formatDeadline, formatDuration, formatNumber, formatPrize, formatTime, formatTimeRange } from '../src/lib/format';
 import type { CompetitionEvent, SiteConfig } from '../src/lib/schemas';
 
 let n = 0;
@@ -111,7 +112,33 @@ ok('.ics: one entry per Day 2 stop with the same start and names; last stop ends
     assert.ok(artists.length === 2 && artists.every((a) => text.includes(a.name[lang])), `${lang}: Remo and Tanmay both in the calendar file`);
     assert.ok(!/\bDAP\b|Motor Head|Movie Promotion|Break/.test(text));
     assert.ok(ics.split('\r\n').every((l) => Buffer.byteLength(l) <= 75), 'folded');
+    assert.ok(!/[೦-೯]/.test(text), `${lang}: .ics has Latin digits only (numerals rule)`);
   }
+});
+
+ok('numerals rule: Latin digits in both languages, Kannada words kept (format.ts)', () => {
+  const KN_DIGIT = /[೦-೯]/;
+  const kn = [
+    formatDate('2026-11-21', 'kn', { year: true }),
+    formatDate('2026-11-21', 'kn', { weekday: true }),
+    formatDeadline('2026-11-18T23:59:00+05:30', 'kn'),
+    formatTime('09:00', 'kn'),
+    formatTimeRange('09:00', '17:45', 'kn'),
+    formatPrize(45000, 'kn'),
+    formatNumber(14, 'kn'),
+    formatNumber(7, 'kn', { pad: 2 }),
+    formatDuration(125, 'kn'),
+  ];
+  for (const s of kn) assert.ok(!KN_DIGIT.test(s), `no Kannada digit in "${s}"`);
+  assert.equal(formatDate('2026-11-21', 'kn', { year: true }), '21 ನವೆಂಬರ್ 2026');
+  assert.equal(formatDeadline('2026-11-18T23:59:00+05:30', 'kn'), '18 ನವೆಂಬರ್, ರಾತ್ರಿ 11:59');
+  assert.equal(formatTime('09:00', 'kn'), 'ಬೆಳಿಗ್ಗೆ 9:00');
+  assert.equal(formatTime('12:30', 'kn'), 'ಮಧ್ಯಾಹ್ನ 12:30');
+  assert.equal(formatTime('09:00', 'en'), '9:00 AM');
+  assert.equal(formatPrize(45000, 'kn'), '₹45,000');
+  assert.equal(formatPrize(100000, 'en'), '₹1,00,000');
+  assert.equal(formatNumber(7, 'kn', { pad: 2 }), '07');
+  assert.equal(formatDuration(125, 'kn'), '2 ಗಂ 05 ನಿ');
 });
 
 ok('Day 1: every competition 12:30–16:30 IST, shown as a range in both languages', () => {
@@ -122,7 +149,7 @@ ok('Day 1: every competition 12:30–16:30 IST, shown as a range in both languag
   assert.equal(site.competitionsStart, '2026-11-20T12:30:00+05:30');
   assert.equal(site.competitionsEnd, '2026-11-20T16:30:00+05:30');
   assert.equal(eventTime(events[0] as CompetitionEvent, 'en'), '12:30 PM – 4:30 PM');
-  assert.equal(eventTime(events[0] as CompetitionEvent, 'kn'), 'ಮಧ್ಯಾಹ್ನ ೧೨:೩೦ – ಸಂಜೆ ೪:೩೦');
+  assert.equal(eventTime(events[0] as CompetitionEvent, 'kn'), 'ಮಧ್ಯಾಹ್ನ 12:30 – ಸಂಜೆ 4:30');
   assert.equal(eventTime({ time: '14:00' }, 'en'), '2:00 PM');
   assert.equal(eventTime({ time: 'TODO-CONFIRM' }, 'en'), null);
   const { timed, tba } = day1Groups();

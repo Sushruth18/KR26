@@ -286,6 +286,16 @@ t('confirmation email is sent to the normalised address with the regId', () => {
   assert.match(rt.mail.sent[0]?.body ?? '', /KR26-ESY-0001/);
   assert.match(rt.mail.sent[0]?.body ?? '', /ನೋಂದಣಿ ಐಡಿ/);
 });
+t('confirmation email uses Latin digits in the Kannada block too (numerals rule) — never Kannada numerals', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  const m = rt.mail.sent[0]!;
+  const all = `${m.subject ?? ''}${m.body ?? ''}${m.htmlBody ?? ''}`;
+  assert.doesNotMatch(all, /[೦-೯]/, 'no Kannada digit anywhere in the email');
+  assert.match(m.body ?? '', /ದಿನ 1 · 20 ನವೆಂಬರ್ · 12:30–16:30 IST/);
+  assert.match(m.body ?? '', /ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ 2026/);
+  assert.match(m.body ?? '', /21 ನವೆಂಬರ್‌ನ ದಸರಾ/);
+});
 t('email failure (quota/outage) does NOT fail the registration', () => {
   const rt = createOpenRuntime();
   rt.mail.fail = true;

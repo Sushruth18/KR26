@@ -9,7 +9,7 @@
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
 var CONFIG_SCHEMA = 6;
-var CONFIG_VERSION = '4d8d0965';
+var CONFIG_VERSION = '9f3241a1';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -124,7 +124,7 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೨ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 2ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 2nd Floor Auditorium"
       },
       "sheetName": "POM – Poem",
@@ -170,7 +170,7 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 1st Floor Auditorium"
       },
       "sheetName": "DEB – Debate",
@@ -216,7 +216,7 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
+        "kn": "ಎಸ್‌ಜೆಬಿ 5ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
         "en": "SJB 5th Floor Amphitheatre"
       },
       "sheetName": "GDN – Group Dance",
@@ -354,7 +354,7 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 1st Floor Auditorium"
       },
       "sheetName": "FDB – Faculty Debate",
@@ -377,7 +377,7 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
+        "kn": "ಎಸ್‌ಜೆಬಿ 5ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
         "en": "SJB 5th Floor Amphitheatre"
       },
       "sheetName": "FGD – Faculty Group Dance",

@@ -734,11 +734,6 @@ function lookup_(b) {
 // Confirmation email (consumer Gmail accounts: ~100 emails/day quota)
 // ---------------------------------------------------------------------------
 
-function knDigits_(s) {
-  var d = ['೦', '೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯'];
-  return String(s).replace(/\d/g, function (x) { return d[Number(x)]; });
-}
-
 function esc_(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
@@ -754,17 +749,18 @@ function buildEmail_(p, ev, regId, whatsappUrl) {
   var day = Number(CONFIG.day1Date.slice(8, 10));
   var day2 = Number(CONFIG.day2Date.slice(8, 10));
   var range = ev.time + (ev.endTime ? '–' + ev.endTime : ''); // 24 h, e.g. 12:30–16:30
+  // Latin digits in both languages (numerals rule, CLAUDE.md §3): "ದಿನ 1 · 20 ನವೆಂಬರ್ · 12:30–16:30 IST".
   var timeEn = ev.time === tba ? 'Time to be announced' : range + ' IST';
-  var timeKn = ev.time === tba ? 'ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ' : knDigits_(range);
+  var timeKn = ev.time === tba ? 'ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ' : range + ' IST';
   var venueEn = ev.venue.en === tba ? 'Venue to be announced' : ev.venue.en;
   var venueKn = ev.venue.kn === tba ? 'ಸ್ಥಳ ಶೀಘ್ರದಲ್ಲೇ' : ev.venue.kn;
 
   var knLines = [
     'ನಮಸ್ಕಾರ ' + p.name + ',',
-    'ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ ' + knDigits_(2026) + ' — "' + ev.name.kn + '" ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮ ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ.',
+    'ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ 2026 — "' + ev.name.kn + '" ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮ ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ.',
     'ನೋಂದಣಿ ಐಡಿ: ' + regId,
-    'ದಿನ ೧ · ' + knDigits_(day) + ' ನವೆಂಬರ್ · ' + timeKn + ' · ' + venueKn,
-    'ಸ್ಥಳದಲ್ಲಿ ಈ ಐಡಿ / ಪಾಸ್ ತೋರಿಸಿ. ' + knDigits_(day2) + ' ನವೆಂಬರ್‌ನ ದಸರಾ ಮೆರವಣಿಗೆಗೂ ಬನ್ನಿ!'
+    'ದಿನ 1 · ' + day + ' ನವೆಂಬರ್ · ' + timeKn + ' · ' + venueKn,
+    'ಸ್ಥಳದಲ್ಲಿ ಈ ಐಡಿ / ಪಾಸ್ ತೋರಿಸಿ. ' + day2 + ' ನವೆಂಬರ್‌ನ ದಸರಾ ಮೆರವಣಿಗೆಗೂ ಬನ್ನಿ!'
   ];
   var enLines = [
     'Hello ' + p.name + ',',

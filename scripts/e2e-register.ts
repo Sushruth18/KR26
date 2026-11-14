@@ -250,12 +250,13 @@ async function main() {
     expect(r.kind === 'success', `expected success, got ${JSON.stringify(r)}`);
     expect(r.regId === 'KR26-ESY-0001', `regId ${r.regId}`);
     const passText = await page.$eval('[data-testid=pass-card]', (e) => e.textContent ?? '');
-    expect(passText.includes('ದಿನ ೧ · ೨೦ ನವೆಂಬರ್'), 'pass shows Day 1 in Kannada numerals');
+    expect(passText.includes('ದಿನ 1 · 20 ನವೆಂಬರ್'), 'pass shows Day 1 with Kannada words, Latin digits');
+    expect(!/[೦-೯]/.test(passText), 'pass has no Kannada digits (numerals rule)');
     expect(passText.includes('ಪ್ರಬಂಧ ಬರಹ'), 'pass shows Kannada event name');
-    expect(passText.includes('ಮಧ್ಯಾಹ್ನ ೧೨:೩೦ – ಸಂಜೆ ೪:೩೦'), 'pass shows the Day 1 time range in Kannada');
+    expect(passText.includes('ಮಧ್ಯಾಹ್ನ 12:30 – ಸಂಜೆ 4:30'), 'pass shows the Day 1 time range in Kannada');
     expect(passText.includes('ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422'), 'pass shows the Essay venue in Kannada');
     expect(!passText.includes('TBA'), 'no TBA once time and venue are set');
-    expect(passText.includes('೨೧ ನವೆಂಬರ್'), 'pass invites to Day 2 (21 Nov)');
+    expect(passText.includes('21 ನವೆಂಬರ್'), 'pass invites to Day 2 (21 Nov)');
     await page.screenshot({ path: resolve(OUT, '01-pass-screen.png') });
 
     const png = await captureDownload(page, '[data-testid=download-png]');
@@ -482,7 +483,7 @@ async function main() {
     await page.click('[data-testid=next]');
     await sleep(300);
     const usnMsg = await page.$eval('#f-id-error', (e) => e.textContent);
-    expect(usnMsg?.includes('೨೦'), `21-char USN → length message, got "${usnMsg}"`);
+    expect(usnMsg?.includes('20'), `21-char USN → length message, got "${usnMsg}"`);
     // Any format is accepted: another college's USN clears the error.
     await typeInto(page, '#f-id', '1TD24CS001');
     await page.click('[data-testid=next]');

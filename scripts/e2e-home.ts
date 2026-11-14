@@ -151,7 +151,8 @@ async function main() {
         expect(m.floats === events.length, `preview floats ${m.floats} ≠ ${events.length}`);
         expect(m.phase, 'countdown phase missing');
         // 14 competitions (11 students + 3 faculty), ₹45,000 in cash prizes + mementos — computed from events.json.
-        const want = lang === 'kn' ? ['೧೪', '₹೪೫,೦೦೦', '೧೧', '೩'] : ['14', '₹45,000', '11', '3'];
+        const want = ['14', '₹45,000', '11', '3']; // Latin digits in both languages (numerals rule)
+        expect(!/[೦-೯]/.test(m.plaques), `plaques have Kannada digits: "${m.plaques}"`);
         expect(want.every((w) => m.plaques.includes(w)), `plaques "${m.plaques}" lack ${want.join(' / ')}`);
         // The lit palace + elephant must be in the first screen on phones (90% of visitors).
         if (width <= 360) {
@@ -485,7 +486,7 @@ async function main() {
         expect(m.phase === kind, `phase ${m.phase}`);
         expect(m.text.includes(lang === 'kn' ? kn : en), `missing "${lang === 'kn' ? kn : en}"`);
         if (kind === 'over') expect(m.gallery, 'no gallery link');
-        if (m.days) expect(lang === 'kn' ? /^[೦-೯]{2,}$/.test(m.days) : /^\d{2,}$/.test(m.days), `days "${m.days}" wrong numerals for ${lang}`);
+        if (m.days) expect(/^\d{2,}$/.test(m.days), `days "${m.days}" must be Latin digits in ${lang}`);
         out.push(`${lang}: days=${m.days ?? '—'}`);
         await page.browserContext().close();
       }
@@ -526,9 +527,9 @@ async function main() {
     const kn = await open(browser, 'kn', `/?${at('2026-11-16T12:00:00+05:30')}`, errors);
     await ready(kn);
     const knText = await kn.$eval('[data-testid=deadline-banner]', (e) => e.textContent ?? '');
-    expect(knText.includes('೨ ದಿನ') && !/\d/.test(knText), `kn banner "${knText}"`);
+    expect(knText.includes('2 ದಿನ') && !/[೦-೯]/.test(knText), `kn banner "${knText}"`);
     await kn.browserContext().close();
-    return `${out.join(', ')}; kn uses Kannada numerals`;
+    return `${out.join(', ')}; kn uses Latin digits`;
   });
 
   // ---------- Preview strip + links ----------

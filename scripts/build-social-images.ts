@@ -61,7 +61,7 @@ h1{font:700 92px/1.35 Baloo;color:#FFD27A;margin-top:4px;
 </svg>
 <div class="frame"></div>
 <div class="text">
-  <h1>ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ ೨೦೨೬</h1>
+  <h1>ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ 2026</h1>
   <div class="club">Honnudi Kannada Sangha · BMSIT&amp;M</div>
   <div class="date">20–21 NOVEMBER 2026</div>
 </div>

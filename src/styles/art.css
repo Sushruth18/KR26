@@ -177,6 +177,95 @@
       0 1px 0 rgb(0 0 0 / 0.55),
       0 0 18px rgb(245 184 65 / 0.25);
   }
+
+  /* Stat plaque (ui/BrassPlaque). The value is sized from the card's own width: --fit is the size, in % of
+     the content width, at which its longest unbreakable piece fits (lib/textFit.ts). Container query units
+     where supported; elsewhere the narrowest card content box in any layout (~175 px) stands in.
+
+     Rows line up across cards: in a .plaque-grid every card spans three shared row tracks (icon · value ·
+     caption) through subgrid, so icons, values and the first caption line align whatever the caption length.
+     The value tracks are 1fr: with no fixed grid height every 1fr track takes the tallest value block, so all
+     cards are the same height in every layout (captions keep two lines reserved for the rows that differ).
+     Without subgrid: equal-height rows (1fr) and the same three rows inside each card. */
+  .plaque-grid {
+    grid-auto-rows: 1fr;
+  }
+  .plaque-cell {
+    min-width: 0;
+  }
+  @supports (grid-template-rows: subgrid) {
+    .plaque-grid {
+      grid-auto-rows: auto 1fr auto;
+    }
+    .plaque-cell,
+    .plaque-grid .plaque,
+    .plaque-grid .plaque-face {
+      display: grid;
+      grid-row: span 3;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+  }
+  .plaque-face {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    justify-items: center;
+    height: 100%;
+    padding: 1.75rem 1.25rem 1.5rem;
+    text-align: center;
+  }
+  .plaque-icon {
+    display: block;
+    height: 26px;
+    margin-bottom: 0.75rem;
+    color: var(--gold-400);
+  }
+  .plaque-body {
+    container-type: inline-size;
+    align-self: center;
+    width: 100%;
+    min-width: 0;
+  }
+  .plaque-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    column-gap: 0.5rem;
+    margin: 0;
+    font-family: var(--font-display);
+    line-height: 1.2;
+    color: var(--gold-300);
+  }
+  html[lang='kn'] .plaque-line {
+    line-height: 1.35;
+  }
+  .plaque-value {
+    max-width: 100%;
+    font-size: clamp(1rem, calc(var(--fit) * 1cqi), 3rem);
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+  .plaque-unit {
+    font-size: clamp(0.875rem, calc(var(--fit) * 1cqi), 1.25rem);
+    white-space: nowrap;
+    color: var(--gold-400);
+  }
+  @supports not (width: 1cqi) {
+    .plaque-value {
+      font-size: clamp(1rem, calc(var(--fit) * 1.75px), 3rem);
+    }
+    .plaque-unit {
+      font-size: clamp(0.875rem, calc(var(--fit) * 1.75px), 1.25rem);
+    }
+  }
+  .plaque-caption {
+    max-width: 28ch;
+    min-height: 3.4em; /* two lines, for browsers without lh */
+    min-height: 2lh;
+    margin: 0.5rem 0 0;
+    color: var(--ivory-300);
+  }
 }
 
 @keyframes bulb-on {

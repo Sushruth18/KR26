@@ -386,7 +386,7 @@ async function main() {
       expect(typeof status.events['s-treasure-hunt']!.seatsLeft === 'number', 'status reports seatsLeft for Treasure Hunt');
       expect(!('seatsLeft' in status.events['s-essay']!), 'and not for other events');
       const W = lang === 'kn'
-        ? { cap: 'ಗರಿಷ್ಠ ೩೦ ತಂಡಗಳು', few: 'ಕೆಲವೇ ಸ್ಥಾನಗಳು ಉಳಿದಿವೆ', full: 'ಭರ್ತಿಯಾಗಿದೆ', open: 'ನೋಂದಣಿ ತೆರೆದಿದೆ' }
+        ? { cap: 'ಗರಿಷ್ಠ 30 ತಂಡಗಳು', few: 'ಕೆಲವೇ ಸ್ಥಾನಗಳು ಉಳಿದಿವೆ', full: 'ಭರ್ತಿಯಾಗಿದೆ', open: 'ನೋಂದಣಿ ತೆರೆದಿದೆ' }
         : { cap: 'Limited to 30 teams', few: 'Few seats left', full: 'Full', open: 'Open' };
       const read = async () => {
         const page = await open(browser, lang, 360, '/competitions?for=students&mock=', errors, true);

@@ -4,6 +4,7 @@ import { BrassPlaque } from '../ui/BrassPlaque';
 import { useLang } from '../../hooks/useLang';
 import { cashPrizePool, events, site } from '../../lib/data';
 import { dateOnlyParts, formatDate, formatNumber, formatPrize, monthName } from '../../lib/format';
+import { breakableRange } from '../../lib/textFit';
 
 /** Dates · number of competitions · prize pool — all computed from the data files. */
 export function HomePlaques() {
@@ -15,25 +16,25 @@ export function HomePlaques() {
   const count = (c: string) => formatNumber(events.filter((e) => e.category === c).length, lang);
 
   return (
-    <section aria-labelledby="plaques-title" className="cv-auto container-page pb-6 pt-10 [--cv-h:780px] md:[--cv-h:330px]">
+    <section aria-labelledby="plaques-title" data-testid="plaques" className="cv-auto container-page pb-6 pt-10 [--cv-h:840px] md:[--cv-h:310px]">
       <h2 id="plaques-title" className="sr-only">
         {t('home.plaques.heading')}
       </h2>
-      <ul className="m-0 grid list-none gap-5 p-0 md:grid-cols-3">
-        <li>
+      <ul className="plaque-grid m-0 grid list-none gap-5 p-0 md:grid-cols-3">
+        <li className="plaque-cell min-w-0">
           <BrassPlaque
             className="h-full"
             icon={<CalendarDays size={26} strokeWidth={1.6} />}
             value={
               sameMonth
                 ? `${formatNumber(d1.day, lang)}–${formatNumber(d2.day, lang)}`
-                : `${formatDate(site.day1Date, lang)} – ${formatDate(site.day2Date, lang)}`
+                : breakableRange(formatDate(site.day1Date, lang), formatDate(site.day2Date, lang))
             }
             unit={sameMonth ? monthName(d1.month, lang) : undefined}
             caption={t('home.plaques.datesCaption')}
           />
         </li>
-        <li>
+        <li className="plaque-cell min-w-0">
           <BrassPlaque
             className="h-full"
             icon={<Flag size={26} strokeWidth={1.6} />}
@@ -42,7 +43,7 @@ export function HomePlaques() {
             caption={t('home.plaques.eventsCaption', { students: count('students'), faculty: count('faculty') })}
           />
         </li>
-        <li>
+        <li className="plaque-cell min-w-0">
           <BrassPlaque
             className="h-full"
             icon={<Trophy size={26} strokeWidth={1.6} />}

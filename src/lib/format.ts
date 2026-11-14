@@ -1,22 +1,12 @@
 /**
  * The ONE place numbers, dates, times and prizes are formatted (CLAUDE.md §3 numerals rule).
- *  - kn: Kannada numerals for dates, times, counts, prizes (own digit mapper; no Intl dependency).
- *  - en: Latin numerals.
- * Registration IDs, phone numbers and USNs are never passed through here — they stay Latin.
+ * Latin digits in BOTH languages (Nov 2026 decision): Kannada mode keeps Kannada words — month names, the
+ * part-of-day word, units — around Latin digits ("21 ನವೆಂಬರ್ 2026", "ಮಧ್ಯಾಹ್ನ 12:30", "₹45,000").
+ * `lang` is still taken everywhere so the words switch with the language.
  */
 import { TODO } from './todo';
 
 export type Lang = 'kn' | 'en';
-
-const KN_DIGITS = ['೦', '೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯'] as const;
-
-export function toKannadaDigits(input: string | number): string {
-  return String(input).replace(/\d/g, (d) => KN_DIGITS[Number(d)] ?? d);
-}
-
-function digits(input: string | number, lang: Lang): string {
-  return lang === 'kn' ? toKannadaDigits(input) : String(input);
-}
 
 const MONTHS = {
   kn: ['ಜನವರಿ', 'ಫೆಬ್ರವರಿ', 'ಮಾರ್ಚ್', 'ಏಪ್ರಿಲ್', 'ಮೇ', 'ಜೂನ್', 'ಜುಲೈ', 'ಆಗಸ್ಟ್', 'ಸೆಪ್ಟೆಂಬರ್', 'ಅಕ್ಟೋಬರ್', 'ನವೆಂಬರ್', 'ಡಿಸೆಂಬರ್'],
@@ -69,9 +59,9 @@ function toParts(input: string): DateParts {
   return /^\d{4}-\d{2}-\d{2}$/.test(input) ? dateOnlyParts(input) : istParts(input);
 }
 
-export function formatNumber(n: number, lang: Lang, opts: { pad?: number } = {}): string {
+export function formatNumber(n: number, _lang: Lang, opts: { pad?: number } = {}): string {
   const s = opts.pad ? String(Math.trunc(n)).padStart(opts.pad, '0') : String(n);
-  return digits(s, lang);
+  return s;
 }
 
 export interface DateFormatOptions {
@@ -81,18 +71,18 @@ export interface DateFormatOptions {
   short?: boolean;
 }
 
-/** kn: "೨೧ ನವೆಂಬರ್ ೨೦೨೬" · en: "21 November 2026". Accepts "YYYY-MM-DD" or an ISO instant (read in IST). */
+/** kn: "21 ನವೆಂಬರ್ 2026" · en: "21 November 2026". Accepts "YYYY-MM-DD" or an ISO instant (read in IST). */
 export function formatDate(input: string | Date, lang: Lang, opts: DateFormatOptions = {}): string {
   const p = typeof input === 'string' ? toParts(input) : istParts(input);
   const full = MONTHS[lang][p.month - 1] ?? '';
   const month = opts.short && lang === 'en' ? full.slice(0, 3) : full;
-  let out = `${digits(p.day, lang)} ${month}`;
-  if (opts.year) out += ` ${digits(p.year, lang)}`;
+  let out = `${p.day} ${month}`;
+  if (opts.year) out += ` ${p.year}`;
   if (opts.weekday) out = `${WEEKDAYS[lang][p.weekday] ?? ''}, ${out}`;
   return out;
 }
 
-/** ISO instant → kn: "೧೮ ನವೆಂಬರ್, ರಾತ್ರಿ ೧೧:೫೯" · en: "18 November, 11:59 PM" (read in IST). */
+/** ISO instant → kn: "18 ನವೆಂಬರ್, ರಾತ್ರಿ 11:59" · en: "18 November, 11:59 PM" (read in IST). */
 export function formatDeadline(iso: string, lang: Lang): string {
   const p = istParts(iso);
   const hhmm = `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
@@ -107,12 +97,12 @@ export function kannadaDayPart(hour24: number): string {
   return 'ರಾತ್ರಿ';
 }
 
-/** "HH:MM" (24h, IST) → kn: "ಬೆಳಿಗ್ಗೆ ೯:೦೦" · en: "9:00 AM". */
+/** "HH:MM" (24h, IST) → kn: "ಬೆಳಿಗ್ಗೆ 9:00" · en: "9:00 AM". */
 export function formatTime(hhmm: string, lang: Lang): string {
   const [h = 0, m = 0] = hhmm.split(':').map(Number);
   const h12 = h % 12 === 0 ? 12 : h % 12;
   const mm = String(m).padStart(2, '0');
-  if (lang === 'kn') return `${kannadaDayPart(h)} ${toKannadaDigits(`${h12}:${mm}`)}`;
+  if (lang === 'kn') return `${kannadaDayPart(h)} ${h12}:${mm}`;
   return `${h12}:${mm} ${h < 12 ? 'AM' : 'PM'}`;
 }
 
@@ -120,15 +110,15 @@ export function formatTimeRange(start: string, end: string, lang: Lang): string 
   return `${formatTime(start, lang)} – ${formatTime(end, lang)}`;
 }
 
-/** Minutes → kn: "೨ ಗಂ ೦೫ ನಿ" · en: "2 h 05 m". */
+/** Minutes → kn: "2 ಗಂ 05 ನಿ" · en: "2 h 05 m". */
 export function formatDuration(totalMinutes: number, lang: Lang): string {
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes % 60;
   const hUnit = lang === 'kn' ? 'ಗಂ' : 'h';
   const mUnit = lang === 'kn' ? 'ನಿ' : 'm';
   const parts: string[] = [];
-  if (h > 0) parts.push(`${digits(h, lang)} ${hUnit}`);
-  if (m > 0) parts.push(`${digits(h > 0 ? String(m).padStart(2, '0') : m, lang)} ${mUnit}`);
+  if (h > 0) parts.push(`${h} ${hUnit}`);
+  if (m > 0) parts.push(`${h > 0 ? String(m).padStart(2, '0') : m} ${mUnit}`);
   return parts.join(' ');
 }
 
@@ -140,13 +130,14 @@ export function minutesBetween(startHHMM: string, endHHMM: string): number {
   return toMin(endHHMM) - toMin(startHHMM);
 }
 
-/** ₹ with Indian digit grouping: ₹3,000 · ₹39,000 · ₹1,00,000 (kn: ₹೩,೦೦೦). */
-export function formatPrize(amount: number, lang: Lang): string {
+/** ₹ with Indian digit grouping: ₹3,000 · ₹39,000 · ₹1,00,000 (same in both languages). */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- kept so every call site stays language-aware
+export function formatPrize(amount: number, _lang: Lang): string {
   const s = String(Math.trunc(Math.abs(amount)));
   const last3 = s.slice(-3);
   const rest = s.slice(0, -3);
   const grouped = rest ? `${rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',')},${last3}` : last3;
-  return `₹${digits(grouped, lang)}`;
+  return `₹${grouped}`;
 }
 
 /** True for values that are still TODO-CONFIRM placeholders in the data files. */

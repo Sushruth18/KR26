@@ -32,6 +32,30 @@
     "id": "events-logistics",
     "members": [
       {
+        "id": "sushruth-kumar",
+        "name": {
+          "kn": "Sushruth Kumar",
+          "en": "Sushruth Kumar"
+        },
+        "role": {
+          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
+          "en": "Events & Logistics"
+        },
+        "photo": "sushruth-kumar"
+      },
+      {
+        "id": "aditya-jamane",
+        "name": {
+          "kn": "Aditya Jamane",
+          "en": "Aditya Jamane"
+        },
+        "role": {
+          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
+          "en": "Events & Logistics"
+        },
+        "photo": "aditya-jamane"
+      },
+      {
         "id": "s-nishitha",
         "name": {
           "kn": "S Nishitha",
@@ -56,18 +80,6 @@
         "photo": "aditya-biju-nair"
       },
       {
-        "id": "sushruth-kumar",
-        "name": {
-          "kn": "Sushruth Kumar",
-          "en": "Sushruth Kumar"
-        },
-        "role": {
-          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
-          "en": "Events & Logistics"
-        },
-        "photo": "sushruth-kumar"
-      },
-      {
         "id": "g-rushika",
         "name": {
           "kn": "G Rushika",
@@ -78,18 +90,6 @@
           "en": "Events & Logistics"
         },
         "photo": "g-rushika"
-      },
-      {
-        "id": "aditya-jamane",
-        "name": {
-          "kn": "Aditya Jamane",
-          "en": "Aditya Jamane"
-        },
-        "role": {
-          "kn": "ಕಾರ್ಯಕ್ರಮ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನೆ",
-          "en": "Events & Logistics"
-        },
-        "photo": "aditya-jamane"
       }
     ]
   },

@@ -25,6 +25,7 @@
     "e2e:home": "tsx scripts/e2e-home.ts",
     "e2e:brand": "tsx scripts/e2e-brand.ts",
     "e2e:event": "tsx scripts/e2e-event.ts",
+    "e2e:plaques": "tsx scripts/e2e-plaques.ts",
     "test:schedule": "tsx scripts/test-schedule.ts",
     "check:banned": "tsx scripts/check-banned-terms.ts",
     "perf:home": "tsx scripts/perf-home.ts",

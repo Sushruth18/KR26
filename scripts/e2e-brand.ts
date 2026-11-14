@@ -27,7 +27,7 @@ const ALT = {
   en: { jubilee: en.brand.jubileeLogoAlt, cultural: en.brand.culturalLogoAlt },
 };
 // Wording the brief asked for — guards against an i18n edit silently changing it.
-expectEq(ALT.kn.jubilee, 'ಬಿ.ಎಂ.ಎಸ್.ಐ.ಟಿ.ಎಂ ೨೫ ವರ್ಷಗಳ ಶ್ರೇಷ್ಠತೆ', 'kn jubilee alt');
+expectEq(ALT.kn.jubilee, 'ಬಿ.ಎಂ.ಎಸ್.ಐ.ಟಿ.ಎಂ 25 ವರ್ಷಗಳ ಶ್ರೇಷ್ಠತೆ', 'kn jubilee alt');
 expectEq(ALT.en.jubilee, 'BMSIT&M 25 Years of Excellence, 2002–2027', 'en jubilee alt');
 expectEq(ALT.kn.cultural, 'ಸಾಂಸ್ಕೃತಿಕ ಲಾಂಛನ', 'kn cultural alt');
 

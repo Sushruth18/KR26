@@ -15,22 +15,23 @@ Placeholders are used in the site until these are filled in. Nothing here has be
   - Register checkbox (given): "ಕನ್ನಡ ನನ್ನ ಮಾತೃಭಾಷೆ ಅಲ್ಲ ಎಂದು ದೃಢೀಕರಿಸುತ್ತೇನೆ." — its error message (draft): "ದಯವಿಟ್ಟು ದೃಢೀಕರಿಸಿ — ಈ ಸ್ಪರ್ಧೆ ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮಾತ್ರ."
   - Elocution rules (drafts; 1–2 and 8 are shared with the Simple Kannada Debate; 8 reuses the existing wording): 1 ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮಾತ್ರ ಅವಕಾಶ. · 2 ಇದು ವೈಯಕ್ತಿಕ ಸ್ಪರ್ಧೆ. · 3 ಸ್ಥಳದಲ್ಲೇ ವಿಷಯದ ಚೀಟಿಯನ್ನು ಆರಿಸಿಕೊಳ್ಳಿ. · 4 ಯೋಚಿಸಲು 1 ನಿಮಿಷ ಮತ್ತು ಮಾತನಾಡಲು 1 ನಿಮಿಷ ಸಿಗುತ್ತದೆ. · 5 ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ; ಸರಳ ಕನ್ನಡಕ್ಕೆ ಸ್ವಾಗತ, ಸಣ್ಣ ತಪ್ಪುಗಳಾದರೂ ಪರವಾಗಿಲ್ಲ, ನಿಮ್ಮ ಪ್ರಯತ್ನವೇ ಮುಖ್ಯ. · 6 ಪ್ರಯತ್ನ, ಆತ್ಮವಿಶ್ವಾಸ, ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಉಚ್ಚಾರಣೆಯ ಆಧಾರದ ಮೇಲೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ. · 7 ಸಭ್ಯ ಭಾಷೆಯನ್ನು ಬಳಸಿ. · 8 ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ.
   - Simple Kannada Debate rules 3–7 (drafts): 3 ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ನೀಡಲಾಗುವುದು; ಸಿದ್ಧತೆಗೆ 5 ನಿಮಿಷ ಸಿಗುತ್ತದೆ. · 4 ಯಾರು ಪರವಾಗಿ, ಯಾರು ವಿರುದ್ಧವಾಗಿ ಮಾತನಾಡಬೇಕು ಎಂದು ನ್ಯಾಯಾಧೀಶರು ನಿರ್ಧರಿಸುತ್ತಾರೆ. · 5 ಸರಳ ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ; ಪದ ಸಿಗದಿದ್ದರೆ ಕೆಲವು ಇಂಗ್ಲಿಷ್ ಪದಗಳನ್ನು ಬಳಸಬಹುದು. · 6 ಕನ್ನಡದಲ್ಲಿ ಮಾಡಿದ ಪ್ರಯತ್ನ, ವಿಚಾರಗಳ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆತ್ಮವಿಶ್ವಾಸದ ಆಧಾರದ ಮೇಲೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ. · 7 ಧರ್ಮ, ಜಾತಿ ಅಥವಾ ಭಾಷೆಯ ಬಗ್ಗೆ ವೈಯಕ್ತಿಕ ವಾದಗಳು ಬೇಡ; ಎಲ್ಲರನ್ನೂ ಗೌರವದಿಂದ ಕಾಣಿ.
+- Numerals (Nov 2026): Kannada numerals dropped site-wide — Kannada mode shows Latin digits with Kannada words ("21 ನವೆಂಬರ್ 2026", "ಮಧ್ಯಾಹ್ನ 12:30", "₹45,000"), also on the pass, the `.ics` and the confirmation email. The Kannada venue plaque value has an invisible line-break hint (U+200B) after "ಬಿ.ಎಂ.ಎಸ್.".
 - Prize pool is now ₹45,000 (`site.json → prizePoolTotal`), 14 competitions
 
 ### More Kannada drafts from the Nov 2026 batch (for a Kannada speaker)
-- [ ] Treasure Hunt cap (`kn.json`): "ಗರಿಷ್ಠ ೩೦ ತಂಡಗಳು" (Limited to 30 teams) · status "ಕೆಲವೇ ಸ್ಥಾನಗಳು ಉಳಿದಿವೆ" (Few seats left) · "ಭರ್ತಿಯಾಗಿದೆ" (Full) · card reason "ಈ ಸ್ಪರ್ಧೆಯ ಎಲ್ಲಾ ಸ್ಥಾನಗಳು ಭರ್ತಿಯಾಗಿವೆ." · Register message "ಕ್ಷಮಿಸಿ — ಈ ಸ್ಪರ್ಧೆಯ ಎಲ್ಲಾ ಸ್ಥಾನಗಳು ಭರ್ತಿಯಾಗಿವೆ. ಬೇರೆ ಸ್ಪರ್ಧೆಗಳನ್ನು ನೋಡಿ."
+- [ ] Treasure Hunt cap (`kn.json`): "ಗರಿಷ್ಠ 30 ತಂಡಗಳು" (Limited to 30 teams) · status "ಕೆಲವೇ ಸ್ಥಾನಗಳು ಉಳಿದಿವೆ" (Few seats left) · "ಭರ್ತಿಯಾಗಿದೆ" (Full) · card reason "ಈ ಸ್ಪರ್ಧೆಯ ಎಲ್ಲಾ ಸ್ಥಾನಗಳು ಭರ್ತಿಯಾಗಿವೆ." · Register message "ಕ್ಷಮಿಸಿ — ಈ ಸ್ಪರ್ಧೆಯ ಎಲ್ಲಾ ಸ್ಥಾನಗಳು ಭರ್ತಿಯಾಗಿವೆ. ಬೇರೆ ಸ್ಪರ್ಧೆಗಳನ್ನು ನೋಡಿ."
 - [ ] Withdrawn pass lookup (`kn.json → pass.lookup.WITHDRAWN`): "ಈ ನೋಂದಣಿಯನ್ನು (…) ಹಿಂಪಡೆಯಲಾಗಿದೆ, ಆದ್ದರಿಂದ ಇದಕ್ಕೆ ಪಾಸ್ ಇಲ್ಲ. ಇದು ತಪ್ಪಾಗಿದ್ದರೆ ಸ್ಪರ್ಧೆಯ ಸಂಯೋಜಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."
 - [ ] Debate notice email (`Code.gs → buildDebateNotice_`, sent once by `notifyDebateMediumChange`) — **check before running it**: subject "… — now in Kannada only / ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ"; "ನಮಸ್ಕಾರ <name>," · ""<event>" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು (ನೋಂದಣಿ ಐಡಿ: …)." · "ಒಂದು ಬದಲಾವಣೆ: ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ." · "ನೀವು ಹಿಂದೆ ಸರಿಯಲು ಬಯಸಿದರೆ, ದಯವಿಟ್ಟು ಸ್ಪರ್ಧೆಯ ಸಂಯೋಜಕರಿಗೆ ತಿಳಿಸಿ — ಅವರ ಸಂಖ್ಯೆಗಳು ಇಲ್ಲಿವೆ: <link>" · student Debate only: "ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲದಿದ್ದರೆ, ಕನ್ನಡೇತರರಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ" ಅಥವಾ "ಆಶುಭಾಷಣ" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಬಹುದು: <links>"
 - [ ] Site name "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ" everywhere on the website; the pass card, its PNG, the `.ics` and the confirmation email keep "ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ" / "Karnataka Rajyotsava" as asked — confirm that split is intended
 
 ### Kannada venue names — drafts for a Kannada speaker (`events.json → venue.kn`)
-Block names are transliterated; floors use Kannada numerals (numerals rule), the room number stays in Latin digits as on the door sign.
+Block names are transliterated; floors and room numbers use Latin digits (numerals rule, Nov 2026: no Kannada numerals anywhere).
 - [ ] BSN Auditorium → ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ (Group Singing, Faculty Group Singing)
 - [ ] Visvesvaraya Auditorium (Architecture Block) → ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್) (Painting)
 - [ ] BSN 422 → ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422 ("room 422") (Essay Writing)
-- [ ] SJB 5th Floor Amphitheatre → ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್ (Group Dance, Faculty Group Dance)
-- [ ] SMV Block (Academic Block), 2nd Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೨ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Poem)
-- [ ] SMV Block (Academic Block), 1st Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Debate, Faculty Debate)
+- [ ] SJB 5th Floor Amphitheatre → ಎಸ್‌ಜೆಬಿ 5ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್ (Group Dance, Faculty Group Dance)
+- [ ] SMV Block (Academic Block), 2nd Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 2ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Poem)
+- [ ] SMV Block (Academic Block), 1st Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Debate, Faculty Debate)
 
 ### Faculty Group Dance (`f-group-dance`)
 - [ ] **Rules** — the rules PDF has no faculty dance section; the card still says "Rules will be announced soon"
@@ -62,7 +63,7 @@ Block names are transliterated; floors use Kannada numerals (numerals rule), the
 ### Differences between the Kannada and English PDF text — kept as written, please confirm
 - [ ] Painting rule 8 (Kannada) ends "ಅಚ್ಚುಕಟ್ಟಾಗಿ" where Rangoli rule 4 says "ಅಚ್ಚುಕಟ್ಟು"
 - [ ] General instructions rule 2 says the venue will be announced in the WhatsApp groups, while the cards will also show the venue once it is set
-- [ ] Rules keep the PDF's Latin digits inside Kannada text (3+1, 500–800, 15); say if they should become Kannada numerals
+- [x] Rules keep the PDF's Latin digits inside Kannada text (3+1, 500–800, 15) — settled Nov 2026: Latin digits everywhere, no Kannada numerals
 
 ## Site (`src/data/site.json`)
 - [ ] `instagramUrl` — empty, footer icon hidden
@@ -87,7 +88,7 @@ Block names are transliterated; floors use Kannada numerals (numerals rule), the
 - [ ] Stop titles (`src/data/schedule.json`): ರ‍್ಯಾಲಿ (Rally) · ಬಿಲ್‌ಬೋರ್ಡ್ (venue, Bill Board) · ಉದ್ಘಾಟನೆ ಮತ್ತು ಮೆರವಣಿಗೆ · ನೃತ್ಯ ಸ್ಪರ್ಧೆ / ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) · ರಂಗಸ್ಥಳ ಪ್ರದರ್ಶನ · ರುಶಾಂಗ್ ಪ್ರದರ್ಶನ · ತಾಂಡವ ಪ್ರದರ್ಶನ · ಫ್ಯಾಷನ್ ಶೋ · ಸಂಗೀತ ಕಚೇರಿ ಮತ್ತು ಡಿಜೆ
 - [ ] Club names keep their own spelling in both languages; the Kannada-script forms ರಂಗಸ್ಥಳ / ರುಶಾಂಗ್ / ತಾಂಡವ are transliterations — confirm "ರುಶಾಂಗ್" in particular
 - [ ] Club descriptions "ನಾಟಕ ಕ್ಲಬ್ / ಸಂಗೀತ ಕ್ಲಬ್ / ನೃತ್ಯ ಕ್ಲಬ್" (Drama / Music / Dance club) and the attraction banner texts (`src/data/attractions.json`)
-- [ ] Event Details page strings (`kn.json → eventPage.*`): "ಪ್ರಮುಖ ಕಲಾವಿದರು" (Headline artist), "ಮುಖ್ಯ ಆಕರ್ಷಣೆ" (Headline act), "ಈಗ ನಡೆಯುತ್ತಿದೆ" (Now), "ಮುಂದೆ" (Up next), tab and intro lines, plaque captions, the venue caption "ಅವಲಹಳ್ಳಿ, ಯಲಹಂಕ, ಬೆಂಗಳೂರು"; calendar-file description "ದಿನ ೨"
+- [ ] Event Details page strings (`kn.json → eventPage.*`): "ಪ್ರಮುಖ ಕಲಾವಿದರು" (Headline artist), "ಮುಖ್ಯ ಆಕರ್ಷಣೆ" (Headline act), "ಈಗ ನಡೆಯುತ್ತಿದೆ" (Now), "ಮುಂದೆ" (Up next), tab and intro lines, plaque captions, the venue caption "ಅವಲಹಳ್ಳಿ, ಯಲಹಂಕ, ಬೆಂಗಳೂರು"; calendar-file description "ದಿನ 2"
 - [ ] Day 2 time plaque shows "9:00 AM – 5:45 PM" (from `eventStart`/`eventEnd`); the timeline itself shows start times only — say if the plaque should also drop the end time
 
 ## Our Team page (`src/data/team.json`)
@@ -230,7 +231,7 @@ Fix by editing `name.kn` in `src/data/team.json`; a re-import never overwrites i
 ## Home page copy (first drafts, written for Phase 4 — confirm wording)
 - [ ] Kannada strings not given in CLAUDE.md: "ಮುಖ್ಯ ಕಾರ್ಯಕ್ರಮಕ್ಕೆ" (Main event in), "ಸ್ಕಿಪ್ ಮಾಡಿ" (splash Skip), "ಸ್ಪರ್ಧೆಗಳ ಮೆರವಣಿಗೆ" / "ಪ್ರತಿ ಸ್ಪರ್ಧೆಯೂ ಒಂದು ಸ್ತಬ್ಧಚಿತ್ರ. ನಿಮ್ಮದನ್ನು ಆರಿಸಿ." (preview strip), plaque captions, deadline-banner and "festival has begun / thank you" lines (`src/i18n/kn.json → home.*`, `intro.*`)
 - [ ] Logo alt text: "ಬಿ.ಎಂ.ಎಸ್. ತಾಂತ್ರಿಕ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನಾ ಮಹಾವಿದ್ಯಾಲಯದ ಲಾಂಛನ", "ಹೊನ್ನುಡಿ ಕನ್ನಡ ಸಂಘದ ಲಾಂಛನ" (`kn.json → brand.*LogoAlt`)
-- [ ] Alt text for the two new logos — Kannada drafts: 25-years logo "ಬಿ.ಎಂ.ಎಸ್.ಐ.ಟಿ.ಎಂ ೨೫ ವರ್ಷಗಳ ಶ್ರೇಷ್ಠತೆ" (wording supplied by the team; confirm), cultural emblem "ಸಾಂಸ್ಕೃತಿಕ ಲಾಂಛನ" (**draft** — confirm, and what the emblem is officially called) (`kn.json → brand.jubileeLogoAlt`, `brand.culturalLogoAlt`)
+- [ ] Alt text for the two new logos — Kannada drafts: 25-years logo "ಬಿ.ಎಂ.ಎಸ್.ಐ.ಟಿ.ಎಂ 25 ವರ್ಷಗಳ ಶ್ರೇಷ್ಠತೆ" (wording supplied by the team; confirm), cultural emblem "ಸಾಂಸ್ಕೃತಿಕ ಲಾಂಛನ" (**draft** — confirm, and what the emblem is officially called) (`kn.json → brand.jubileeLogoAlt`, `brand.culturalLogoAlt`)
 - [ ] English counterparts of the same (`src/i18n/en.json`); the cultural emblem's English alt "Cultural emblem" is a draft too
 - [ ] 25-years logo reads "BMSITM" in its lettering while the English alt text says "BMSIT&M" — confirm the logo's spelling is intended
 - [ ] `public/audio/theme.mp3` — royalty-free / self-recorded nadaswaram or dollu loop (music toggle hidden while absent)
@@ -254,7 +255,7 @@ Fix by editing `name.kn` in `src/data/team.json`; a re-import never overwrites i
 ## Rules to confirm
 - [ ] **Employee ID format** — draft rule is letters and digits only, at most 20 characters (`src/lib/rules.ts`). If BMSIT employee IDs contain `-` or `/`, faculty will be rejected: send me a few real examples
 - [ ] **"BMSITM" vs "BMSIT&M"** — see Home page copy above (logo lettering vs everywhere else)
-- [ ] Kannada wording for the team step (`kn.json → register.teamIntroExact`, `register.teamCountExact`, `register.teamCount`, `errors.teamSizeExact`): "ಈ ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮನ್ನೂ ಸೇರಿ ನಿಖರವಾಗಿ ೫ ಸದಸ್ಯರು ಬೇಕು…", "ತಂಡದ ಸದಸ್ಯರು: ೫ರಲ್ಲಿ ೫", "(ಕನಿಷ್ಠ ೪, ಗರಿಷ್ಠ ೧೨)"
+- [ ] Kannada wording for the team step (`kn.json → register.teamIntroExact`, `register.teamCountExact`, `register.teamCount`, `errors.teamSizeExact`): "ಈ ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮನ್ನೂ ಸೇರಿ ನಿಖರವಾಗಿ 5 ಸದಸ್ಯರು ಬೇಕು…", "ತಂಡದ ಸದಸ್ಯರು: 5ರಲ್ಲಿ 5", "(ಕನಿಷ್ಠ 4, ಗರಿಷ್ಠ 12)"
 - [ ] Kannada wording written by me, to be checked by a Kannada speaker: the confirmation email's "View your pass" lines ("ನಿಮ್ಮ ಪಾಸ್ ವೀಕ್ಷಿಸಿ", "ನೋಂದಣಿಯಲ್ಲಿ ನೀಡಿದ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ — ಐಡಿ ಮೊದಲೇ ತುಂಬಿರುತ್ತದೆ.") and the pass lookup text (`kn.json → pass.lookup.*`)
 
 ## Pages not built yet (Phase 6)
