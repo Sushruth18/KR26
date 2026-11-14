@@ -25,7 +25,7 @@
     "register": "Register"
   },
   "brand": {
-    "wordmark": "Karnataka Rajyotsava",
+    "wordmark": "Kannada Rajyotsava",
     "college": "BMS Institute of Technology & Management",
     "club": "Honnudi Kannada Sangha",
     "collegeLogoAlt": "BMS Institute of Technology & Management logo",
@@ -147,6 +147,7 @@
     "otherEvents": "See other competitions"
   },
   "pass": {
+    "brand": "Karnataka Rajyotsava",
     "label": "Procession Pass",
     "success": "You're registered! Welcome to the procession.",
     "emailNote": "A confirmation email is on its way (check spam too).",
@@ -260,23 +261,23 @@
   },
   "pages": {
     "home": {
-      "title": "Karnataka Rajyotsava 2026 — The Dasara Procession",
-      "description": "Karnataka Rajyotsava 2026 at BMS Institute of Technology & Management, organised by Honnudi Kannada Sangha — competitions and the Dasara procession."
+      "title": "Kannada Rajyotsava 2026 — The Dasara Procession",
+      "description": "Kannada Rajyotsava 2026 at BMS Institute of Technology & Management, organised by Honnudi Kannada Sangha — competitions and the Dasara procession."
     },
     "competitions": {
       "title": "Competitions",
       "subtitle": "Show your talent",
-      "description": "All competitions at Karnataka Rajyotsava 2026 for students and faculty. Register today."
+      "description": "All competitions at Kannada Rajyotsava 2026 for students and faculty. Register today."
     },
     "event": {
       "title": "Event Details",
-      "subtitle": "Karnataka Rajyotsava 2026",
-      "description": "Schedule, guests and venue for the two-day Karnataka Rajyotsava 2026 festival."
+      "subtitle": "Kannada Rajyotsava 2026",
+      "description": "Schedule, guests and venue for the two-day Kannada Rajyotsava 2026 festival."
     },
     "gallery": {
       "title": "Gallery",
       "subtitle": "Memories from our festival",
-      "description": "Photos and reels from past Karnataka Rajyotsava celebrations."
+      "description": "Photos and reels from past Kannada Rajyotsava celebrations."
     },
     "team": {
       "title": "Our Team",
@@ -286,7 +287,7 @@
     "register": {
       "title": "Register",
       "subtitle": "Join the procession",
-      "description": "Register for the Karnataka Rajyotsava 2026 competitions."
+      "description": "Register for the Kannada Rajyotsava 2026 competitions."
     },
     "pass": {
       "title": "Your Procession Pass",

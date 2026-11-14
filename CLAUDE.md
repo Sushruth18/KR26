@@ -1,4 +1,4 @@
-# CLAUDE.md — Karnataka Rajyotsava 2026 · BMSIT&M · Honnudi Kannada Sangha
+# CLAUDE.md — Kannada Rajyotsava 2026 · BMSIT&M · Honnudi Kannada Sangha
 
 Read this whole file before writing any code. It is the single source of truth for this project.
 When something here conflicts with your defaults, this file wins. When something is marked
@@ -8,11 +8,11 @@ When something here conflicts with your defaults, this file wins. When something
 
 ## 1. Project
 
-- **What:** Official website for Karnataka Rajyotsava 2026 at BMS Institute of Technology & Management, organised by Honnudi Kannada Sangha.
+- **What:** Official website for Kannada Rajyotsava 2026 at BMS Institute of Technology & Management, organised by Honnudi Kannada Sangha.
 - **Theme:** **Mysuru Dasara procession (Jamboo Savari)** — the site is designed as the procession itself: palace lights switching on at night, the golden Ambari on the elephant, tableaux floats, folk troupes, torchlight.
 - **Two-day festival, BMSIT&M campus:**
   - **Day 1 — Competitions:** **20 November 2026** (Friday). All 12 competitions (students + faculty) happen this day.
-  - **Day 2 — Karnataka Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — rally, inauguration & Dasara procession, club performances, fashion show, music concert & DJ.
+  - **Day 2 — Kannada Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — rally, inauguration & Dasara procession, club performances, fashion show, music concert & DJ.
   - All dates (both days, countdown targets, registration window, per-event `deadline`) come from `src/data/site.json` / `events.json` — never hard-code a date in a component.
 - **Registration:** **open from now** (no opening date, no seat limits); closes **18 Nov 2026, 23:59 IST** (one day of buffer before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
 - **Source of event data:** `Kannada_Rajyotsava_26_Budget_Proposal.docx` (schedule + prize breakdown) — §5.3 and §6 below are taken from it.
@@ -123,7 +123,7 @@ Routes (all inside one `<Layout>` that renders `<Navbar/>`, `<Outlet/>`, `<Foote
 Scroll to top on route change. Active nav item has a gold underline. Lazy-load routes (`React.lazy`).
 
 ### Global UI
-- **Navbar:** sticky, blurred night background; left: "ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ" wordmark; right: links, music toggle, language toggle (KN ⇄ EN). Mobile: hamburger → full-screen menu with staggered links. Language choice persists in localStorage (try/catch).
+- **Navbar:** sticky, blurred night background; left: "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ" wordmark; right: links, music toggle, language toggle (KN ⇄ EN). Mobile: hamburger → full-screen menu with staggered links. Language choice persists in localStorage (try/catch).
 - **Music toggle:** muted by default, never autoplays. Audio file `public/audio/theme.mp3` (TODO-CONFIRM: royalty-free/self-recorded nadaswaram or dollu loop). If file missing, hide the toggle.
 - **Footer:** torches on both sides, "© 2026 ಹೊನ್ನುಡಿ ಕನ್ನಡ ಸಂಘ | ಎಲ್ಲ ಹಕ್ಕುಗಳೂ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ", Instagram link (TODO-CONFIRM handle), college name, small "Made by" credit.
 
@@ -145,7 +145,7 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 ### 5.1 Home `/`
 - College logo + "ಬಿ.ಎಂ.ಎಸ್. ತಾಂತ್ರಿಕ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನಾ ಮಹಾವಿದ್ಯಾಲಯ" row; Honnudi logo (assets in `public/brand/`).
 - Hero: lit palace at night, parallax layers (sky → palace → crowd silhouettes → Ambari elephant walking across the foreground).
-- Eyebrow "ಪ್ರಸ್ತುತಪಡಿಸುತ್ತಿರುವ", title "ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ" with gold glow, subtitle "೨೦೨೬", tagline "ದಸರಾ ಮೆರವಣಿಗೆ" / "The Dasara Procession".
+- Eyebrow "ಪ್ರಸ್ತುತಪಡಿಸುತ್ತಿರುವ", title "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ" with gold glow, subtitle "೨೦೨೬", tagline "ದಸರಾ ಮೆರವಣಿಗೆ" / "The Dasara Procession".
 - **Countdown** (days/hours/mins/secs in plaque tiles; numerals per language) that moves through phases automatically:
   1. Before 20 Nov 09:00 → "ಸ್ಪರ್ಧೆಗಳಿಗೆ" / "Competitions begin in" → `site.json → competitionsStart`.
   2. During 20 Nov → "ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!" / "Competitions are on!" + "Main event in" countdown to `eventStart`.
@@ -171,7 +171,7 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 - Skeleton shimmer while status loads.
 
 ### 5.3 Event Details `/event`
-- Title "ಕಾರ್ಯಕ್ರಮ ವಿವರಗಳು", subtitle "ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ ೨೦೨೬".
+- Title "ಕಾರ್ಯಕ್ರಮ ವಿವರಗಳು", subtitle "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ ೨೦೨೬".
 - **Chief guest(s)** in Darbar-hall arch frames with gold pillars. Single clean image — no reflected/duplicated image. (TODO-CONFIRM guest names, titles, photos; if unconfirmed, show a tasteful "ಶೀಘ್ರದಲ್ಲೇ ಘೋಷಣೆ / Announcing soon" frame.)
 - 4 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · time (Day 2: 9:00 AM – 5:45 PM) · venue (BMSIT&M campus) · cash prize pool (₹39,000 + mementos).
 - **Day tabs** above the timeline: **ದಿನ ೧ · ೨೦ ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು** / **ದಿನ ೨ · ೨೧ ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ** (Day 1 · Competitions / Day 2 · Rajyotsava). Default to Day 2 except on 20 Nov, when Day 1 is default. Synced to `?day=1|2`.
@@ -401,6 +401,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 | 7 | Polish & QA | Reduced-motion / low-end pass, a11y, Lighthouse, OG card, §12 checklist | ⏳ |
 
 ### Approved decisions (override or refine the sections above)
+- **Name (Nov 2026):** the festival is **"Kannada Rajyotsava" / "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ"** everywhere on the website (`brand.wordmark`, page titles/descriptions, `index.html` OG/Twitter tags, manifest, `public/og.png` from `npm run social:images`). **Exceptions — they keep "Karnataka Rajyotsava" / "ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ":** the pass card and its PNG (`pass.brand`), the `.ics` file (`pass.icsSuffix`, `pass.icsDay2`) and the confirmation email (`buildEmail_` in Code.gs). Site URL, ids and codes are unchanged. `npm run e2e:rename` checks every route × kn/en (text outside the pass card, title, meta, alt/aria/title) and that the pass card still has the old name.
 - **TODO values** (`TODO-CONFIRM` in data) render as "To be announced": hide `tel:` links, all-day `.ics`, "TBA" on the pass; Day 1 events with unknown time go in the "Time TBA" group.
 - **Backend** adds `action=lookup` — requires USN/employee ID **and** the full phone to match; returns only `regId`, `event`, `name`. Used on the pass page when local data is lost.
 - **BMSIT-only.** One person may register for several events; duplicates are checked per event only. Category is derived from the event and locked. Team member rows take a USN (student events) or employee ID (faculty events); the duplicate check covers both.

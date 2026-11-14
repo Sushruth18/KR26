@@ -40,7 +40,7 @@ export const PassCard = forwardRef<HTMLDivElement, { pass: PassData; fixed?: boo
       style={{ backgroundImage: 'radial-gradient(ellipse at 50% 0%, rgba(139,30,45,.55), transparent 65%)' }}
     >
       <div className="pointer-events-none absolute inset-2 rounded-[22px] border border-gold-600/60" aria-hidden="true" />
-      <p className="tracking-latin font-display text-sm text-gold-300">{t('brand.wordmark')} · {formatNumber(2026, lang)}</p>
+      <p className="tracking-latin font-display text-sm text-gold-300">{t('pass.brand')} · {formatNumber(2026, lang)}</p>
       <AmbariMotif className="mx-auto my-3 h-24 w-28" />
       <p className="tracking-latin text-xs text-ivory-300">{t('pass.label')}</p>
       <h2 className="mt-1 text-2xl text-gold-300">{event ? event.name[lang] : pass.eventId}</h2>

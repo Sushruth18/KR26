@@ -29,7 +29,8 @@
     "check:banned": "tsx scripts/check-banned-terms.ts",
     "perf:home": "tsx scripts/perf-home.ts",
     "team:import": "tsx scripts/import-team.ts",
-    "e2e:team": "tsx --tsconfig tsconfig.node.json scripts/e2e-team.ts"
+    "e2e:team": "tsx --tsconfig tsconfig.node.json scripts/e2e-team.ts",
+    "e2e:rename": "tsx scripts/e2e-rename.ts"
   },
   "dependencies": {
     "@fontsource/baloo-tamma-2": "^5.3.0",
