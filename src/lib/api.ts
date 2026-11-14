@@ -1,7 +1,10 @@
 /**
  * Registration backend client (Google Apps Script web app; local mock at /mock-api in dev).
  * - POST bodies are sent as text/plain JSON → a "simple" CORS request with no preflight.
- * - register(): 20 s timeout, ONE automatic retry on network failure only (never after a server reply).
+ * - register(): 35 s timeout, ONE automatic retry on network failure only (never after a server reply).
+ *   35 s, not 20: Code.gs may wait up to 20 s for the script lock (LOCK_WAIT_MS) before it even starts, plus a cold
+ *   start and the write. A shorter timeout gave up on requests that then succeeded, and the automatic retry came
+ *   back DUPLICATE — a "you are already registered" on someone's first try.
  *   A retry after a request that did reach the server comes back DUPLICATE with the regId — safe.
  */
 import type { RegisterPayload } from './validation';
@@ -11,7 +14,7 @@ const CONFIGURED = (import.meta.env.VITE_REGISTRATION_ENDPOINT as string | undef
 export const ENDPOINT = CONFIGURED || (import.meta.env.DEV ? '/mock-api' : '');
 export const USING_MOCK = import.meta.env.DEV && !CONFIGURED;
 
-const REGISTER_TIMEOUT_MS = 20000;
+const REGISTER_TIMEOUT_MS = 35000;
 const STATUS_TIMEOUT_MS = 10000;
 const STATUS_CACHE_MS = 30000;
 
@@ -22,6 +25,7 @@ export type ErrorCode =
   | 'DUPLICATE'
   | 'SERVER'
   | 'NOT_FOUND'
+  | 'WITHDRAWN'
   | 'RATE_LIMITED'
   | 'NETWORK'
   | 'CONFIG';
@@ -33,6 +37,8 @@ export interface ApiError {
   reason?: string;
   field?: string;
   regId?: string;
+  /** Lookup WITHDRAWN: the registrations a coordinator marked withdrawn (they have no pass). */
+  withdrawn?: { regId: string; event: string }[];
 }
 
 export interface LiveEventStatus {

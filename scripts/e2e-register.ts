@@ -452,7 +452,7 @@ async function main() {
     async (page) => {
       await fillToReview(page, poem(12), 'slow');
       const t0 = Date.now();
-      const r = await submit(page, 60000);
+      const r = await submit(page, 100000);
       const waited = Math.round((Date.now() - t0) / 1000);
       expect(r.kind === 'error' && r.code === 'NETWORK', JSON.stringify(r));
       await sleep(6000); // let the mock finish the requests the browser gave up on
@@ -463,7 +463,7 @@ async function main() {
         { timeout: 15000 },
       ).then(() => page.evaluate(() => document.querySelector('[data-testid=existing-reg-id]')?.textContent ?? 'success'));
       expect(/^KR26-POM-\d{4}$/.test(r2), `retry after timeout should be DUPLICATE (request had landed), got ${r2}`);
-      return `25 s server delay → client timed out at 20 s, retried once, showed NETWORK after ${waited}s; the first request had actually landed, so manual Retry → DUPLICATE ${r2} (no double registration)`;
+      return `40 s server delay → client timed out at 35 s, retried once, showed NETWORK after ${waited}s; the first request had actually landed, so manual Retry → DUPLICATE ${r2} (no double registration)`;
     },
     /ERR|Failed to load resource|aborted/i,
   );
@@ -543,6 +543,26 @@ async function main() {
     const regId = await page.$eval('[data-testid=pass-reg-id]', (e) => e.textContent?.trim());
     expect(regId === 'KR26-ESY-0001', `lookup regId ${regId}`);
     return `no pass on device → lookup form; wrong phone → "${wrong}"; ID + full phone → pass ${regId}`;
+  });
+
+  await scenario(browser, '11b-lookup-withdrawn-en', 'en', async (page) => {
+    // A coordinator marks the Essay registration from scenario 01 as WITHDRAWN in its status column.
+    const w = (await (await fetch(`${BASE}/mock-api/__status?event=s-essay&regId=KR26-ESY-0001&value=WITHDRAWN`)).json()) as { ok: boolean };
+    expect(w.ok, 'row marked withdrawn');
+    try {
+      await page.goto(`${BASE}/register/success?lookup=1`, { waitUntil: 'networkidle0' });
+      await page.waitForSelector('[data-testid=lookup-form]');
+      await page.type('#lk-id', '1BY23CS101');
+      await page.type('#lk-phone', '9845012345');
+      await page.click('[data-testid=lookup-form] button[type=submit]');
+      await page.waitForSelector('[data-testid=lookup-error]');
+      const m = await page.$eval('[data-testid=lookup-error]', (e) => ({ text: e.textContent ?? '', code: e.getAttribute('data-code') }));
+      expect(m.code === 'WITHDRAWN' && m.text.includes('KR26-ESY-0001') && /withdrawn/i.test(m.text), `message "${m.text}"`);
+      expect(!(await page.$('[data-testid=pass-reg-id]')), 'no pass shown');
+      return `lookup of a withdrawn registration → "${m.text}"`;
+    } finally {
+      await fetch(`${BASE}/mock-api/__status?event=s-essay&regId=KR26-ESY-0001&value=`);
+    }
   });
 
   await scenario(browser, '12-pass-png-kannada', 'kn', async (page) => {

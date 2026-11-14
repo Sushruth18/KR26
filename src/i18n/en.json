@@ -182,6 +182,7 @@
       "submit": "Find",
       "searching": "Searching…",
       "NOT_FOUND": "No registration matches these details. Check the ID and mobile number.",
+      "WITHDRAWN": "This registration ({{ids}}) has been withdrawn, so there is no pass for it. If that is a mistake, please contact the competition's coordinator.",
       "RATE_LIMITED": "Too many attempts. Please try again in 10 minutes.",
       "VALIDATION": "Enter your ID and a 10-digit mobile number.",
       "found": "Your registrations"

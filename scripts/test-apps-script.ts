@@ -80,7 +80,7 @@ const st = (rt: GasRuntime) => {
 const ids = (rt: GasRuntime) => Object.keys((rt.ctx.CONFIG as { events: Record<string, unknown> }).events);
 const TAB_HEADERS = 'timestamp|reg_id|category|name|usn_or_empid|department|semester|phone|email|team_name|members_json|member_ids|consent_photo';
 /** Columns appended after the 13 base columns (by setupSheet, at the END of an existing tab). */
-const EXTRA = ['eligibility_confirmed'];
+const EXTRA = ['eligibility_confirmed', 'status'];
 /** Number of competitions (events.json → Config.gs). */
 const N = Object.keys(JSON.parse(readFileSync('src/data/events.json', 'utf8'))).length;
 
@@ -1595,6 +1595,119 @@ t('the cap applies to Treasure Hunt only: other events stay unlimited', () => {
   const rt = createOpenRuntime();
   for (let i = 0; i < 40; i++) assert.equal(reg(rt, { id: `1BY26ES${String(i).padStart(3, '0')}` }).ok, true);
   assert.equal('seatsLeft' in st(rt).events['s-essay']!, false);
+});
+
+console.log('\nWithdrawn rows (status column) and registration IDs');
+/** A coordinator types into the status column of row n (as in the Sheet: plain text). */
+const setStatus = (rt: GasRuntime, eventId: string, row: number, value: string) => {
+  const sh = rt.tab(eventId);
+  const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0] ?? [];
+  sh.getRange(row, headers.indexOf('status') + 1, 1, 1).setValues([[value]]);
+  rt.cache.clear();
+};
+t('every event tab has a status column at the end (new tabs and, appended, existing ones)', () => {
+  const rt = createOpenRuntime();
+  for (const id of ids(rt)) {
+    const sh = rt.tab(id);
+    const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0]!;
+    assert.equal(headers[headers.length - 1], 'status', id);
+  }
+});
+t('WITHDRAWN: the person can register again (new, higher ID); the withdrawn row stays as it was', () => {
+  const rt = createOpenRuntime();
+  assert.equal(reg(rt).regId, 'KR26-ESY-0001');
+  assert.equal(reg(rt, { id: '1BY23CS002' }).regId, 'KR26-ESY-0002');
+  assert.equal(reg(rt).code, 'DUPLICATE');
+  setStatus(rt, 's-essay', 2, 'WITHDRAWN');
+  const before = JSON.stringify(regRow(rt, 2));
+  assert.equal(reg(rt).regId, 'KR26-ESY-0003', 'new ID, 0001 is never reused');
+  assert.equal(JSON.stringify(regRow(rt, 2)), before, 'the withdrawn row is untouched');
+  assert.equal(cellOf(rt, 's-essay', 2, 'status'), 'WITHDRAWN');
+  assert.equal(cellOf(rt, 's-essay', 4, 'status'), '', 'the script never writes status');
+});
+t('WITHDRAWN is case- and space-insensitive; anything else (e.g. "called") is still active', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  setStatus(rt, 's-essay', 2, 'called');
+  assert.equal(reg(rt).code, 'DUPLICATE');
+  setStatus(rt, 's-essay', 2, '  withdrawn ');
+  assert.equal(reg(rt).ok, true);
+});
+t('a withdrawn team frees its members (duplicate check) and its place (cap); counts and seatsLeft ignore it', () => {
+  const rt = createOpenRuntime();
+  const team = huntTeam();
+  rt.post(team);
+  fillHunt(rt, 29);
+  assert.equal(rt.post(huntTeam()).code, 'FULL');
+  assert.equal(st(rt).events['s-treasure-hunt']?.registeredCount, 30);
+  setStatus(rt, 's-treasure-hunt', 2, 'WITHDRAWN');
+  const s = st(rt).events['s-treasure-hunt']!;
+  assert.equal(s.registeredCount, 29);
+  assert.equal(s.seatsLeft, 1);
+  // One of its members registers with a new team: allowed (no DUPLICATE), takes the freed place, gets the next ID.
+  const again = { ...huntTeam(), members: [team.members[0]!, ...huntTeam().members.slice(1)] };
+  const r = rt.post(again);
+  assert.equal(r.regId, 'KR26-TRH-0031');
+  assert.equal(rt.post(huntTeam()).code, 'FULL');
+});
+t('lookup of a withdrawn registration → WITHDRAWN with its ID (by USN and by reg ID), no pass, no rate-limit strike', () => {
+  const rt = createOpenRuntime();
+  const r = reg(rt);
+  setStatus(rt, 's-essay', 2, 'WITHDRAWN');
+  for (let i = 0; i < 7; i++) {
+    assert.deepEqual(rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }), { ok: false, code: 'WITHDRAWN', withdrawn: [{ regId: r.regId, event: 's-essay' }] });
+  }
+  assert.deepEqual(rt.post({ action: 'lookup', id: r.regId, phone: '9845012345' }), { ok: false, code: 'WITHDRAWN', withdrawn: [{ regId: r.regId, event: 's-essay' }] });
+  // Registered again: lookup now returns only the active pass.
+  const again = reg(rt);
+  const l = rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }) as { ok: boolean; passes: { regId: string }[] };
+  assert.equal(l.ok, true);
+  assert.deepEqual(l.passes.map((p) => p.regId), [again.regId]);
+});
+t('deleting a middle row: the next ID is still highest + 1 (never the row count, never a reused number)', () => {
+  const rt = createOpenRuntime();
+  for (let i = 1; i <= 4; i++) assert.equal(reg(rt, { id: `1BY23CS10${i}` }).regId, `KR26-ESY-000${i}`);
+  rt.tab('s-essay').deleteRow(3); // KR26-ESY-0002 deleted by hand: 3 rows left
+  assert.equal(rt.countRegs('s-essay'), 3);
+  assert.equal(reg(rt, { id: '1BY23CS200' }).regId, 'KR26-ESY-0005');
+});
+t('deleting the LAST row does not hand its ID out again (high-water mark in Script Properties)', () => {
+  const rt = createOpenRuntime();
+  reg(rt, { id: 'A1' });
+  reg(rt, { id: 'A2' });
+  assert.equal(reg(rt, { id: 'A3' }).regId, 'KR26-ESY-0003');
+  rt.tab('s-essay').deleteRow(4); // the newest registration deleted
+  assert.equal(rt.props.getProperty('regNo_s-essay'), '3');
+  assert.equal(reg(rt, { id: 'A4' }).regId, 'KR26-ESY-0004', '0003 is not reused');
+  // Even with every row deleted.
+  rt.tab('s-essay').deleteRow(2);
+  rt.tab('s-essay').deleteRow(2);
+  rt.tab('s-essay').deleteRow(2);
+  assert.equal(reg(rt, { id: 'A5' }).regId, 'KR26-ESY-0005');
+  // Without a stored mark (e.g. right after this update) the tab's highest number is used.
+  rt.props.deleteProperty('regNo_s-essay');
+  assert.equal(reg(rt, { id: 'A6' }).regId, 'KR26-ESY-0006');
+});
+t('IDs are per event, and a row whose reg_id has another code (typed by hand) does not affect the numbering', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  rt.tab('s-essay').getRange(3, 1, 1, 2).setValues([['x', 'KR26-POM-0099']]);
+  assert.equal(reg(rt, { id: 'B1' }).regId, 'KR26-ESY-0002');
+  assert.equal(reg(rt, { eventId: 's-poem', id: 'B1' }).regId, 'KR26-POM-0001');
+});
+t('findRegistrations() (editor diagnostic) lists every row holding an ID — as registrant or team member, withdrawn or not', () => {
+  const rt = createOpenRuntime();
+  reg(rt);
+  rt.post({ ...huntTeam(), members: [{ name: 'Ananya Rao', id: '1by23cs001', phone: '9845012345' }, ...huntTeam().members.slice(1)] });
+  setStatus(rt, 's-essay', 2, 'WITHDRAWN');
+  const logs = captureLogs(rt);
+  rt.ctx.FIND_REGISTRATIONS_ID = ' 1by23 cs001 ';
+  (rt.ctx.findRegistrations as () => void)();
+  assert.ok(logs.some((l) => /^s-essay — tab "ESY – Essay Writing" row 2: KR26-ESY-0001 \(registrant, WITHDRAWN/.test(l)), logs.join('\n'));
+  assert.ok(logs.some((l) => /^s-treasure-hunt — .* row 2: KR26-TRH-0001 \(team member, active/.test(l)), logs.join('\n'));
+  assert.match(logs[logs.length - 1] ?? '', /^2 row\(s\) found for 1BY23CS001\./);
+  rt.ctx.FIND_REGISTRATIONS_ID = '';
+  assert.throws(() => (rt.ctx.findRegistrations as () => void)(), /FIND_REGISTRATIONS_ID/);
 });
 
 console.log('\nClient/server parity');

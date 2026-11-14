@@ -16,6 +16,7 @@
  *                                                  (seatsLeft only for events with a max_teams number)
  *   POST { action: "register", ...fields }      -> { ok:true, regId, event, name, whatsappUrl? } | { ok:false, code, reason?, field?, regId? }
  *   POST { action: "lookup", id, phone }        -> (id = USN / employee ID, or a registration ID like KR26-ESY-0042) { ok:true, passes:[{ regId, event, name, whatsappUrl? }] } | { ok:false, code }
+ *                                                  (code WITHDRAWN + withdrawn:[{ regId, event }] when the only matches are withdrawn rows)
  * whatsappUrl is present only when the event's whatsapp_url cell holds a valid https://chat.whatsapp.com/<code> (or
  * https://whatsapp.com/channel/<code>) link; any other value is ignored and logged (never returned).
  * The browser sends POST bodies as Content-Type text/plain so no CORS preflight is needed.
@@ -23,7 +24,8 @@
  * Registration is open unless the event's is_open cell is not TRUE or its deadline has passed. An event whose
  * max_teams cell holds a number takes at most that many non-withdrawn registrations (FULL after that; blank = no
  * limit -- only Treasure Hunt is capped, at 30). Error codes: VALIDATION, CLOSED (reason NOT_OPEN = closed by a
- * coordinator | DEADLINE), FULL, DUPLICATE, SERVER, NOT_FOUND and RATE_LIMITED (lookup only).
+ * coordinator | DEADLINE), FULL, DUPLICATE, SERVER, NOT_FOUND, WITHDRAWN and RATE_LIMITED (lookup only).
+ * A row whose status column says WITHDRAWN is ignored by the duplicate check, the cap and the counts.
  *
  * Every SERVER answer carries a short machine-readable "reason" (never a secret, stack trace or sheet content):
  *   EVENTS_TAB_MISSING                  the Events tab does not exist
@@ -56,7 +58,13 @@ var REG_HEADERS = [
 // Columns added later. setupSheet APPENDS any that are missing at the END of an existing tab (after whatever is there,
 // even a coordinator's own extra column) and never moves, renames or clears anything. Found by header name.
 //   eligibility_confirmed  TRUE when the registrant confirmed Kannada is not their mother tongue (eligibility events)
-var REG_EXTRA_HEADERS = ['eligibility_confirmed'];
+//   status                 coordinators type WITHDRAWN here instead of deleting the row: the row is then ignored by the
+//                          duplicate check, the max_teams cap and the counts, and the pass lookup says "withdrawn".
+//                          Anything else (blank) = active. The script never writes this column.
+var REG_EXTRA_HEADERS = ['eligibility_confirmed', 'status'];
+// Script Properties key prefix: the highest registration number ever issued per event (a "high-water mark"), so an ID
+// is never handed out twice — even if a coordinator deletes the row with the highest number.
+var REG_NO_PROP = 'regNo_';
 var LOCK_WAIT_MS = 20000;
 // Config.gs (generated) must declare CONFIG_SCHEMA with this exact number, or every request answers CONFIG_MISMATCH.
 // Keep equal to GAS_CONFIG_SCHEMA in scripts/gas-config.ts (npm run gas:config fails if they differ).
@@ -441,9 +449,10 @@ function idsOfRow_(row) {
   return ids;
 }
 
-/** Same USN/employee ID — registrant or any team member, on either side — already in this event. */
+/** Same USN/employee ID — registrant or any team member, on either side — already in this event (withdrawn rows don't count). */
 function findDuplicate_(rows, ids) {
   for (var i = 0; i < rows.length; i++) {
+    if (isWithdrawn_(rows[i])) continue;
     var existing = idsOfRow_(rows[i]);
     for (var j = 0; j < ids.length; j++) {
       if (existing.indexOf(ids[j]) !== -1) return rows[i].reg_id;
@@ -452,16 +461,41 @@ function findDuplicate_(rows, ids) {
   return null;
 }
 
-/** KR26-<CODE>-NNNN with NNNN = highest existing number for the event + 1 (safe if a row is deleted). */
-function nextRegId_(code, rows) {
-  var max = 0;
+/**
+ * KR26-<CODE>-NNNN. NNNN = 1 + the highest number this event has ever had: the highest reg_id in its tab (withdrawn rows
+ * included) or the high-water mark kept in Script Properties, whichever is larger. Never based on the row count, so
+ * deleting or withdrawing rows (even the last one) can never hand an ID out twice. Called inside the script lock;
+ * the caller stores the new number with rememberRegNo_ once the row is written.
+ */
+function nextRegId_(code, rows, eventId) {
+  var max = highWater_(eventId);
   rows.forEach(function (r) {
-    var n = parseInt(String(r.reg_id).split('-').pop(), 10);
+    var m = REG_ID_RE.exec(String(r.reg_id).trim());
+    var n = m && m[1] === code ? parseInt(m[2], 10) : NaN;
     if (n > max) max = n;
   });
   var num = String(max + 1);
   while (num.length < 4) num = '0' + num;
   return 'KR26-' + code + '-' + num;
+}
+
+/** The highest number ever issued for an event (0 if none recorded yet). A Properties failure falls back to the tab. */
+function highWater_(eventId) {
+  try {
+    return parseInt(PropertiesService.getScriptProperties().getProperty(REG_NO_PROP + eventId) || '0', 10) || 0;
+  } catch (err) {
+    console.warn('Could not read the ID high-water mark for ' + eventId + ': ' + err);
+    return 0;
+  }
+}
+
+function rememberRegNo_(eventId, regId) {
+  try {
+    var n = parseInt(String(regId).split('-').pop(), 10);
+    if (n > highWater_(eventId)) PropertiesService.getScriptProperties().setProperty(REG_NO_PROP + eventId, String(n));
+  } catch (err) {
+    console.warn('Could not store the ID high-water mark for ' + eventId + ': ' + err);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -540,7 +574,7 @@ function register_(b) {
     // Cap (max_teams), counted inside the lock: two people can never both take the last place.
     if (live.maxTeams !== null && activeRows_(rows).length >= live.maxTeams) return { ok: false, code: 'FULL' };
 
-    var regId = nextRegId_(ev.code, rows);
+    var regId = nextRegId_(ev.code, rows, p.eventId);
     appendByHeader_(tab, {
       timestamp: new Date().toISOString(),
       reg_id: regId,
@@ -558,6 +592,7 @@ function register_(b) {
       eligibility_confirmed: p.eligibilityConfirmed ? 'TRUE' : ''
     });
     SpreadsheetApp.flush();
+    rememberRegNo_(p.eventId, regId);
     CacheService.getScriptCache().remove(STATUS_CACHE_KEY);
     result = { ok: true, regId: regId, event: p.eventId, name: p.name };
     whatsappUrl = whatsappFor_(events, p.eventId);
@@ -571,7 +606,9 @@ function register_(b) {
 }
 
 // ---------------------------------------------------------------------------
-// Lookup (pass recovery): ID AND full phone must match; returns only regId, event, name
+// Lookup (pass recovery): ID AND full phone must match; returns only regId, event, name.
+// A matching row whose status is WITHDRAWN gives no pass: if nothing else matches the answer is
+// { ok:false, code:'WITHDRAWN', withdrawn:[{ regId, event }] } so the website can say so clearly.
 // ---------------------------------------------------------------------------
 
 function lookup_(b) {
@@ -586,7 +623,14 @@ function lookup_(b) {
   if (fails >= LOOKUP_MAX_FAILS) return { ok: false, code: 'RATE_LIMITED' };
 
   var passes = [];
+  var withdrawn = [];
   var events = readEvents_();
+  var finish = function () {
+    if (passes.length) return { ok: true, passes: passes };
+    if (withdrawn.length) return { ok: false, code: 'WITHDRAWN', withdrawn: withdrawn }; // identity proven: not a failed attempt
+    cache.put(key, String(fails + 1), LOOKUP_WINDOW_S);
+    return { ok: false, code: 'NOT_FOUND' };
+  };
 
   // A registration ID (KR26-ESY-0042, as in the confirmation email's "View your pass" link) + the phone of the
   // registrant or of a team member: only that one registration's own tab is read. Same rate limit as below.
@@ -605,8 +649,12 @@ function lookup_(b) {
       };
       readTable_(tab).forEach(function (r) {
         if (String(r.reg_id) !== id) return;
+        var take = function (name) {
+          if (isWithdrawn_(r)) withdrawn.push({ regId: id, event: eventId });
+          else passes.push(passFor(name));
+        };
         if (normPhone_(r.phone) === phone) {
-          passes.push(passFor(r.name));
+          take(r.name);
           return;
         }
         var members;
@@ -617,17 +665,13 @@ function lookup_(b) {
         }
         for (var i = 0; i < members.length; i++) {
           if (normPhone_(members[i].phone) === phone) {
-            passes.push(passFor(members[i].name));
+            take(members[i].name);
             return;
           }
         }
       });
     });
-    if (!passes.length) {
-      cache.put(key, String(fails + 1), LOOKUP_WINDOW_S);
-      return { ok: false, code: 'NOT_FOUND' };
-    }
-    return { ok: true, passes: passes };
+    return finish();
   }
 
   // Every event tab is searched; a person registered for several events gets all their passes.
@@ -642,8 +686,12 @@ function lookup_(b) {
       return pass;
     };
     readTable_(tab).forEach(function (r) {
+      var take = function (name) {
+        if (isWithdrawn_(r)) withdrawn.push({ regId: r.reg_id, event: eventId });
+        else passes.push(passFor(r.reg_id, name));
+      };
       if (normId_(r.usn_or_empid) === id && normPhone_(r.phone) === phone) {
-        passes.push(passFor(r.reg_id, r.name));
+        take(r.name);
         return;
       }
       if (!r.members_json) return;
@@ -655,18 +703,13 @@ function lookup_(b) {
       }
       for (var i = 0; i < members.length; i++) {
         if (normId_(members[i].id) === id && normPhone_(members[i].phone) === phone) {
-          passes.push(passFor(r.reg_id, members[i].name));
+          take(members[i].name);
           return;
         }
       }
     });
   });
-
-  if (!passes.length) {
-    cache.put(key, String(fails + 1), LOOKUP_WINDOW_S);
-    return { ok: false, code: 'NOT_FOUND' };
-  }
-  return { ok: true, passes: passes };
+  return finish();
 }
 
 // ---------------------------------------------------------------------------
@@ -872,6 +915,38 @@ function setupSheet() {
     ids.filter(function (id) { return report[id].row === 'ADDED'; }).length + ' Events row(s) added; ' +
     created.length + ' event tab(s) created' + (created.length ? ' (' + created.join(', ') + ')' : '') + ', ' +
     existed.length + ' already existed. Nothing was deleted or overwritten.');
+}
+
+/**
+ * Diagnostic, read-only (README "Why does someone get DUPLICATE?"): put a USN / employee ID between the quotes, run
+ * findRegistrations() from the editor, and the log lists every event tab row that holds it — as registrant or team
+ * member, its reg_id, its status and whether the row is hidden or filtered out (still counted!). Clear it afterwards.
+ */
+var FIND_REGISTRATIONS_ID = '';
+function findRegistrations() {
+  assertConfig_();
+  var id = normId_(FIND_REGISTRATIONS_ID);
+  if (!id) throw new Error('Put the USN / employee ID in FIND_REGISTRATIONS_ID (just above this function), then run it again.');
+  var events = readEvents_();
+  var found = 0;
+  Object.keys(CONFIG.events).forEach(function (eventId) {
+    var tab = eventTabOrNull_(eventId, events);
+    if (!tab) return;
+    readTable_(tab).forEach(function (r) {
+      var asRegistrant = normId_(r.usn_or_empid) === id;
+      var asMember = !asRegistrant && idsOfRow_(r).indexOf(id) !== -1;
+      if (!asRegistrant && !asMember) return;
+      found++;
+      var hidden = '';
+      try {
+        if (tab.isRowHiddenByUser && tab.isRowHiddenByUser(r._row)) hidden = ' — row is HIDDEN (still counted; delete it or mark it WITHDRAWN)';
+        else if (tab.isRowHiddenByFilter && tab.isRowHiddenByFilter(r._row)) hidden = ' — row is hidden by a FILTER (still counted)';
+      } catch (err) { /* not available: ignore */ }
+      console.log(eventId + ' — tab "' + tab.getName() + '" row ' + r._row + ': ' + r.reg_id + ' (' + (asRegistrant ? 'registrant' : 'team member') +
+        ', ' + (isWithdrawn_(r) ? 'WITHDRAWN — ignored' : 'active — blocks a new registration for this event') + ')' + hidden);
+    });
+  });
+  console.log(found ? found + ' row(s) found for ' + id + '.' : 'No row holds ' + id + ' in any event tab.');
 }
 
 /** Run from the editor to see which Config.gs this project is using (version, schema, events) without changing anything. */

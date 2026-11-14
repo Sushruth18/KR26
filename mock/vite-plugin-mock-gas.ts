@@ -10,9 +10,10 @@
  *   validation phone := 5555555555 (fails the phone rule) → real VALIDATION field "phone"
  *   server     the event's own tab throws                 → real SERVER
  *   network    submit: socket destroyed, no response      → fetch() rejects in the browser
- *   slow       submit: 25 s delay (client times out at 20 s)
+ *   slow       submit: 40 s delay (client times out at 35 s)
  *   statusdown status GET: socket destroyed               → UI falls back to events.json + clock
- * POST /mock-api/__reset wipes all mock data; /mock-api/__set?id=&header=&value= edits an Events cell.
+ * POST /mock-api/__reset wipes all mock data; /mock-api/__set?id=&header=&value= edits an Events cell;
+ * /mock-api/__status?event=&regId=&value=WITHDRAWN types into a registration row's status column.
  */
 import type { Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -120,6 +121,21 @@ export function mockGas(): Plugin {
             const prev = runtime().setEventField(q.get('id') ?? '', q.get('header') ?? '', q.get('value') ?? '');
             return send(res, { ok: true, prev, registrations: runtime().countRegs(q.get('id') ?? '') });
           }
+          // A coordinator marks a registration withdrawn: /__status?event=s-essay&regId=KR26-ESY-0001&value=WITHDRAWN
+          if (url.pathname === '/__status') {
+            const q = url.searchParams;
+            const sh = runtime().tab(q.get('event') ?? '');
+            const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0] ?? [];
+            const col = headers.indexOf('status') + 1;
+            for (let r = 2; r <= sh.getLastRow(); r++) {
+              if (String(sh.get(r, 2)) === q.get('regId')) {
+                sh.getRange(r, col, 1, 1).setValues([[q.get('value') ?? '']]);
+                runtime().cache.clear();
+                return send(res, { ok: true, row: r });
+              }
+            }
+            return send(res, { ok: false });
+          }
           // network/slow hit submissions (POST) only; statusdown kills just the status GET.
           const isPost = req.method === 'POST';
           if ((mock === 'network' && isPost) || (mock === 'statusdown' && !isPost)) {
@@ -130,7 +146,7 @@ export function mockGas(): Plugin {
           // Read the body first, like a real server: if the browser gives up while we're "slow",
           // the request is still processed (that is exactly what happens with Apps Script).
           const body = isPost ? await readBody(req) : '';
-          await sleep(mock === 'slow' && isPost ? 25000 : LATENCY_MS);
+          await sleep(mock === 'slow' && isPost ? 40000 : LATENCY_MS);
           if (req.method === 'GET') {
             return send(res, runtime().get(Object.fromEntries(url.searchParams)));
           }

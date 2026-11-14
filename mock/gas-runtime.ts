@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import vm from 'node:vm';
-import { FakeCache, FakeLock, FakeMail, FakeSpreadsheet, type FakeSheet } from './fake-sheets.ts';
+import { FakeCache, FakeLock, FakeMail, FakeProperties, FakeSpreadsheet, type FakeSheet } from './fake-sheets.ts';
 import { buildGasConfigSource } from '../scripts/gas-config.ts';
 
 export interface GasResponse {
@@ -18,6 +18,8 @@ export interface GasRuntime {
   lock: FakeLock;
   cache: FakeCache;
   mail: FakeMail;
+  /** Script Properties (ID high-water marks, notice send log). */
+  props: FakeProperties;
   /** Functions defined in Code.gs / Config.gs (doGet, doPost, setupSheet, validate_, safeCell_, CONFIG …). */
   ctx: Record<string, unknown>;
   get(params: Record<string, string>): GasResponse;
@@ -41,12 +43,14 @@ export function createGasRuntime(root = process.cwd()): GasRuntime {
   const lock = new FakeLock();
   const cache = new FakeCache();
   const mail = new FakeMail();
+  const props = new FakeProperties();
 
   const ctx: Record<string, unknown> = {
     console: { log: () => undefined, warn: () => undefined, error: () => undefined },
     SpreadsheetApp: { getActiveSpreadsheet: () => ss, flush: () => undefined },
     LockService: { getScriptLock: () => lock },
     CacheService: { getScriptCache: () => cache },
+    PropertiesService: { getScriptProperties: () => props },
     MailApp: mail,
     ContentService: {
       MimeType: { JSON: 'application/json' },
@@ -76,6 +80,7 @@ export function createGasRuntime(root = process.cwd()): GasRuntime {
     lock,
     cache,
     mail,
+    props,
     ctx,
     get: (parameter) => call('doGet', { parameter }),
     post: (body) => call('doPost', { postData: { contents: JSON.stringify(body) } }),

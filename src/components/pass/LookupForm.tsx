@@ -8,7 +8,7 @@ import { cleanWhatsappUrl } from '../../lib/whatsapp';
 import type { PassData } from '../../lib/passStore';
 import { Button } from '../ui/Button';
 
-type State = { kind: 'idle' } | { kind: 'busy' } | { kind: 'error'; key: string };
+type State = { kind: 'idle' } | { kind: 'busy' } | { kind: 'error'; key: string; vars?: Record<string, string> };
 
 /** `?id=` comes from the "View your pass" button in the confirmation email: a registration ID, a USN or an employee ID. */
 const PREFILL_ID = /^[A-Za-z0-9-]{1,20}$/;
@@ -40,6 +40,10 @@ export function LookupForm({ onFound }: { onFound: (passes: PassData[]) => void 
       );
       return;
     }
+    if (res.code === 'WITHDRAWN') {
+      // Registration IDs stay in Latin script in both languages.
+      return setState({ kind: 'error', key: 'pass.lookup.WITHDRAWN', vars: { ids: (res.withdrawn ?? []).map((w) => w.regId).join(', ') } });
+    }
     const key = ['NOT_FOUND', 'RATE_LIMITED', 'VALIDATION'].includes(res.code)
       ? `pass.lookup.${res.code}`
       : res.code === 'NETWORK'
@@ -66,8 +70,8 @@ export function LookupForm({ onFound }: { onFound: (passes: PassData[]) => void 
       </div>
       <div aria-live="polite">
         {state.kind === 'error' && (
-          <p className="field-error" role="alert" data-testid="lookup-error">
-            {t(state.key)}
+          <p className="field-error" role="alert" data-testid="lookup-error" data-code={state.key.split('.').pop()}>
+            {t(state.key, state.vars)}
           </p>
         )}
       </div>

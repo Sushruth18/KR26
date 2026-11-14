@@ -237,3 +237,22 @@ export class FakeMail {
     return this.quota;
   }
 }
+
+/** Script Properties: a string map (the ID high-water marks, the notice send log). */
+export class FakeProperties {
+  m = new Map<string, string>();
+  getProperty(k: string) {
+    return this.m.has(k) ? this.m.get(k)! : null;
+  }
+  setProperty(k: string, v: string) {
+    this.m.set(k, String(v));
+    return this;
+  }
+  deleteProperty(k: string) {
+    this.m.delete(k);
+    return this;
+  }
+  getProperties() {
+    return Object.fromEntries(this.m);
+  }
+}
