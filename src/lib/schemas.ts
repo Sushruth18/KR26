@@ -33,7 +33,7 @@ export const eventSchema = z.object({
    */
   alternatives: z.array(z.string()).optional(),
   /**
-   * "nonKannadiga" = only for students whose mother tongue is not Kannada: the Register page asks them to confirm it
+   * "nonKannadiga" = only for students / faculty members whose mother tongue is not Kannada: the Register page asks them to confirm it
    * (required checkbox), the server rejects a registration without it and stores it in eligibility_confirmed.
    */
   eligibility: z.literal('nonKannadiga').optional(),

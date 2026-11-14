@@ -965,7 +965,7 @@ t('setupSheet logs "Config <version> … lists N events", then one line per even
     assert.ok(line && /Events row ADDED/.test(line) && /tab "[^"]+" CREATED/.test(line), `${id}: ${line}`);
   }
   const last = logs[logs.length - 1] ?? '';
-  assert.match(last, /^Setup complete\. Config [0-9a-f]{8}: 14 events; 14 Events row\(s\) added; 14 event tab\(s\) created \(.*\), 0 already existed\./);
+  assert.match(last, /^Setup complete\. Config [0-9a-f]{8}: 15 events; 15 Events row\(s\) added; 15 event tab\(s\) created \(.*\), 0 already existed\./);
 });
 t('setupSheet seeds the Events tab from Config.gs: one row per event with id, code, name_en, sheet_name, deadline_iso, is_open TRUE', () => {
   const rt = createGasRuntime();
@@ -993,7 +993,7 @@ t('re-running setupSheet reports "already there / already existed" for every eve
     const line = logs.find((l) => l.startsWith(`${id}: `));
     assert.ok(line && /Events row already there/.test(line) && /already existed/.test(line), `${id}: ${line}`);
   }
-  assert.match(logs[logs.length - 1] ?? '', /0 Events row\(s\) added; 0 event tab\(s\) created, 14 already existed\./);
+  assert.match(logs[logs.length - 1] ?? '', /0 Events row\(s\) added; 0 event tab\(s\) created, 15 already existed\./);
 });
 t('a partly set-up spreadsheet: only the missing tab is added, and it is reported as such', () => {
   const rt = createGasRuntime();
@@ -1003,7 +1003,7 @@ t('a partly set-up spreadsheet: only the missing tab is added, and it is reporte
   setup(rt);
   assert.ok(logs.some((l) => /^s-poem: .*CREATED/.test(l)));
   assert.ok(logs.some((l) => /^s-essay: .*already existed/.test(l)));
-  assert.match(logs[logs.length - 1] ?? '', /1 event tab\(s\) created \(POM – Poem\), 13 already existed/);
+  assert.ok((logs[logs.length - 1] ?? '').includes(`1 event tab(s) created (POM – Poem), ${N - 1} already existed`), logs[logs.length - 1]);
 });
 t('setupSheet with an EMPTY Config.gs events list throws "Config.gs has no events — paste the latest Config.gs" and touches nothing', () => {
   const rt = createGasRuntime();
@@ -1428,12 +1428,13 @@ const cellOf = (rt: GasRuntime, eventId: string, row: number, header: string) =>
   if (col < 1) throw new Error(`no ${header} column in ${sh.getName()}`);
   return sh.getRange(row, col, 1, 1).getDisplayValues()[0]?.[0] ?? '';
 };
-t('setupSheet gives the two new events their own Events row and tab (ELO, SKD), open, 14 events in all', () => {
+t('setupSheet gives the non-Kannadiga events their own Events row and tab (ELO, SKD, FSD), open, 15 events in all', () => {
   const rt = createOpenRuntime();
-  assert.equal(N, 14);
+  assert.equal(N, 15);
   assert.equal(rt.tab('s-elocution').getName(), 'ELO – Elocution – Pick & Speak (for non-Kannadigas)');
   assert.equal(rt.tab('s-simple-debate').getName(), 'SKD – Simple Kannada Debate (for non-Kannadigas)');
-  for (const id of ['s-elocution', 's-simple-debate']) {
+  assert.equal(rt.tab('f-simple-debate').getName(), 'FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)');
+  for (const id of ['s-elocution', 's-simple-debate', 'f-simple-debate']) {
     assert.equal(rt.eventField(id, 'is_open'), 'TRUE');
     assert.equal(st(rt).events[id]?.isOpen, true);
   }
@@ -1453,6 +1454,24 @@ t('eligibility: confirmed → registered (KR26-ELO-0001, KR26-SKD-0001) and stor
   assert.equal(rt.post({ ...elo, eventId: 's-simple-debate' }).regId, 'KR26-SKD-0001');
   assert.equal(cellOf(rt, 's-elocution', 2, 'eligibility_confirmed'), 'TRUE');
   assert.equal(cellOf(rt, 's-simple-debate', 2, 'eligibility_confirmed'), 'TRUE');
+});
+t('faculty Simple Kannada Debate (FSD): eligibility required, employee ID, individual; KR26-FSD-0001 stored TRUE', () => {
+  const rt = createOpenRuntime();
+  const fsd = { ...base, eventId: 'f-simple-debate', id: 'EMP 42', name: 'Prof Meera', semester: null, department: 'ECE', eligibilityConfirmed: true };
+  for (const v of [undefined, false]) {
+    assert.deepEqual(rt.post({ ...fsd, eligibilityConfirmed: v }), { ok: false, code: 'VALIDATION', field: 'eligibilityConfirmed' }, String(v));
+  }
+  assert.equal(rt.countRegs('f-simple-debate'), 0);
+  const ok = rt.post(fsd);
+  assert.equal(ok.ok, true);
+  assert.equal(ok.regId, 'KR26-FSD-0001');
+  assert.equal(cellOf(rt, 'f-simple-debate', 2, 'eligibility_confirmed'), 'TRUE');
+  assert.equal(cellOf(rt, 'f-simple-debate', 2, 'category'), 'faculty');
+  assert.equal(cellOf(rt, 'f-simple-debate', 2, 'usn_or_empid'), 'EMP42');
+  assert.deepEqual(rt.post({ ...fsd, phone: '9845099999' }), { ok: false, code: 'DUPLICATE', regId: 'KR26-FSD-0001' });
+  const ev = (rt.ctx.CONFIG as { events: Record<string, { category: string; eligibility: string; teamSize: { min: number; max: number } }> }).events['f-simple-debate']!;
+  assert.deepEqual([ev.category, ev.eligibility, ev.teamSize.min, ev.teamSize.max], ['faculty', 'nonKannadiga', 1, 1]);
+  assert.equal(st(rt).events['f-simple-debate']?.isOpen, true);
 });
 t('eligibility is ignored for other events (not required, stored empty)', () => {
   const rt = createOpenRuntime();
@@ -1848,6 +1867,28 @@ t('Summary formulas: Events looked up by header name (INDEX/MATCH), event tabs t
   const row = (r: number) => sh.getRange(r, 1, 1, 8).getFormulas()[0]!;
   assert.deepEqual(row(3).filter((_, i) => i !== 6), row(42).filter((_, i) => i !== 6));
 });
+t('upgrading a live sheet (set up before FSD existed): setupSheet appends the FSD Events row + tab; the untouched Summary already has its formula row', () => {
+  const rt = createGasRuntime();
+  const full = JSON.parse(JSON.stringify(cfgOf(rt).events));
+  delete cfgOf(rt).events['f-simple-debate'];
+  setup(rt);
+  const summaryBefore = JSON.stringify(summaryOf(rt).getRange(1, 1, 42, 8).getFormulas());
+  assert.equal(rt.ss.getSheets().filter((s) => /^FSD/.test(s.getName())).length, 0);
+  cfgOf(rt).events = full;
+  const logs = captureLogs(rt);
+  setup(rt);
+  assert.ok(logs.some((l) => /^f-simple-debate: Events row ADDED.*CREATED/.test(l)), logs.join('\n'));
+  const events = rt.ss.getSheetByName('Events')!;
+  const ids = events.getRange(2, 1, events.getLastRow() - 1, 1).getDisplayValues().map((r) => r[0]);
+  const row = ids.indexOf('f-simple-debate') + 2;
+  assert.equal(row, N + 1, 'appended as the last Events row');
+  assert.equal(rt.eventField('f-simple-debate', 'is_open'), 'TRUE');
+  assert.equal(rt.tab('f-simple-debate').getName(), 'FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)');
+  assert.equal(JSON.stringify(summaryOf(rt).getRange(1, 1, 42, 8).getFormulas()), summaryBefore, 'Summary is not rewritten');
+  const f = summaryOf(rt).getRange(row + 1, 1, 1, 8).getFormulas()[0]!;
+  assert.ok(f[0]!.includes('INDEX(Events!$A:$Z,ROW()-1,MATCH("code"'), `Summary row ${row + 1} reads Events row ${row}`);
+  assert.ok(f[2]!.includes('LEFT(') && f[2]!.includes('"faculty"'), 'For = faculty from the f- prefix');
+});
 t('the event tabs keep reg_id in column B and member_ids in column L (what the Summary formulas rely on)', () => {
   const rt = createOpenRuntime();
   for (const id of ids(rt)) {
@@ -1888,6 +1929,7 @@ t('setupSheet on the live spreadsheet (no Summary yet) adds it at the END, after
 
 console.log('\nOne-off: notifyDebateMediumChange()');
 const notify = (rt: GasRuntime) => (rt.ctx.notifyDebateMediumChange as () => { sent: number; failed: number; skipped: number })();
+const notifyOption = (rt: GasRuntime) => (rt.ctx.notifyFacultyDebateOption as () => { sent: number; failed: number; skipped: number })();
 /** A runtime with 3 student debaters (one withdrawn), 1 faculty debater and an essay registrant; confirmation mails cleared. */
 const debateRuntime = () => {
   const rt = createOpenRuntime();
@@ -1924,7 +1966,21 @@ t('the note is bilingual: Kannada only + withdraw via a coordinator; only the st
   assert.ok(student!.body.includes('https://kr2k26-bmsit.netlify.app/register?event=s-elocution'));
   assert.ok(student!.body.includes('https://kr2k26-bmsit.netlify.app/competitions?for=students#s-debate'));
   assert.ok(faculty!.body.includes('https://kr2k26-bmsit.netlify.app/competitions?for=faculty#f-debate'));
-  assert.ok(!/Simple Kannada|Elocution|ಆಶುಭಾಷಣ/.test(faculty!.body), 'faculty are not pointed at the student-only events');
+  assert.ok(!/Elocution|ಆಶುಭಾಷಣ|event=s-/.test(faculty!.body), 'faculty are not pointed at the student-only events');
+  assert.ok(!/f-simple-debate|Faculty \(for non/.test(student!.body), 'students are not pointed at the faculty event');
+});
+t('the faculty note names the faculty Simple Kannada Debate, and records the address for notifyFacultyDebateOption', () => {
+  const rt = debateRuntime();
+  notify(rt);
+  const faculty = rt.mail.sent.find((m) => m.to === 'anand@example.com')!;
+  assert.ok(faculty.body.includes('Simple Kannada Debate – Faculty (for non-Kannadigas)'));
+  assert.ok(faculty.body.includes('ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ"'));
+  assert.ok(faculty.body.includes('https://kr2k26-bmsit.netlify.app/register?event=f-simple-debate'));
+  assert.ok(faculty.htmlBody!.includes('register?event=f-simple-debate'));
+  assert.deepEqual(JSON.parse(rt.props.getProperty('notified_facultySimpleDebate')!), ['anand@example.com'], 'only the faculty address');
+  rt.mail.sent = [];
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 0, failed: 0, skipped: 1 }, 'already told — the follow-up sends nothing');
+  assert.equal(rt.mail.sent.length, 0);
 });
 t('never emails the same address twice: a second run sends nothing; duplicate addresses in the tab get one mail', () => {
   const rt = debateRuntime();
@@ -1953,6 +2009,84 @@ t('notifyDebateMediumChange never changes the spreadsheet', () => {
   const before = rt.ss.snapshot();
   notify(rt);
   assert.equal(rt.ss.snapshot(), before);
+});
+
+console.log('\nOne-off: notifyFacultyDebateOption()');
+/** As if the old notice (without the faculty option) had already gone out to these addresses. */
+const alreadyNoticed = (rt: GasRuntime, emails: string[]) => rt.props.setProperty('notified_debateMedium', JSON.stringify(emails));
+/** debateRuntime + two more faculty debaters (one withdrawn) and a faculty Group Dance registrant. */
+const facultyRuntime = () => {
+  const rt = debateRuntime();
+  reg(rt, { eventId: 'f-debate', id: 'EMP8', name: 'Prof Latha', email: 'latha@example.com', semester: null, department: 'CSE' });
+  reg(rt, { eventId: 'f-debate', id: 'EMP9', name: 'Prof Gone', email: 'fgone@example.com', semester: null, department: 'CSE' });
+  setStatus(rt, 'f-debate', 4, 'WITHDRAWN');
+  rt.mail.sent = [];
+  return rt;
+};
+t('emails only faculty Debate registrants who were already sent the Debate notice — not students, not new or withdrawn people', () => {
+  const rt = facultyRuntime();
+  alreadyNoticed(rt, ['kavya@example.com', 'rohit@example.com', 'anand@example.com', 'fgone@example.com']);
+  const logs = captureLogs(rt);
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 1, failed: 0, skipped: 1 });
+  assert.deepEqual(rt.mail.sent.map((m) => m.to), ['anand@example.com'], 'latha was never sent the notice; fgone is withdrawn; students are not faculty');
+  assert.match(logs[logs.length - 1] ?? '', /^notifyFacultyDebateOption: 1 sent, 0 failed, 1 skipped/);
+});
+t('the follow-up is bilingual, carries the reg ID and only the new option (with its link)', () => {
+  const rt = facultyRuntime();
+  alreadyNoticed(rt, ['anand@example.com']);
+  notifyOption(rt);
+  const m = rt.mail.sent[0]!;
+  assert.match(m.subject, /Faculty Debate — a Simple Kannada Debate for faculty \/ ಅಧ್ಯಾಪಕರಿಗೆ ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ/);
+  assert.ok(m.body.includes('Prof Anand') && m.body.includes('KR26-FDB-0001'));
+  assert.ok(m.body.includes('Simple Kannada Debate – Faculty (for non-Kannadigas)') && m.body.includes('ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗಾಗಿ'));
+  assert.ok(m.body.includes('https://kr2k26-bmsit.netlify.app/register?event=f-simple-debate'));
+  assert.ok(m.body.includes('Your current registration stays as it is'));
+  assert.ok(!/Kannada only|Elocution|event=s-/.test(m.body), 'just the new option');
+  assert.ok(m.htmlBody!.includes('f-simple-debate'));
+  assert.ok(!/[೦-೯]/.test(m.body + m.subject), 'Latin digits only');
+});
+t('never twice: a second run sends nothing; the record is separate from notified_debateMedium (which is left as it was)', () => {
+  const rt = facultyRuntime();
+  alreadyNoticed(rt, ['anand@example.com']);
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 1, failed: 0, skipped: 1 });
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 0, failed: 0, skipped: 2 });
+  assert.equal(rt.mail.sent.length, 1);
+  assert.deepEqual(JSON.parse(rt.props.getProperty('notified_facultySimpleDebate')!), ['anand@example.com']);
+  assert.deepEqual(JSON.parse(rt.props.getProperty('notified_debateMedium')!), ['anand@example.com']);
+});
+t('someone never sent the notice gets the full note (with the option) from notifyDebateMediumChange, then nothing from the follow-up', () => {
+  const rt = facultyRuntime();
+  alreadyNoticed(rt, ['kavya@example.com', 'rohit@example.com', 'anand@example.com']);
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 1, failed: 0, skipped: 1 }, 'anand gets the follow-up');
+  rt.mail.sent = [];
+  assert.deepEqual({ ...notify(rt) }, { sent: 1, failed: 0, skipped: 3 }, 'only latha is new to the Debate notice');
+  assert.equal(rt.mail.sent[0]!.to, 'latha@example.com');
+  assert.ok(rt.mail.sent[0]!.body.includes('register?event=f-simple-debate'));
+  rt.mail.sent = [];
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 0, failed: 0, skipped: 2 });
+  assert.equal(rt.mail.sent.length, 0);
+});
+t('follow-up: a failed send is not recorded and is retried; the quota running out stops sending; the sheet never changes', () => {
+  const rt = facultyRuntime();
+  alreadyNoticed(rt, ['anand@example.com', 'latha@example.com']);
+  const before = rt.ss.snapshot();
+  rt.mail.fail = true;
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 0, failed: 2, skipped: 0 });
+  rt.mail.fail = false;
+  rt.mail.quota = 1;
+  const logs = captureLogs(rt);
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 1, failed: 1, skipped: 0 });
+  assert.match(logs[logs.length - 1] ?? '', /quota used up — run it again tomorrow/);
+  rt.mail.quota = 100;
+  assert.deepEqual({ ...notifyOption(rt) }, { sent: 1, failed: 0, skipped: 1 });
+  assert.deepEqual(rt.mail.sent.map((m) => m.to).sort(), ['anand@example.com', 'latha@example.com']);
+  assert.equal(rt.ss.snapshot(), before);
+});
+t('follow-up: a broken notified_* property stops the run loudly before any mail', () => {
+  const rt = facultyRuntime();
+  rt.props.setProperty('notified_facultySimpleDebate', 'not json');
+  assert.throws(() => notifyOption(rt), /notified_facultySimpleDebate is not valid JSON/);
+  assert.equal(rt.mail.sent.length, 0);
 });
 
 console.log('\nClient/server parity');

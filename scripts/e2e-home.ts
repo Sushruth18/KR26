@@ -150,8 +150,8 @@ async function main() {
         expect(m.sceneTop > m.h1Bottom, 'scene overlaps the title');
         expect(m.floats === events.length, `preview floats ${m.floats} ≠ ${events.length}`);
         expect(m.phase, 'countdown phase missing');
-        // 14 competitions (11 students + 3 faculty), ₹45,000 in cash prizes + mementos — computed from events.json.
-        const want = ['14', '₹45,000', '11', '3']; // Latin digits in both languages (numerals rule)
+        // 15 competitions (11 students + 4 faculty), ₹45,000 in cash prizes + mementos — computed from events.json.
+        const want = ['15', '₹45,000', lang === 'kn' ? 'ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ 11, ಅಧ್ಯಾಪಕರಿಗೆ 4' : '11 for students, 4 for faculty']; // Latin digits in both languages
         expect(!/[೦-೯]/.test(m.plaques), `plaques have Kannada digits: "${m.plaques}"`);
         expect(want.every((w) => m.plaques.includes(w)), `plaques "${m.plaques}" lack ${want.join(' / ')}`);
         // The lit palace + elephant must be in the first screen on phones (90% of visitors).

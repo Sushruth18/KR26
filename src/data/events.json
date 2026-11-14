@@ -675,6 +675,9 @@
       "en": "SMV Block (Academic Block), 1st Floor Auditorium"
     },
     "medium": "kannada",
+    "alternatives": [
+      "f-simple-debate"
+    ],
     "teamSize": {
       "min": 1,
       "max": 1
@@ -821,6 +824,56 @@
         "phone": "9902824336"
       }
     ],
+    "completed": false
+  },
+  {
+    "id": "f-simple-debate",
+    "code": "FSD",
+    "category": "faculty",
+    "name": {
+      "kn": "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗೆ)",
+      "en": "Simple Kannada Debate – Faculty (for non-Kannadigas)"
+    },
+    "icon": "messages-square",
+    "date": "2026-11-20",
+    "time": "12:30",
+    "endTime": "16:30",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "eligibility": "nonKannadiga",
+    "teamSize": {
+      "min": 1,
+      "max": 1
+    },
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "memento"
+    },
+    "rules": {
+      "kn": [
+        "ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ಅಧ್ಯಾಪಕರಿಗೆ ಮಾತ್ರ ಅವಕಾಶ.",
+        "ಇದು ವೈಯಕ್ತಿಕ ಸ್ಪರ್ಧೆ.",
+        "ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ನೀಡಲಾಗುವುದು; ಸಿದ್ಧತೆಗೆ 5 ನಿಮಿಷ ಸಿಗುತ್ತದೆ.",
+        "ಯಾರು ಪರವಾಗಿ, ಯಾರು ವಿರುದ್ಧವಾಗಿ ಮಾತನಾಡಬೇಕು ಎಂದು ನ್ಯಾಯಾಧೀಶರು ನಿರ್ಧರಿಸುತ್ತಾರೆ.",
+        "ಸರಳ ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ; ಪದ ಸಿಗದಿದ್ದರೆ ಕೆಲವು ಇಂಗ್ಲಿಷ್ ಪದಗಳನ್ನು ಬಳಸಬಹುದು.",
+        "ಕನ್ನಡದಲ್ಲಿ ಮಾಡಿದ ಪ್ರಯತ್ನ, ವಿಚಾರಗಳ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆತ್ಮವಿಶ್ವಾಸದ ಆಧಾರದ ಮೇಲೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ.",
+        "ಧರ್ಮ, ಜಾತಿ ಅಥವಾ ಭಾಷೆಯ ಬಗ್ಗೆ ವೈಯಕ್ತಿಕ ವಾದಗಳು ಬೇಡ; ಎಲ್ಲರನ್ನೂ ಗೌರವದಿಂದ ಕಾಣಿ.",
+        "ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ."
+      ],
+      "en": [
+        "Open only to faculty members whose mother tongue is not Kannada.",
+        "Individual event.",
+        "Topics are given on the spot, with 5 minutes to prepare.",
+        "Judges decide who speaks for or against.",
+        "Speak in simple Kannada; a few English words are allowed if you get stuck.",
+        "Judged on effort in Kannada, clarity of ideas and confidence.",
+        "No personal arguments about religion, caste or language; be respectful.",
+        "Judges’ decision will be final."
+      ]
+    },
+    "coordinators": [],
     "completed": false
   }
 ]

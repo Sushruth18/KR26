@@ -840,11 +840,15 @@ function sendConfirmation_(p, ev, regId, whatsappUrl) {
 // Script Properties key holding the (lower-case) addresses already sent this notice — never email anyone twice.
 var NOTIFY_DEBATE_PROP = 'notified_debateMedium';
 var DEBATE_EVENTS = ['s-debate', 'f-debate']; // s-debate first: its notice also suggests the non-Kannadiga events
+// Addresses already told about the faculty Simple Kannada Debate — by notifyDebateMediumChange (the faculty note
+// includes it) or by notifyFacultyDebateOption. Nobody is told about that option twice.
+var NOTIFY_FACULTY_OPTION_PROP = 'notified_facultySimpleDebate';
 
 /**
  * Run ONCE from the editor. Emails every non-withdrawn registrant of the student and faculty Debate a short bilingual
  * note: the Debate is now in Kannada only; tell a coordinator if you want to withdraw. Student Debate registrants are
- * also told about the Simple Kannada Debate and Elocution (for non-Kannadigas), with links. Each address gets it at
+ * also told about the Simple Kannada Debate and Elocution (for non-Kannadigas), faculty Debate registrants about the
+ * faculty Simple Kannada Debate (those addresses are also recorded for notifyFacultyDebateOption), with links. Each address gets it at
  * most once, ever (recorded in Script Properties after each successful send), so it is safe to run again — e.g. the
  * next day if the daily email quota ran out; a failed send is not recorded and is retried on the next run.
  * Logs and returns { sent, failed, skipped }. Never changes the spreadsheet.
@@ -852,12 +856,8 @@ var DEBATE_EVENTS = ['s-debate', 'f-debate']; // s-debate first: its notice also
 function notifyDebateMediumChange() {
   assertConfig_();
   var props = PropertiesService.getScriptProperties();
-  var done = {};
-  try {
-    JSON.parse(props.getProperty(NOTIFY_DEBATE_PROP) || '[]').forEach(function (e) { done[e] = true; });
-  } catch (err) {
-    throw new Error('Script property ' + NOTIFY_DEBATE_PROP + ' is not valid JSON — fix or delete it before running this again.');
-  }
+  var done = notifiedSet_(props, NOTIFY_DEBATE_PROP);
+  var optionDone = notifiedSet_(props, NOTIFY_FACULTY_OPTION_PROP);
   var events = readEvents_();
   var sent = 0;
   var failed = 0;
@@ -884,6 +884,10 @@ function notifyDebateMediumChange() {
         MailApp.sendEmail(msg);
         done[to] = true;
         props.setProperty(NOTIFY_DEBATE_PROP, JSON.stringify(Object.keys(done)));
+        if (eventId === 'f-debate') {
+          optionDone[to] = true; // this note already names the faculty Simple Kannada Debate
+          props.setProperty(NOTIFY_FACULTY_OPTION_PROP, JSON.stringify(Object.keys(optionDone)));
+        }
         sent++;
       } catch (err) {
         failed++;
@@ -904,6 +908,7 @@ function buildDebateNotice_(row, eventId) {
   var cardUrl = siteUrl ? siteUrl + '/competitions?for=' + (student ? 'students' : 'faculty') + '#' + eventId : '';
   var simpleUrl = siteUrl ? siteUrl + '/register?event=s-simple-debate' : '';
   var elocutionUrl = siteUrl ? siteUrl + '/register?event=s-elocution' : '';
+  var facultySimpleUrl = siteUrl ? siteUrl + '/register?event=f-simple-debate' : '';
   var name = normText_(row.name);
   var regId = String(row.reg_id);
 
@@ -924,6 +929,9 @@ function buildDebateNotice_(row, eventId) {
       (simpleUrl ? ': ' + simpleUrl + ' · ' + elocutionUrl : '.'));
     en.push('If Kannada is not your mother tongue, you can register for the Simple Kannada Debate or Elocution (for non-Kannadigas) instead' +
       (simpleUrl ? ': ' + simpleUrl + ' · ' + elocutionUrl : '.'));
+  } else {
+    kn.push(facultyOptionKn_(facultySimpleUrl));
+    en.push(facultyOptionEn_(facultySimpleUrl));
   }
   var signoff = '— Honnudi Kannada Sangha, BMSIT&M';
   var text = kn.concat(['', '---', ''], en, ['', signoff]).join('\n');
@@ -934,6 +942,108 @@ function buildDebateNotice_(row, eventId) {
     paras(kn) + '<hr style="border:none;border-top:1px solid #dddddd;margin:18px 0">' + paras(en) +
     '<p style="margin:16px 0 0;color:#555555">' + esc_(signoff) + '</p></div>';
   return { subject: 'KR 2026 · ' + ev.name.en + ' — now in Kannada only / ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ', text: text, html: html };
+}
+
+/** The set of addresses recorded under a Script Properties key (a JSON list). A broken value stops the run loudly. */
+function notifiedSet_(props, key) {
+  var set = {};
+  try {
+    JSON.parse(props.getProperty(key) || '[]').forEach(function (e) { set[e] = true; });
+  } catch (err) {
+    throw new Error('Script property ' + key + ' is not valid JSON — fix or delete it before running this again.');
+  }
+  return set;
+}
+
+/** The faculty Simple Kannada Debate sentence, shared by the Debate notice and notifyFacultyDebateOption. */
+function facultyOptionKn_(url) {
+  return 'ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲದಿದ್ದರೆ, ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಬಹುದು' + (url ? ': ' + url : '.');
+}
+function facultyOptionEn_(url) {
+  return 'If Kannada is not your mother tongue, you can register for the Simple Kannada Debate – Faculty (for non-Kannadigas) instead' +
+    (url ? ': ' + url : '.');
+}
+
+// ---------------------------------------------------------------------------
+// ONE-OFF follow-up: the faculty Simple Kannada Debate (README "One-off functions")
+// ---------------------------------------------------------------------------
+
+/**
+ * Run ONCE from the editor, after notifyDebateMediumChange. Emails only the faculty Debate registrants (not withdrawn)
+ * who were ALREADY sent the Debate notice before it mentioned the faculty Simple Kannada Debate, with just that new
+ * option. Nobody else: people never sent the notice get it, option included, from notifyDebateMediumChange instead.
+ * Each address gets this at most once, ever (Script Properties notified_facultySimpleDebate, written after each
+ * successful send; the Debate notice writes it too), so it is safe to run again; a failed send is retried next run.
+ * Logs and returns { sent, failed, skipped }. Never changes the spreadsheet.
+ */
+function notifyFacultyDebateOption() {
+  assertConfig_();
+  var props = PropertiesService.getScriptProperties();
+  var noticed = notifiedSet_(props, NOTIFY_DEBATE_PROP);
+  var done = notifiedSet_(props, NOTIFY_FACULTY_OPTION_PROP);
+  var tab = eventTab_('f-debate', readEvents_()); // a broken tab stops the run loudly instead of silently skipping people
+  var sent = 0;
+  var failed = 0;
+  var skipped = 0;
+  var quotaOut = false;
+  activeRows_(readTable_(tab)).forEach(function (r) {
+    var to = normEmail_(r.email);
+    if (!to || !matches_(CONFIG.rules.email.pattern, to) || !noticed[to] || done[to]) {
+      skipped++;
+      return;
+    }
+    if (quotaOut || MailApp.getRemainingDailyQuota() < 1) {
+      quotaOut = true;
+      failed++;
+      return;
+    }
+    try {
+      var mail = buildFacultyOptionNotice_(r);
+      var msg = { to: to, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Honnudi Kannada Sangha' };
+      var contact = typeof CONFIG.contactEmail === 'string' ? CONFIG.contactEmail.trim() : '';
+      if (contact && matches_(CONFIG.rules.email.pattern, contact)) msg.replyTo = contact;
+      MailApp.sendEmail(msg);
+      done[to] = true;
+      props.setProperty(NOTIFY_FACULTY_OPTION_PROP, JSON.stringify(Object.keys(done)));
+      sent++;
+    } catch (err) {
+      failed++;
+      console.error('Faculty option notice failed for ' + r.reg_id + ': ' + err);
+    }
+  });
+  console.log('notifyFacultyDebateOption: ' + sent + ' sent, ' + failed + ' failed' + (quotaOut ? ' (daily email quota used up — run it again tomorrow)' : '') +
+    ', ' + skipped + ' skipped (not sent the Debate notice yet, already told, duplicate address or no valid email). Withdrawn registrations are not emailed.');
+  return { sent: sent, failed: failed, skipped: skipped };
+}
+
+/** The follow-up for one faculty Debate registration: { subject, text, html }, Kannada then English, escaped. */
+function buildFacultyOptionNotice_(row) {
+  var ev = CONFIG.events['f-debate'];
+  var siteUrl = typeof CONFIG.siteUrl === 'string' ? CONFIG.siteUrl.replace(/\/+$/, '') : '';
+  var url = siteUrl ? siteUrl + '/register?event=f-simple-debate' : '';
+  var name = normText_(row.name);
+  var regId = String(row.reg_id);
+  var kn = [
+    'ನಮಸ್ಕಾರ ' + name + ',',
+    '"' + ev.name.kn + '" ಸ್ಪರ್ಧೆಯ ಬಗ್ಗೆ ಹಿಂದೆ ಕಳುಹಿಸಿದ ಸಂದೇಶಕ್ಕೆ ಒಂದು ಸೇರ್ಪಡೆ (ನೋಂದಣಿ ಐಡಿ: ' + regId + ').',
+    facultyOptionKn_(url),
+    'ನಿಮ್ಮ ಈಗಿನ ನೋಂದಣಿ ಹಾಗೆಯೇ ಇರುತ್ತದೆ; ನೀವು ಏನನ್ನೂ ಮಾಡಬೇಕಿಲ್ಲ.'
+  ];
+  var en = [
+    'Hello ' + name + ',',
+    'One addition to our earlier note about "' + ev.name.en + '" (registration ID: ' + regId + ').',
+    facultyOptionEn_(url),
+    'Your current registration stays as it is; you do not need to do anything.'
+  ];
+  var signoff = '— Honnudi Kannada Sangha, BMSIT&M';
+  var text = kn.concat(['', '---', ''], en, ['', signoff]).join('\n');
+  var paras = function (lines) {
+    return lines.map(function (l) { return '<p style="margin:0 0 10px">' + esc_(l) + '</p>'; }).join('');
+  };
+  var html = '<div style="font-family:Arial,\'Noto Sans Kannada\',sans-serif;font-size:15px;line-height:1.6;color:#222222;max-width:560px">' +
+    paras(kn) + '<hr style="border:none;border-top:1px solid #dddddd;margin:18px 0">' + paras(en) +
+    '<p style="margin:16px 0 0;color:#555555">' + esc_(signoff) + '</p></div>';
+  return { subject: 'KR 2026 · ' + ev.name.en + ' — a Simple Kannada Debate for faculty / ಅಧ್ಯಾಪಕರಿಗೆ ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ', text: text, html: html };
 }
 
 /** Run from the editor to see how many confirmation emails can still be sent today (README §8). */

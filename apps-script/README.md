@@ -153,7 +153,7 @@ Each competition has its **own tab** (for example **`ESY – Essay Writing`**) w
 `timestamp | reg_id | category | name | usn_or_empid | department | semester | phone | email | team_name | members_json | member_ids | consent_photo | eligibility_confirmed | status`
 
 - `timestamp` is India time as plain text, e.g. `2026-11-14 18:05:09 IST`. (Rows from before this update say `…Z`, which is UTC; run `convertTimestampsToIST` once to convert them, see "One-off functions".)
-- `eligibility_confirmed` is `TRUE` for the Elocution and Simple Kannada Debate (the registrant confirmed Kannada is not their mother tongue; registration is refused without it) and empty elsewhere. `status` is yours: see "Withdrawing a registration".
+- `eligibility_confirmed` is `TRUE` for the Elocution and both Simple Kannada Debates (the registrant confirmed Kannada is not their mother tongue; registration is refused without it) and empty elsewhere. `status` is yours: see "Withdrawing a registration".
 - In tabs that existed before, the two newest columns were added **at the end**, after any columns you had added yourself. That's fine: the script finds every column by its header name.
 - A person who registers for two competitions gets one row in each tab.
 
@@ -205,6 +205,19 @@ You need this when a developer changes `Code.gs`, or when **`Config.gs`** change
 
 Event IDs come from the website's data. If a new competition is added there, run **`setupSheet`** again after updating `Config.gs`. It adds the missing Events row and the new event's tab, and never deletes or overwrites anything.
 
+### Adding the faculty Simple Kannada Debate (Config `c82d0f3f`, schema 6)
+
+Do this after the November 2026 update below. Nothing is removed or rewritten; the schema stays 6.
+
+1. **Code.gs**: Apps Script → `Code.gs` → **Ctrl + A** → paste the new `Code.gs` → **Save**.
+2. **Config.gs**: same for `Config.gs` (paste both before running anything).
+3. Run **`checkConfig`**. The log must say `Config.gs OK — version c82d0f3f, schema 6, 15 events: …`.
+4. Run **`setupSheet`**. Expected log: `f-simple-debate: Events row ADDED; tab "FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)" CREATED`; every other event `already there; … already existed`; `Summary tab already exists — left as it is.`. In the spreadsheet: one new tab, one new last row in **Events** (`is_open` TRUE), and the **Summary** tab shows FSD on its next row by itself (its formulas already cover 40 rows; it is not rewritten).
+5. **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy** (same URL). Then `<your /exec URL>?action=status` must contain `"configVersion":"c82d0f3f"` and `"f-simple-debate"`.
+6. **After the website has been deployed** (so the new card and the faculty Debate notice are live):
+   - Run **`notifyDebateMediumChange`**. It only emails Debate registrants who never got the Debate notice (everyone else is skipped); faculty among them now also get the new option.
+   - Run **`notifyFacultyDebateOption`** once (log: `notifyFacultyDebateOption: N sent, 0 failed, …`). It emails only faculty Debate registrants who already got the old notice, with just the new option. The order of these two does not matter, and neither ever emails the same address twice.
+
 ### Updating to the November 2026 version (Config `4d8d0965`, schema 6)
 
 Registration is live, so do it in this order. Until step 6 the website keeps using the version that is deployed now, and every step only *adds* things to the spreadsheet.
@@ -227,7 +240,8 @@ Choose the function in the drop-down above the code and click **▶ Run**; the r
 | `checkConfig` | Shows which `Config.gs` version is pasted. Read-only. | After every paste |
 | `setupSheet` | Adds what is missing (rows, tabs, columns at the end, Summary). Never deletes or overwrites. | After every `Config.gs` update |
 | `convertTimestampsToIST` | **One-off.** Rewrites old `2026-11-10T05:00:00.000Z` timestamps in every event tab to `2026-11-10 10:30:00 IST`. Skips rows already in IST, leaves anything else alone, logs how many it changed. Only the `timestamp` cells change. | Once, after deploying the November 2026 version |
-| `notifyDebateMediumChange` | **One-off.** Emails every Debate (student and faculty) registrant who has not withdrawn: the Debate is now in Kannada only; tell a coordinator if you want to withdraw. Student Debate registrants also get links to the Simple Kannada Debate and Elocution. Each address at most once, ever (the list is kept in Script Properties as `notified_debateMedium`); failed sends are retried on the next run. Logs sent / failed / skipped. | Once, after the website is updated |
+| `notifyDebateMediumChange` | **One-off.** Emails every Debate (student and faculty) registrant who has not withdrawn: the Debate is now in Kannada only; tell a coordinator if you want to withdraw. Student Debate registrants also get links to the Simple Kannada Debate and Elocution; faculty Debate registrants a link to the faculty Simple Kannada Debate (their addresses are also recorded as `notified_facultySimpleDebate`). Each address at most once, ever (the list is kept in Script Properties as `notified_debateMedium`); failed sends are retried on the next run. Logs sent / failed / skipped. | Once, after the website is updated |
+| `notifyFacultyDebateOption` | **One-off.** Emails only faculty Debate registrants (not withdrawn) who already received the Debate notice before it mentioned the faculty Simple Kannada Debate, with just that option and its link. Each address at most once, ever (Script Properties `notified_facultySimpleDebate`); failed sends are retried on the next run. Logs sent / failed / skipped. | Once, after the website shows the new competition |
 | `findRegistrations` | **Read-only diagnostic.** Type a USN or employee ID between the quotes of `var FIND_REGISTRATIONS_ID = '';` (just above the function), save, run, then clear it again. Lists every row in every event tab that holds that ID: as registrant or team member, withdrawn or not, and whether the row is hidden or filtered. | When someone gets "already registered" unexpectedly |
 | `checkEmailQuota` | How many emails can still be sent today. | Before a mailing |
 

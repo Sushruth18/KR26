@@ -107,7 +107,8 @@ async function main() {
             return {
               hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
               cards: cards.length,
-              perRow: cards.length / tops.size,
+              // the widest row (the last row may hold fewer cards, e.g. 4 faculty cards = 3 + 1)
+              perRow: Math.max(...[...tops].map((t) => cards.filter((c) => Math.round(c.getBoundingClientRect().top) === t).length)),
               footers: document.querySelectorAll('footer').length,
               h1: document.querySelectorAll('h1').length,
               tel: [...document.querySelectorAll('[data-testid=competition-grid] a[href^="tel:"]')].map((a) => a.getAttribute('href')),
@@ -247,7 +248,7 @@ async function main() {
         });
         expect(m.text.includes(only), `${id}: notice "${m.text}"`);
         expect(m.role === 'note' && m.fits, `${id}: role ${m.role}, fits ${m.fits}`);
-        const want = ((ev as { alternatives?: string[] }).alternatives ?? []).map((a) => `/competitions?for=students#${a}`);
+        const want = ((ev as { alternatives?: string[] }).alternatives ?? []).map((a) => `/competitions?for=${ev.category}#${a}`);
         expect(m.links.join() === want.join(), `${id}: links ${m.links.join()} (want ${want.join() || 'none'})`);
         const others = await page.$$eval('[data-testid^=medium-]:not([data-testid^=medium-link])', (n) => n.map((x) => x.getAttribute('data-testid')));
         expect(others.every((x) => x === 'medium-s-debate' || x === 'medium-f-debate'), `only the debates have a notice: ${others.join()}`);
@@ -259,6 +260,66 @@ async function main() {
       await reg.waitForSelector('[data-testid=event-summary] [data-testid=medium-f-debate]');
       await reg.browserContext().close();
       return `${out.join(', ')}; register summary shows it too`;
+    });
+
+    // Faculty Debate notice → the faculty Simple Kannada Debate card (exact wording, working link).
+    await scenario(`faculty-debate-notice-link-${lang}-360`, async (errors) => {
+      const want =
+        lang === 'kn'
+          ? 'ಮಾಧ್ಯಮ: ಕನ್ನಡ ಮಾತ್ರ. ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲವೇ? ಕನ್ನಡೇತರರಿಗಾಗಿ ಇರುವ ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ ಸ್ಪರ್ಧೆಯಲ್ಲಿ ಭಾಗವಹಿಸಿ.'
+          : 'Medium: Kannada only. Not a Kannada speaker? Try the Simple Kannada Debate (for non-Kannadigas).';
+      const page = await open(browser, lang, 360, '/competitions?for=faculty&mock=', errors, true);
+      const text = await page.$eval('[data-testid=medium-f-debate]', (n) => (n.textContent ?? '').replace(/\s+/g, ' ').trim());
+      expect(text === want, `notice "${text}"`);
+      const links = await page.$$eval('[data-testid=medium-f-debate] a', (a) => a.map((x) => [x.getAttribute('href'), x.getAttribute('data-testid')]));
+      expect(JSON.stringify(links) === JSON.stringify([['/competitions?for=faculty#f-simple-debate', 'medium-link-f-simple-debate']]), `links ${JSON.stringify(links)}`);
+      await page.click('[data-testid=medium-link-f-simple-debate]');
+      await sleep(600);
+      const after = await page.evaluate(() => {
+        const card = document.getElementById('f-simple-debate') ?? document.querySelector('[data-testid=card-f-simple-debate]');
+        const r = card?.getBoundingClientRect();
+        return { url: location.pathname + location.search + location.hash, pressed: document.querySelector('[aria-pressed=true]')?.getAttribute('data-testid'), inView: !!r && r.top < innerHeight && r.bottom > 0 };
+      });
+      expect(after.url === '/competitions?for=faculty#f-simple-debate', `url ${after.url}`);
+      expect(after.pressed === 'toggle-faculty' && after.inView, `faculty tab ${after.pressed}, card in view ${after.inView}`);
+      await page.browserContext().close();
+      return `"${text}" → ${after.url}, card in view`;
+    });
+
+    // The faculty Simple Kannada Debate card: memento, no coordinators, time range, venue TBA, open, Register link; 15 events.
+    await scenario(`faculty-simple-debate-card-${lang}-360`, async (errors) => {
+      const fsd = events.find((e) => e.id === 'f-simple-debate')!;
+      expect(fsd && fsd.category === 'faculty' && fsd.code === 'FSD' && (fsd as { eligibility?: string }).eligibility === 'nonKannadiga', 'events.json record');
+      expect(fsd.prizes.type === 'memento' && fsd.coordinators.length === 0 && fsd.rules.en.length === 8 && fsd.rules.kn.length === 8, 'memento, no coordinators, 8 rules');
+      expect(events.length === 15, `${events.length} events`);
+      const page = await open(browser, lang, 360, '/competitions?for=faculty&mock=', errors, true);
+      const counts = await page.$$eval('[data-testid^=toggle-] .segmented-count', (n) => n.map((x) => x.textContent));
+      const nStudents = events.filter((e) => e.category === 'students').length;
+      const nFaculty = events.filter((e) => e.category === 'faculty').length;
+      expect(nStudents === 11 && nFaculty === 4 && counts.join() === `${nStudents},${nFaculty}`, `toggle counts ${counts.join()}`);
+      const cards = await page.$$eval('[data-testid^=card-]', (n) => n.map((x) => x.getAttribute('data-testid')));
+      expect(cards.length === nFaculty && cards.includes('card-f-simple-debate'), `faculty cards ${cards.join()}`);
+      const c = await page.$eval('[data-testid=card-f-simple-debate]', (n) => ({
+        text: (n.textContent ?? '').replace(/\s+/g, ' '),
+        memento: !!n.querySelector('[data-testid=prize-memento]'),
+        cash: !!n.querySelector('[data-testid=prize-cash]'),
+        coordinators: !!n.querySelector('[data-testid^=coordinators-]'),
+        tel: n.querySelectorAll('a[href^="tel:"]').length,
+        register: n.querySelector('[data-testid=register-f-simple-debate]')?.getAttribute('href'),
+      }));
+      expect(c.text.includes(fsd.name[lang]), `name "${fsd.name[lang]}" missing`);
+      expect(c.memento && !c.cash, `memento ${c.memento}, cash ${c.cash}`);
+      expect(!c.coordinators && c.tel === 0, 'no coordinator block or tel: link');
+      expect(c.text.includes(lang === 'kn' ? 'ಮಧ್ಯಾಹ್ನ 12:30 – ಸಂಜೆ 4:30' : '12:30 PM – 4:30 PM'), 'time range');
+      expect(c.register === '/register?event=f-simple-debate', `register href ${c.register}`);
+      expect(!(await page.$('[data-testid=medium-f-simple-debate]')), 'no Kannada-only notice on the simple debate itself');
+      await page.click('[data-testid=rules-toggle-f-simple-debate]');
+      await page.waitForSelector('[data-testid=rules-f-simple-debate] li');
+      const rules = await page.$$eval('[data-testid=rules-f-simple-debate] li', (n) => n.map((x) => x.textContent));
+      expect(rules.length === 8 && rules[0] === fsd.rules[lang][0], `rule 1 "${rules[0]}"`);
+      expect(lang === 'kn' ? rules[0]!.includes('ಅಧ್ಯಾಪಕರಿಗೆ') : rules[0] === 'Open only to faculty members whose mother tongue is not Kannada.', `rule 1 wording "${rules[0]}"`);
+      await page.browserContext().close();
+      return `toggle ${counts.join('/')}, memento, no coordinators, 8 rules, Register → ${c.register}`;
     });
 
     await scenario(`treasure-hunt-three-coordinators-${lang}-360`, async (errors) => {

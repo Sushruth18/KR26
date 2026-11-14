@@ -649,6 +649,38 @@ async function main() {
     return `checkbox required (client error without it) → ${r.regId}; absent for other events`;
   });
 
+  await scenario(browser, '16-faculty-simple-debate-en', 'en', async (page) => {
+    // Faculty: employee ID, no semester; individual, so no team step.
+    const p: Person = { eventId: 'f-simple-debate', name: 'Meera Iyer', id: 'EMP 501', dept: 'ECE', sem: '', phone: '9845066670', email: 'meera@example.com' };
+    // Step 1 (the event summary lives here) and step 2 (no semester for faculty).
+    await page.goto(`${BASE}/register?event=f-simple-debate&mock=`, { waitUntil: 'networkidle0' });
+    await page.waitForSelector('[data-testid=event-summary]');
+    await page.waitForFunction(() => !document.querySelector('[data-testid=event-summary] .skeleton'), { timeout: 15000 });
+    const summary = await page.$eval('[data-testid=event-summary]', (e) => (e.textContent ?? '').replace(/\s+/g, ' '));
+    expect(summary.includes('Simple Kannada Debate – Faculty (for non-Kannadigas)'), `summary "${summary}"`);
+    expect(/Prizes\s*Memento/.test(summary) && !summary.includes('₹'), `the summary shows a memento, no cash: "${summary}"`);
+    await page.click('[data-testid=next]');
+    await waitStep(page, 'details');
+    expect(!(await page.$('#f-semester')), 'no semester field for faculty');
+    // The form keeps a draft (step included) across reloads — start the fill from step 1 again.
+    await page.evaluate(() => sessionStorage.clear());
+    await fillToReview(page, p);
+    expect(!(await page.$('#f-teamName')), 'individual: no team step');
+    const label = await page.$eval('label[for=f-eligibilityConfirmed]', (l) => l.textContent ?? '');
+    expect(label.includes('I confirm Kannada is not my mother tongue.'), `label "${label}"`);
+    await page.click('[data-testid=submit]');
+    await page.waitForSelector('#f-eligibilityConfirmed-error');
+    const err = await page.$eval('#f-eligibilityConfirmed-error', (e) => e.textContent ?? '');
+    expect(err.includes('only for faculty members whose mother tongue is not Kannada'), `error "${err}"`);
+    expect(new URL(page.url()).pathname === '/register', 'still on the form');
+    await page.click('#f-eligibilityConfirmed');
+    const r = await submit(page);
+    expect(r.kind === 'success' && r.regId === 'KR26-FSD-0001', `expected KR26-FSD-0001, got ${JSON.stringify(r)}`);
+    const pass = await page.$eval('[data-testid=pass-card]', (e) => e.textContent ?? '');
+    expect(pass.includes('Simple Kannada Debate – Faculty') && pass.includes('Meera Iyer'), 'pass shows event and name');
+    return `faculty error wording without the checkbox → ${r.regId}; memento in summary`;
+  });
+
   await browser.close();
   writeFileSync(resolve(OUT, 'results.json'), JSON.stringify(results, null, 2));
   const failed = results.filter((r) => !r.ok);

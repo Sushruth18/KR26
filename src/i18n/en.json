@@ -133,6 +133,7 @@
     "teamSizeExact": "This event needs exactly {{n}} members including you",
     "memberDuplicate": "This ID is already in the team",
     "eligibility": "Please confirm — this competition is only for students whose mother tongue is not Kannada.",
+    "eligibilityFaculty": "Please confirm — this competition is only for faculty members whose mother tongue is not Kannada.",
     "consentRules": "You need to agree to the rules to continue",
     "server": "The server didn't accept this — please check it"
   },
@@ -221,7 +222,8 @@
       "tail": " (for non-Kannadigas).",
       "short": {
         "s-simple-debate": "Simple Kannada Debate",
-        "s-elocution": "Elocution"
+        "s-elocution": "Elocution",
+        "f-simple-debate": "Simple Kannada Debate"
       }
     }
   },

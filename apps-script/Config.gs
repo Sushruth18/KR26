@@ -9,7 +9,7 @@
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
 var CONFIG_SCHEMA = 6;
-var CONFIG_VERSION = '9f3241a1';
+var CONFIG_VERSION = 'c82d0f3f';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -404,6 +404,29 @@ var CONFIG = {
         "en": "BSN Auditorium"
       },
       "sheetName": "FGS – Faculty Group Singing",
+      "deadline": "2026-11-18T23:59:00+05:30"
+    },
+    "f-simple-debate": {
+      "code": "FSD",
+      "category": "faculty",
+      "name": {
+        "kn": "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗೆ)",
+        "en": "Simple Kannada Debate – Faculty (for non-Kannadigas)"
+      },
+      "teamSize": {
+        "min": 1,
+        "max": 1
+      },
+      "date": "2026-11-20",
+      "time": "12:30",
+      "endTime": "16:30",
+      "eligibility": "nonKannadiga",
+      "maxTeams": 0,
+      "venue": {
+        "kn": "TODO-CONFIRM",
+        "en": "TODO-CONFIRM"
+      },
+      "sheetName": "FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)",
       "deadline": "2026-11-18T23:59:00+05:30"
     }
   }

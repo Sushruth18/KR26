@@ -147,7 +147,9 @@ export function registrationSchema(event: CompetitionEvent | undefined, site: Si
       });
     }
 
-    if (event.eligibility && !v.eligibilityConfirmed) add(['eligibilityConfirmed'], 'errors.eligibility');
+    if (event.eligibility && !v.eligibilityConfirmed) {
+      add(['eligibilityConfirmed'], event.category === 'faculty' ? 'errors.eligibilityFaculty' : 'errors.eligibility');
+    }
     if (!v.consentRules) add(['consentRules'], 'errors.consentRules');
   });
 }
