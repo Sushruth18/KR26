@@ -15,6 +15,7 @@ const spaced = (digits: string) => `${digits.slice(0, 5)} ${digits.slice(5)}`;
 export function Coordinators({ eventId, people }: { eventId: string; people: CompetitionEvent['coordinators'] }) {
   const { t } = useTranslation();
   const labelId = `coordinators-${eventId}`;
+  if (!people.length) return null; // coordinators not named yet (TODO-CONFIRM.md) — no empty block, no dead link
 
   return (
     <div className="text-sm" data-testid={`coordinators-${eventId}`}>

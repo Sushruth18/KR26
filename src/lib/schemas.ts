@@ -32,6 +32,11 @@ export const eventSchema = z.object({
    * the medium notice). Checked by validate-data.
    */
   alternatives: z.array(z.string()).optional(),
+  /**
+   * "nonKannadiga" = only for students whose mother tongue is not Kannada: the Register page asks them to confirm it
+   * (required checkbox), the server rejects a registration without it and stores it in eligibility_confirmed.
+   */
+  eligibility: z.literal('nonKannadiga').optional(),
   teamSize: z.object({ min: z.number().int().min(1), max: z.number().int().min(1) }),
   deadline: isoDateTime,
   prizes: z.discriminatedUnion('type', [
@@ -39,7 +44,7 @@ export const eventSchema = z.object({
     z.object({ type: z.literal('memento') }),
   ]),
   rules: bilingualList,
-  /** 1–3 people; phone = 10 digits (RULES.phone), shown as a tel: link each. */
+  /** 0–3 people (0 = not named yet: the card shows no coordinator block); phone = 10 digits (RULES.phone), a tel: link each. */
   coordinators: z
     .array(
       z
@@ -49,7 +54,6 @@ export const eventSchema = z.object({
         })
         .strict(),
     )
-    .min(1)
     .max(3),
   completed: z.boolean(),
 });

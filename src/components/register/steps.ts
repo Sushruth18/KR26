@@ -13,7 +13,7 @@ export const STEP_FIELDS: Record<StepId, FieldName[]> = {
   event: ['eventId'],
   details: ['name', 'id', 'department', 'departmentOther', 'semester', 'phone', 'email'],
   team: ['teamName', 'members'],
-  review: ['consentRules'],
+  review: ['eligibilityConfirmed', 'consentRules'],
 };
 
 /** Which step owns a field path such as "phone" or "members.2.id" (from client or server errors). */

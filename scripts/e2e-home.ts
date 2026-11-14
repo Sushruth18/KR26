@@ -139,6 +139,7 @@ async function main() {
             h1Bottom: Math.round(h1.bottom),
             phase: document.querySelector('[data-testid=countdown]')?.getAttribute('data-phase'),
             floats: document.querySelectorAll('.marquee-list:not([aria-hidden]) a').length,
+            plaques: document.querySelector('[aria-labelledby=plaques-title]')?.textContent ?? '',
           };
         });
         await page.addStyleTag({ content: '.cv-auto{content-visibility:visible!important}' }); // full-page capture skips off-screen content-visibility sections
@@ -149,6 +150,9 @@ async function main() {
         expect(m.sceneTop > m.h1Bottom, 'scene overlaps the title');
         expect(m.floats === events.length, `preview floats ${m.floats} ≠ ${events.length}`);
         expect(m.phase, 'countdown phase missing');
+        // 14 competitions (11 students + 3 faculty), ₹45,000 in cash prizes + mementos — computed from events.json.
+        const want = lang === 'kn' ? ['೧೪', '₹೪೫,೦೦೦', '೧೧', '೩'] : ['14', '₹45,000', '11', '3'];
+        expect(want.every((w) => m.plaques.includes(w)), `plaques "${m.plaques}" lack ${want.join(' / ')}`);
         // The lit palace + elephant must be in the first screen on phones (90% of visitors).
         if (width <= 360) {
           expect(m.sceneTop < 760 - 150, `scene starts at ${m.sceneTop}px — palace not in the first screen`);

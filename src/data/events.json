@@ -198,6 +198,10 @@
       "en": "SMV Block (Academic Block), 1st Floor Auditorium"
     },
     "medium": "kannada",
+    "alternatives": [
+      "s-simple-debate",
+      "s-elocution"
+    ],
     "teamSize": {
       "min": 1,
       "max": 1
@@ -547,6 +551,110 @@
         "phone": "9483770666"
       }
     ],
+    "completed": false
+  },
+  {
+    "id": "s-elocution",
+    "code": "ELO",
+    "category": "students",
+    "name": {
+      "kn": "ಆಶುಭಾಷಣ (ಕನ್ನಡೇತರರಿಗೆ)",
+      "en": "Elocution – Pick & Speak (for non-Kannadigas)"
+    },
+    "icon": "megaphone",
+    "date": "2026-11-20",
+    "time": "12:30",
+    "endTime": "16:30",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "eligibility": "nonKannadiga",
+    "teamSize": {
+      "min": 1,
+      "max": 1
+    },
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 2000,
+      "second": 1000
+    },
+    "rules": {
+      "kn": [
+        "ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮಾತ್ರ ಅವಕಾಶ.",
+        "ಇದು ವೈಯಕ್ತಿಕ ಸ್ಪರ್ಧೆ.",
+        "ಸ್ಥಳದಲ್ಲೇ ವಿಷಯದ ಚೀಟಿಯನ್ನು ಆರಿಸಿಕೊಳ್ಳಿ.",
+        "ಯೋಚಿಸಲು 1 ನಿಮಿಷ ಮತ್ತು ಮಾತನಾಡಲು 1 ನಿಮಿಷ ಸಿಗುತ್ತದೆ.",
+        "ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ; ಸರಳ ಕನ್ನಡಕ್ಕೆ ಸ್ವಾಗತ, ಸಣ್ಣ ತಪ್ಪುಗಳಾದರೂ ಪರವಾಗಿಲ್ಲ, ನಿಮ್ಮ ಪ್ರಯತ್ನವೇ ಮುಖ್ಯ.",
+        "ಪ್ರಯತ್ನ, ಆತ್ಮವಿಶ್ವಾಸ, ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಉಚ್ಚಾರಣೆಯ ಆಧಾರದ ಮೇಲೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ.",
+        "ಸಭ್ಯ ಭಾಷೆಯನ್ನು ಬಳಸಿ.",
+        "ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ."
+      ],
+      "en": [
+        "Open only to students whose mother tongue is not Kannada.",
+        "Individual event.",
+        "Pick a topic chit on the spot.",
+        "You get 1 minute to think and 1 minute to speak.",
+        "Speak in Kannada; simple Kannada is welcome, small mistakes are fine, your effort counts.",
+        "Judged on effort, confidence, clarity and pronunciation.",
+        "Use decent language.",
+        "Judges’ decision will be final."
+      ]
+    },
+    "coordinators": [],
+    "completed": false
+  },
+  {
+    "id": "s-simple-debate",
+    "code": "SKD",
+    "category": "students",
+    "name": {
+      "kn": "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರರಿಗೆ)",
+      "en": "Simple Kannada Debate (for non-Kannadigas)"
+    },
+    "icon": "messages-square",
+    "date": "2026-11-20",
+    "time": "12:30",
+    "endTime": "16:30",
+    "venue": {
+      "kn": "TODO-CONFIRM",
+      "en": "TODO-CONFIRM"
+    },
+    "eligibility": "nonKannadiga",
+    "teamSize": {
+      "min": 1,
+      "max": 1
+    },
+    "deadline": "2026-11-18T23:59:00+05:30",
+    "prizes": {
+      "type": "cash",
+      "first": 2000,
+      "second": 1000
+    },
+    "rules": {
+      "kn": [
+        "ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮಾತ್ರ ಅವಕಾಶ.",
+        "ಇದು ವೈಯಕ್ತಿಕ ಸ್ಪರ್ಧೆ.",
+        "ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ನೀಡಲಾಗುವುದು; ಸಿದ್ಧತೆಗೆ 5 ನಿಮಿಷ ಸಿಗುತ್ತದೆ.",
+        "ಯಾರು ಪರವಾಗಿ, ಯಾರು ವಿರುದ್ಧವಾಗಿ ಮಾತನಾಡಬೇಕು ಎಂದು ನ್ಯಾಯಾಧೀಶರು ನಿರ್ಧರಿಸುತ್ತಾರೆ.",
+        "ಸರಳ ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ; ಪದ ಸಿಗದಿದ್ದರೆ ಕೆಲವು ಇಂಗ್ಲಿಷ್ ಪದಗಳನ್ನು ಬಳಸಬಹುದು.",
+        "ಕನ್ನಡದಲ್ಲಿ ಮಾಡಿದ ಪ್ರಯತ್ನ, ವಿಚಾರಗಳ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆತ್ಮವಿಶ್ವಾಸದ ಆಧಾರದ ಮೇಲೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ.",
+        "ಧರ್ಮ, ಜಾತಿ ಅಥವಾ ಭಾಷೆಯ ಬಗ್ಗೆ ವೈಯಕ್ತಿಕ ವಾದಗಳು ಬೇಡ; ಎಲ್ಲರನ್ನೂ ಗೌರವದಿಂದ ಕಾಣಿ.",
+        "ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ."
+      ],
+      "en": [
+        "Open only to students whose mother tongue is not Kannada.",
+        "Individual event.",
+        "Topics are given on the spot, with 5 minutes to prepare.",
+        "Judges decide who speaks for or against.",
+        "Speak in simple Kannada; a few English words are allowed if you get stuck.",
+        "Judged on effort in Kannada, clarity of ideas and confidence.",
+        "No personal arguments about religion, caste or language; be respectful.",
+        "Judges’ decision will be final."
+      ]
+    },
+    "coordinators": [],
     "completed": false
   },
   {

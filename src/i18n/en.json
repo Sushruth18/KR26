@@ -102,6 +102,7 @@
     "removeMember": "Remove member {{n}}",
     "reviewIntro": "Check your details before submitting.",
     "edit": "Edit",
+    "eligibility": "I confirm Kannada is not my mother tongue.",
     "consentRules": "I have read the rules of this competition and will follow them.",
     "consentPhoto": "I consent to appearing in event photos/videos (optional).",
     "yes": "Yes",
@@ -129,6 +130,7 @@
     "teamSize": "Teams need {{range}} people including you",
     "teamSizeExact": "This event needs exactly {{n}} members including you",
     "memberDuplicate": "This ID is already in the team",
+    "eligibility": "Please confirm — this competition is only for students whose mother tongue is not Kannada.",
     "consentRules": "You need to agree to the rules to continue",
     "server": "The server didn't accept this — please check it"
   },

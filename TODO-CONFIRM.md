@@ -5,7 +5,17 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 ## Competitions (`src/data/events.json`)
 - Time: every competition is on 20 Nov 2026, **12:30 PM – 4:30 PM** (`time` 12:30, `endTime` 16:30; `site.json` competitionsStart/End 12:30/16:30) — from the college schedule
 - Venues from the college schedule are filled in. Coordinators (1–3 per event, each with its own `tel:` link) and rules are filled in for every event except the items below.
-- [ ] **Venue still to be announced** (time is known): Quiz (`s-quiz`), Treasure Hunt (`s-treasure-hunt`), Rangoli (`s-rangoli`)
+- [ ] **Venue still to be announced** (time is known): Quiz (`s-quiz`), Treasure Hunt (`s-treasure-hunt`), Rangoli (`s-rangoli`), Elocution (`s-elocution`), Simple Kannada Debate (`s-simple-debate`)
+
+### New events for non-Kannadiga students (Nov 2026): Elocution (`s-elocution`, ELO) and Simple Kannada Debate (`s-simple-debate`, SKD)
+- [ ] **Coordinators** for both — none yet (allowed for now: the card shows no coordinator block). Add 1–3 `{ name, phone }` to `events.json`
+- [ ] **Venue** for both (time 12:30–16:30 is set)
+- [ ] Kannada wording — drafts for a Kannada speaker:
+  - Names (given): ಆಶುಭಾಷಣ (ಕನ್ನಡೇತರರಿಗೆ) · ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರರಿಗೆ)
+  - Register checkbox (given): "ಕನ್ನಡ ನನ್ನ ಮಾತೃಭಾಷೆ ಅಲ್ಲ ಎಂದು ದೃಢೀಕರಿಸುತ್ತೇನೆ." — its error message (draft): "ದಯವಿಟ್ಟು ದೃಢೀಕರಿಸಿ — ಈ ಸ್ಪರ್ಧೆ ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮಾತ್ರ."
+  - Elocution rules (drafts; 1–2 and 8 are shared with the Simple Kannada Debate; 8 reuses the existing wording): 1 ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮಾತ್ರ ಅವಕಾಶ. · 2 ಇದು ವೈಯಕ್ತಿಕ ಸ್ಪರ್ಧೆ. · 3 ಸ್ಥಳದಲ್ಲೇ ವಿಷಯದ ಚೀಟಿಯನ್ನು ಆರಿಸಿಕೊಳ್ಳಿ. · 4 ಯೋಚಿಸಲು 1 ನಿಮಿಷ ಮತ್ತು ಮಾತನಾಡಲು 1 ನಿಮಿಷ ಸಿಗುತ್ತದೆ. · 5 ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ; ಸರಳ ಕನ್ನಡಕ್ಕೆ ಸ್ವಾಗತ, ಸಣ್ಣ ತಪ್ಪುಗಳಾದರೂ ಪರವಾಗಿಲ್ಲ, ನಿಮ್ಮ ಪ್ರಯತ್ನವೇ ಮುಖ್ಯ. · 6 ಪ್ರಯತ್ನ, ಆತ್ಮವಿಶ್ವಾಸ, ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಉಚ್ಚಾರಣೆಯ ಆಧಾರದ ಮೇಲೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ. · 7 ಸಭ್ಯ ಭಾಷೆಯನ್ನು ಬಳಸಿ. · 8 ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ.
+  - Simple Kannada Debate rules 3–7 (drafts): 3 ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ನೀಡಲಾಗುವುದು; ಸಿದ್ಧತೆಗೆ 5 ನಿಮಿಷ ಸಿಗುತ್ತದೆ. · 4 ಯಾರು ಪರವಾಗಿ, ಯಾರು ವಿರುದ್ಧವಾಗಿ ಮಾತನಾಡಬೇಕು ಎಂದು ನ್ಯಾಯಾಧೀಶರು ನಿರ್ಧರಿಸುತ್ತಾರೆ. · 5 ಸರಳ ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ; ಪದ ಸಿಗದಿದ್ದರೆ ಕೆಲವು ಇಂಗ್ಲಿಷ್ ಪದಗಳನ್ನು ಬಳಸಬಹುದು. · 6 ಕನ್ನಡದಲ್ಲಿ ಮಾಡಿದ ಪ್ರಯತ್ನ, ವಿಚಾರಗಳ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆತ್ಮವಿಶ್ವಾಸದ ಆಧಾರದ ಮೇಲೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ. · 7 ಧರ್ಮ, ಜಾತಿ ಅಥವಾ ಭಾಷೆಯ ಬಗ್ಗೆ ವೈಯಕ್ತಿಕ ವಾದಗಳು ಬೇಡ; ಎಲ್ಲರನ್ನೂ ಗೌರವದಿಂದ ಕಾಣಿ.
+- Prize pool is now ₹45,000 (`site.json → prizePoolTotal`), 14 competitions
 
 ### Kannada venue names — drafts for a Kannada speaker (`events.json → venue.kn`)
 Block names are transliterated; floors use Kannada numerals (numerals rule), the room number stays in Latin digits as on the door sign.

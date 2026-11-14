@@ -79,21 +79,25 @@ const st = (rt: GasRuntime) => {
 };
 const ids = (rt: GasRuntime) => Object.keys((rt.ctx.CONFIG as { events: Record<string, unknown> }).events);
 const TAB_HEADERS = 'timestamp|reg_id|category|name|usn_or_empid|department|semester|phone|email|team_name|members_json|member_ids|consent_photo';
+/** Columns appended after the 13 base columns (by setupSheet, at the END of an existing tab). */
+const EXTRA = ['eligibility_confirmed'];
+/** Number of competitions (events.json → Config.gs). */
+const N = Object.keys(JSON.parse(readFileSync('src/data/events.json', 'utf8'))).length;
 
 console.log('\nSetup & status');
-t('setupSheet creates the Events tab and one tab per event — all 12 — and NO shared Registrations tab', () => {
+t('setupSheet creates the Events tab and one tab per event — all of them — and NO shared Registrations tab', () => {
   const rt = createGasRuntime();
   setup(rt);
   assert.equal(rt.events().getRange(1, 1, 1, 7).getDisplayValues()[0]?.join('|'), 'id|code|name_en|sheet_name|deadline_iso|is_open|whatsapp_url');
-  assert.equal(rt.events().getLastRow(), 13);
-  assert.equal(ids(rt).length, 12);
+  assert.equal(rt.events().getLastRow(), N + 1);
+  assert.equal(ids(rt).length, N);
   const names = rt.ss.getSheets().map((x) => x.getName());
-  assert.equal(names.length, 13, `tabs: ${names.join(', ')}`);
+  assert.equal(names.length, N + 1, `tabs: ${names.join(', ')}`);
   assert.equal(names.includes('Registrations'), false);
   for (const id of ids(rt)) {
     const tab = rt.tab(id);
     assert.equal(tab.getRange(1, 1, 1, 13).getDisplayValues()[0]?.join('|'), TAB_HEADERS, id);
-    assert.equal(tab.getLastColumn(), 13);
+    assert.equal(tab.getLastColumn(), 13 + EXTRA.length, `${id}: base + appended columns`);
     assert.equal(tab.getLastRow(), 1, 'header only');
   }
   assert.equal(rt.eventField('s-essay', 'sheet_name'), 'ESY – Essay Writing');
@@ -161,7 +165,7 @@ t('setupSheet is safe to run again: a second run changes nothing', () => {
   assert.equal(rt.ss.getSheets().length, tabsBefore);
   assert.equal(rt.ss.snapshot(), before);
   assert.equal(rt.eventField('s-debate', 'is_open'), 'FALSE');
-  assert.equal(rt.events().getLastRow(), 13);
+  assert.equal(rt.events().getLastRow(), N + 1);
   assert.equal(rt.countRegs('s-essay'), 1);
 });
 t('setupSheet only adds what is missing: a deleted tab is recreated empty, other tabs keep their rows', () => {
@@ -197,13 +201,13 @@ t('setupSheet upgrades an older Events tab (seats column, no sheet_name): adds s
   assert.equal(rt.eventField('s-essay', 'sheet_name'), 'ESY – Essay Writing');
   assert.equal(rt.eventField('s-essay', 'is_open'), 'FALSE'); // existing value kept
   assert.equal(rt.eventField('s-poem', 'is_open'), 'TRUE');
-  assert.equal(rt.events().getLastRow(), 13);
+  assert.equal(rt.events().getLastRow(), N + 1);
 });
 t('an event tab with a wrong header row makes setupSheet stop with a clear error (nothing overwritten)', () => {
   const rt = createGasRuntime();
   const bad = rt.ss.insertSheet('ESY – Essay Writing');
   bad.getRange(1, 1, 1, 2).setValues([['foo', 'bar']]);
-  assert.throws(() => setup(rt), /row 1 must be/);
+  assert.throws(() => setup(rt), /row 1 must start with/);
   assert.equal(bad.get(1, 1), 'foo');
 });
 t('unknown GET action / bad JSON / unknown POST action → VALIDATION', () => {
@@ -638,7 +642,7 @@ t('a registration lands only in its own event tab — every other tab stays unto
   assert.equal(rt.tab('s-essay').getLastRow(), 2);
   assert.equal(regRow(rt, 2)[1], 'KR26-ESY-0001');
   for (const id of others) assert.equal(JSON.stringify([rt.tab(id).cells, rt.tab(id).formats]), before[id], `${id} untouched`);
-  assert.equal(rt.events().getLastRow(), 13, 'Events tab gets no registration rows');
+  assert.equal(rt.events().getLastRow(), N + 1, 'Events tab gets no registration rows');
 });
 t('two events → two separate rows in two separate tabs (no shared tab)', () => {
   const rt = createOpenRuntime();
@@ -750,7 +754,7 @@ t('sheet_name pointing at another event\'s tab (or at "Events") → SERVER, noth
   const beforeEvents = rt.ss.snapshot(); // after the cell edit itself
   assert.deepEqual(reg(rt), { ok: false, code: 'SERVER', reason: 'EVENT_TAB_RESERVED:s-essay' });
   assert.equal(rt.ss.snapshot(), beforeEvents);
-  assert.equal(rt.events().getLastRow(), 13);
+  assert.equal(rt.events().getLastRow(), N + 1);
 });
 t('a tab whose header row is not the registration layout is never written to', () => {
   const rt = createOpenRuntime();
@@ -917,7 +921,7 @@ t('generated Config.gs: CONFIG_SCHEMA matches Code.gs, CONFIG_VERSION is an 8-he
   assert.match(String(rt.ctx.CONFIG_VERSION), /^[0-9a-f]{8}$/);
   assert.equal(rt.ctx.CONFIG_SCHEMA, GAS_CONFIG_SCHEMA);
   assert.equal(rt.ctx.CONFIG_VERSION, computeConfigVersion(JSON.parse(JSON.stringify(rt.ctx.CONFIG))));
-  assert.equal(Object.keys(cfgOf(rt).events).length, 12);
+  assert.equal(Object.keys(cfgOf(rt).events).length, N);
 });
 t('CONFIG_VERSION changes when an event, a deadline or a rule changes, and is stable otherwise', () => {
   const rt = createGasRuntime();
@@ -939,22 +943,22 @@ t('status includes configVersion (= CONFIG_VERSION), also when served from the c
   const cached = rt.get({ action: 'status' }) as unknown as { configVersion: string };
   assert.equal(cached.configVersion, rt.ctx.CONFIG_VERSION);
 });
-t('setupSheet logs "Config <version> … lists 12 events", then one line per event: Events row ADDED + tab CREATED', () => {
+t('setupSheet logs "Config <version> … lists N events", then one line per event: Events row ADDED + tab CREATED', () => {
   const rt = createGasRuntime();
   const logs = captureLogs(rt);
   setup(rt);
-  assert.match(logs[0] ?? '', new RegExp(`^Config ${rt.ctx.CONFIG_VERSION} \\(schema ${GAS_CONFIG_SCHEMA}\\) lists 12 events: s-essay, s-poem`));
+  assert.match(logs[0] ?? '', new RegExp(`^Config ${rt.ctx.CONFIG_VERSION} \\(schema ${GAS_CONFIG_SCHEMA}\\) lists ${N} events: s-essay, s-poem`));
   for (const id of ids(rt)) {
     const line = logs.find((l) => l.startsWith(`${id}: `));
     assert.ok(line && /Events row ADDED/.test(line) && /tab "[^"]+" CREATED/.test(line), `${id}: ${line}`);
   }
   const last = logs[logs.length - 1] ?? '';
-  assert.match(last, /^Setup complete\. Config [0-9a-f]{8}: 12 events; 12 Events row\(s\) added; 12 event tab\(s\) created \(.*\), 0 already existed\./);
+  assert.match(last, /^Setup complete\. Config [0-9a-f]{8}: 14 events; 14 Events row\(s\) added; 14 event tab\(s\) created \(.*\), 0 already existed\./);
 });
 t('setupSheet seeds the Events tab from Config.gs: one row per event with id, code, name_en, sheet_name, deadline_iso, is_open TRUE', () => {
   const rt = createGasRuntime();
   setup(rt);
-  assert.equal(rt.events().getLastRow(), 13);
+  assert.equal(rt.events().getLastRow(), N + 1);
   const cfg = JSON.parse(JSON.stringify(rt.ctx.CONFIG)) as { events: Record<string, { code: string; name: { en: string }; sheetName: string; deadline: string }> };
   for (const [id, e] of Object.entries(cfg.events)) {
     assert.equal(rt.eventField(id, 'code'), e.code);
@@ -977,7 +981,7 @@ t('re-running setupSheet reports "already there / already existed" for every eve
     const line = logs.find((l) => l.startsWith(`${id}: `));
     assert.ok(line && /Events row already there/.test(line) && /already existed/.test(line), `${id}: ${line}`);
   }
-  assert.match(logs[logs.length - 1] ?? '', /0 Events row\(s\) added; 0 event tab\(s\) created, 12 already existed\./);
+  assert.match(logs[logs.length - 1] ?? '', /0 Events row\(s\) added; 0 event tab\(s\) created, 14 already existed\./);
 });
 t('a partly set-up spreadsheet: only the missing tab is added, and it is reported as such', () => {
   const rt = createGasRuntime();
@@ -987,7 +991,7 @@ t('a partly set-up spreadsheet: only the missing tab is added, and it is reporte
   setup(rt);
   assert.ok(logs.some((l) => /^s-poem: .*CREATED/.test(l)));
   assert.ok(logs.some((l) => /^s-essay: .*already existed/.test(l)));
-  assert.match(logs[logs.length - 1] ?? '', /1 event tab\(s\) created \(POM – Poem\), 11 already existed/);
+  assert.match(logs[logs.length - 1] ?? '', /1 event tab\(s\) created \(POM – Poem\), 13 already existed/);
 });
 t('setupSheet with an EMPTY Config.gs events list throws "Config.gs has no events — paste the latest Config.gs" and touches nothing', () => {
   const rt = createGasRuntime();
@@ -1023,7 +1027,7 @@ t('checkConfig() logs version, schema and event count — and fails on an empty 
   const rt = createGasRuntime();
   const logs = captureLogs(rt);
   (rt.ctx.checkConfig as () => void)();
-  assert.match(logs[0] ?? '', new RegExp(`^Config\\.gs OK — version [0-9a-f]{8}, schema ${GAS_CONFIG_SCHEMA}, 12 events: s-essay`));
+  assert.match(logs[0] ?? '', new RegExp(`^Config\\.gs OK — version [0-9a-f]{8}, schema ${GAS_CONFIG_SCHEMA}, ${N} events: s-essay`));
   cfgOf(rt).events = {};
   assert.throws(() => (rt.ctx.checkConfig as () => void)(), /no events/);
 });
@@ -1069,7 +1073,7 @@ const setWa = (rt: GasRuntime, id: string, v: string) => rt.setEventField(id, 'w
 type RegOk = { ok: true; regId: string; event: string; name: string; whatsappUrl?: string };
 type LookupOk = { ok: true; passes: { regId: string; event: string; name: string; whatsappUrl?: string }[] };
 
-t('a new Events tab has the whatsapp_url column (last), empty for all 12 events and plain text', () => {
+t('a new Events tab has the whatsapp_url column (last), empty for every event and plain text', () => {
   const rt = createGasRuntime();
   setup(rt);
   const headers = rt.events().getRange(1, 1, 1, rt.events().getLastColumn()).getDisplayValues()[0] ?? [];
@@ -1400,6 +1404,82 @@ t('lookup by registration ID shares the 5-failures rate limit, and a USN lookup 
   for (let i = 0; i < 5; i++) rt.post({ action: 'lookup', id: 'KR26-ESY-0001', phone: `98450000${10 + i}` });
   assert.deepEqual(rt.post({ action: 'lookup', id: 'KR26-ESY-0001', phone: '9845012345' }), { ok: false, code: 'RATE_LIMITED' });
   assert.equal(rt.post({ action: 'lookup', id: '1BY23CS001', phone: '9845012345' }).ok, true, 'a different key (the USN) is not rate-limited');
+});
+
+console.log('\nNon-Kannadiga events: eligibility (Elocution, Simple Kannada Debate)');
+const elo = { ...base, eventId: 's-elocution', id: '1BY24EC777', eligibilityConfirmed: true };
+/** Cell of an event tab by header name (columns are placed by name, not position). */
+const cellOf = (rt: GasRuntime, eventId: string, row: number, header: string) => {
+  const sh = rt.tab(eventId);
+  const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0] ?? [];
+  const col = headers.indexOf(header) + 1;
+  if (col < 1) throw new Error(`no ${header} column in ${sh.getName()}`);
+  return sh.getRange(row, col, 1, 1).getDisplayValues()[0]?.[0] ?? '';
+};
+t('setupSheet gives the two new events their own Events row and tab (ELO, SKD), open, 14 events in all', () => {
+  const rt = createOpenRuntime();
+  assert.equal(N, 14);
+  assert.equal(rt.tab('s-elocution').getName(), 'ELO – Elocution – Pick & Speak (for non-Kannadigas)');
+  assert.equal(rt.tab('s-simple-debate').getName(), 'SKD – Simple Kannada Debate (for non-Kannadigas)');
+  for (const id of ['s-elocution', 's-simple-debate']) {
+    assert.equal(rt.eventField(id, 'is_open'), 'TRUE');
+    assert.equal(st(rt).events[id]?.isOpen, true);
+  }
+});
+t('eligibility: a registration without "Kannada is not my mother tongue" → VALIDATION (field eligibilityConfirmed), nothing written', () => {
+  const rt = createOpenRuntime();
+  for (const v of [undefined, false, 'true', 1]) {
+    assert.deepEqual(rt.post({ ...elo, eligibilityConfirmed: v }), { ok: false, code: 'VALIDATION', field: 'eligibilityConfirmed' }, String(v));
+    assert.deepEqual(rt.post({ ...elo, eventId: 's-simple-debate', eligibilityConfirmed: v }), { ok: false, code: 'VALIDATION', field: 'eligibilityConfirmed' });
+  }
+  assert.equal(rt.countRegs('s-elocution'), 0);
+  assert.equal(rt.countRegs('s-simple-debate'), 0);
+});
+t('eligibility: confirmed → registered (KR26-ELO-0001, KR26-SKD-0001) and stored TRUE in eligibility_confirmed', () => {
+  const rt = createOpenRuntime();
+  assert.equal(rt.post(elo).regId, 'KR26-ELO-0001');
+  assert.equal(rt.post({ ...elo, eventId: 's-simple-debate' }).regId, 'KR26-SKD-0001');
+  assert.equal(cellOf(rt, 's-elocution', 2, 'eligibility_confirmed'), 'TRUE');
+  assert.equal(cellOf(rt, 's-simple-debate', 2, 'eligibility_confirmed'), 'TRUE');
+});
+t('eligibility is ignored for other events (not required, stored empty)', () => {
+  const rt = createOpenRuntime();
+  assert.equal(reg(rt).ok, true);
+  assert.equal(reg(rt, { id: '1BY23CS002', eligibilityConfirmed: true }).ok, true);
+  assert.equal(cellOf(rt, 's-essay', 2, 'eligibility_confirmed'), '');
+  assert.equal(cellOf(rt, 's-essay', 3, 'eligibility_confirmed'), '');
+});
+t('an existing 13-column tab with live rows: setupSheet APPENDS the new column at the end, rows and other columns untouched', () => {
+  const rt = createGasRuntime();
+  setup(rt);
+  // Simulate the live Sheet before this change: 13 columns, a coordinator's own "notes" column, two registrations.
+  const sh = rt.tab('s-quiz');
+  sh.cells = [];
+  sh.getRange(1, 1, 1, 14).setValues([[...TAB_HEADERS.split('|'), 'notes']]);
+  sh.getRange(2, 1, 2, 14).setNumberFormat('@');
+  sh.getRange(2, 1, 2, 14).setValues([
+    ['2026-11-10T05:00:00.000Z', 'KR26-QIZ-0001', 'students', 'A B', 'U1', 'CSE', '3', '9845000001', 'a@b.co', '', '', '', 'TRUE', 'called'],
+    ['2026-11-10T06:00:00.000Z', 'KR26-QIZ-0002', 'students', 'C D', 'U2', 'ISE', '5', '9845000002', 'c@d.co', '', '', '', 'FALSE', ''],
+  ]);
+  const before = JSON.stringify(sh.cells.map((r) => r.slice(0, 14)));
+  setup(rt);
+  const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0]!;
+  assert.deepEqual(headers.slice(0, 14), [...TAB_HEADERS.split('|'), 'notes'], 'existing columns stay where they were');
+  assert.deepEqual(headers.slice(14), EXTRA, 'new columns are appended after the last one');
+  assert.equal(JSON.stringify(sh.cells.map((r) => r.slice(0, 14))), before, 'no existing cell changed');
+  assert.equal(sh.getLastRow(), 3, 'no row added or removed');
+  // and the next registration still lands correctly, by header name
+  assert.equal(rt.post({ ...base, eventId: 's-quiz', id: 'U3' }).regId, 'KR26-QIZ-0003');
+  assert.equal(cellOf(rt, 's-quiz', 4, 'notes'), '');
+  assert.equal(cellOf(rt, 's-quiz', 4, 'usn_or_empid'), 'U3');
+});
+t('an eligibility event whose tab lacks eligibility_confirmed → SERVER EVENT_TAB_COLUMN_MISSING, nothing written', () => {
+  const rt = createOpenRuntime();
+  const sh = rt.tab('s-elocution');
+  sh.cells = [TAB_HEADERS.split('|')]; // the 13 base columns only
+  const r = rt.post(elo);
+  assert.deepEqual(r, { ok: false, code: 'SERVER', reason: 'EVENT_TAB_COLUMN_MISSING:s-elocution:eligibility_confirmed' });
+  assert.equal(sh.getLastRow(), 1);
 });
 
 console.log('\nClient/server parity');

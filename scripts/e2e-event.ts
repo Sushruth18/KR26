@@ -108,6 +108,8 @@ async function main() {
       await scenario(`layout-${lang}-${width}`, async (errors) => {
         const page = await open(browser, lang, width, `/event?day=2&${noon}&mock=`, errors);
         await revealAll(page);
+        const plaques = await page.$$eval('main li .brass-plaque, main section li', (n) => n.map((x) => x.textContent ?? '').join(' '));
+        expect(plaques.includes(lang === 'kn' ? '₹೪೫,೦೦೦' : '₹45,000'), `prize plaque shows the ₹45,000 pool (${lang})`);
         const m = await page.evaluate(() => {
           const vw = document.documentElement.clientWidth;
           // body has overflow-x: clip, so scrollWidth cannot see clipped content: measure element rects instead.

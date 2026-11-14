@@ -11,7 +11,7 @@ When something here conflicts with your defaults, this file wins. When something
 - **What:** Official website for Kannada Rajyotsava 2026 at BMS Institute of Technology & Management, organised by Honnudi Kannada Sangha.
 - **Theme:** **Mysuru Dasara procession (Jamboo Savari)** — the site is designed as the procession itself: palace lights switching on at night, the golden Ambari on the elephant, tableaux floats, folk troupes, torchlight.
 - **Two-day festival, BMSIT&M campus:**
-  - **Day 1 — Competitions:** **20 November 2026** (Friday). All 12 competitions (students + faculty) happen this day.
+  - **Day 1 — Competitions:** **20 November 2026** (Friday). All 14 competitions (students + faculty) happen this day, 12:30 PM – 4:30 PM.
   - **Day 2 — Kannada Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — rally, inauguration & Dasara procession, club performances, fashion show, music concert & DJ.
   - All dates (both days, countdown targets, registration window, per-event `deadline`) come from `src/data/site.json` / `events.json` — never hard-code a date in a component.
 - **Registration:** **open from now** (no opening date, no seat limits); closes **18 Nov 2026, 23:59 IST** (one day of buffer before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
@@ -153,7 +153,7 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
   4. During 21 Nov → "ಉತ್ಸವ ಆರಂಭವಾಗಿದೆ!"; after `eventEnd` → "ಧನ್ಯವಾದಗಳು" + link to gallery.
 - A small **two-day strip** under the title: "೨೦ ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು" ‖ "೨೧ ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ ಮೆರವಣಿಗೆ" (Day 1 Competitions / Day 2 Rajyotsava Procession).
 - CTAs: primary **"ಮೆರವಣಿಗೆಗೆ ಸೇರಿ — ನೋಂದಾಯಿಸಿ"** → `/competitions`; secondary "ನಮ್ಮ ತಂಡ" → `/team`.
-- 3 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · number of competitions (computed from data — 12) · cash prize pool (computed from data — **₹39,000**; shown as "₹39,000 + mementos" because faculty events award mementos).
+- 3 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · number of competitions (computed from data — 14) · cash prize pool (computed from data — **₹45,000**; shown as "₹45,000 + mementos" because faculty events award mementos).
 - "Procession preview" strip: horizontally scrolling row of mini tableau cards for the competitions (auto-scroll, pauses on hover/touch, reduced-motion = static).
 - Registration-deadline banner when ≤ 3 days remain.
 
@@ -173,7 +173,7 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 ### 5.3 Event Details `/event`
 - Title "ಕಾರ್ಯಕ್ರಮ ವಿವರಗಳು", subtitle "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ ೨೦೨೬".
 - **Chief guest(s)** in Darbar-hall arch frames with gold pillars. Single clean image — no reflected/duplicated image. (TODO-CONFIRM guest names, titles, photos; if unconfirmed, show a tasteful "ಶೀಘ್ರದಲ್ಲೇ ಘೋಷಣೆ / Announcing soon" frame.)
-- 4 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · time (Day 2: 9:00 AM – 5:45 PM) · venue (BMSIT&M campus) · cash prize pool (₹39,000 + mementos).
+- 4 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · time (Day 2: 9:00 AM – 5:45 PM) · venue (BMSIT&M campus) · cash prize pool (₹45,000 + mementos).
 - **Day tabs** above the timeline: **ದಿನ ೧ · ೨೦ ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು** / **ದಿನ ೨ · ೨೧ ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ** (Day 1 · Competitions / Day 2 · Rajyotsava). Default to Day 2 except on 20 Nov, when Day 1 is default. Synced to `?day=1|2`.
 - **Procession-route timeline**: a winding SVG road; each stop is a schedule item (**start time**, title, venue — no end times or durations anywhere in the timeline). Vertical on mobile, winding horizontal/zigzag on desktop. Generated from `src/data/schedule.json` (entries carry a `day` field). Highlight the "Inauguration & Procession" stop as the Day 2 centrepiece (Ambari icon) — it IS the Dasara theme.
   - **Day 1** is generated from `events.json` (all competitions, sorted by time, each stop links to its competition card and Register button). Events with unknown time sit in an "ಸಮಯ ಶೀಘ್ರದಲ್ಲೇ / Time to be announced" group at the end.
@@ -263,7 +263,7 @@ All content lives in JSON; components never hard-code event data.
 ```
 Events have **no `seats` field** — registration is unlimited. `prizes` is either `{ "type": "cash", "first": n, "second": n }` or `{ "type": "memento" }`.
 The prize-pool plaque sums only cash prizes. Add a build-time check in `validate-data.ts` that the cash
-total equals `site.json → prizePoolTotal` (39000) and fails the build if not.
+total equals `site.json → prizePoolTotal` (45000) and fails the build if not.
 
 Seed with the **12 competitions from the 2026 budget proposal** (prizes are final per the proposal;
 times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the organisers, see the Competitions data notes below). **Every competition is on 20 Nov 2026 (Day 1)**, with `deadline` 2026-11-18T23:59:00+05:30:
@@ -283,7 +283,16 @@ times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the 
 | f-group-dance | FGD | faculty | ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು) | Faculty Group Dance | memento | — | 4–12 | TODO |
 | f-group-singing | FGS | faculty | ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು) | Faculty Group Singing | memento | — | 6–12 | TODO |
 
-Cash total check: (5 × 3,000) + (4 × 6,000) = **₹39,000** ✔ matches the proposal.
+Cash total check: (5 × 3,000) + (4 × 6,000) = ₹39,000 from the proposal, **+ 2 × 3,000 for the two events added in Nov 2026 = ₹45,000**.
+
+**Added Nov 2026 — for students whose mother tongue is not Kannada** (20 Nov 12:30–16:30, venue TBA, individual, ₹2,000 / ₹1,000, deadline 18 Nov 23:59, coordinators to come — an event may have **zero** coordinators, the card then shows none):
+
+| id | code | Kannada | English | icon |
+|---|---|---|---|---|
+| s-elocution | ELO | ಆಶುಭಾಷಣ (ಕನ್ನಡೇತರರಿಗೆ) | Elocution – Pick & Speak (for non-Kannadigas) | megaphone |
+| s-simple-debate | SKD | ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರರಿಗೆ) | Simple Kannada Debate (for non-Kannadigas) | messages-square |
+
+Both carry `eligibility: "nonKannadiga"`: the Register review step shows a **required** checkbox "I confirm Kannada is not my mother tongue" / "ಕನ್ನಡ ನನ್ನ ಮಾತೃಭಾಷೆ ಅಲ್ಲ ಎಂದು ದೃಢೀಕರಿಸುತ್ತೇನೆ" (`eligibilityConfirmed`); the server answers `VALIDATION` field `eligibilityConfirmed` without it and stores TRUE in the event tab's `eligibility_confirmed` column.
 Icons (lucide): essay `file-text`, poem `feather`, painting `palette`, debate `mic`, quiz `brain`,
 group dance `users`, treasure hunt `search`, group singing `music`, rangoli `flower`.
 Rangoli is new this year and fits the theme perfectly — give its card a kolam-pattern corner ornament.
@@ -302,7 +311,7 @@ Rangoli is new this year and fits the theme perfectly — give its card a kolam-
 - `guests.json` — `[{ name:{kn,en}, title:{kn,en}, photo }]`
 - `team.json` — now `[{ id, members:[{ id, name:{kn,en}, role:{kn,en}, photo, linkedin?, instagram? }] }]`: `id` is a troupe of `src/data/team-config.json`, which owns the group labels (`label:{kn,en}`), icons and the page order (replaces the earlier `[{ group:{kn,en}, members }]`)
 - `gallery.json` — `{ photos:[{ year, src, alt:{kn,en}, caption? }], reels:[{ year, poster, video?|url?, title }] }`
-- `site.json` — `competitionsStart` ("2026-11-20T09:00:00+05:30" — TODO-CONFIRM start time), `competitionsEnd` ("2026-11-20T18:00:00+05:30" — TODO-CONFIRM), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), the registration close time (`registrationClose` "2026-11-18T23:59:00+05:30"; there is **no** `registrationOpen` — registration is open from the start), `prizePoolTotal` (39000), Instagram URL, contact email.
+- `site.json` — `competitionsStart` ("2026-11-20T12:30:00+05:30"), `competitionsEnd` ("2026-11-20T16:30:00+05:30"), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), the registration close time (`registrationClose` "2026-11-18T23:59:00+05:30"; there is **no** `registrationOpen` — registration is open from the start), `prizePoolTotal` (45000), Instagram URL, contact email.
 
 Validate every data file with a zod schema at build time (a small `scripts/validate-data.ts` run in `prebuild`).
 
@@ -312,7 +321,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 
 ### Sheet layout (one spreadsheet, one tab per event)
 - **`Events`** tab (coordinators control this): `id | code | name_en | sheet_name | deadline_iso | is_open (TRUE/FALSE)`. The server reads the deadline, the open switch and the event's tab name from here — coordinators can close an event (`is_open` FALSE), move its deadline or rename its tab without redeploying the site. There is **no seats column**.
-- **One tab per event** (12), named by `sheet_name`, default `<CODE> – <English name>` (e.g. `ESY – Essay Writing`), created by `setupSheet` with a frozen, bold header row and plain-text data columns: `timestamp | reg_id | category | name | usn_or_empid | department | semester | phone | email | team_name | members_json | member_ids | consent_photo` (no `event_id` — the tab is the event). **There is no shared `Registrations` tab**; an old one is never read, written or deleted by the script (the README tells coordinators to delete it by hand).
+- **One tab per event** (14), named by `sheet_name`, default `<CODE> – <English name>` (e.g. `ESY – Essay Writing`), created by `setupSheet` with a frozen, bold header row and plain-text data columns: `timestamp | reg_id | category | name | usn_or_empid | department | semester | phone | email | team_name | members_json | member_ids | consent_photo` (no `event_id` — the tab is the event), then the later columns `eligibility_confirmed` (… see Registration architecture) — `setupSheet` **appends** any missing later column at the END of an existing tab and never moves, renames or clears anything. **There is no shared `Registrations` tab**; an old one is never read, written or deleted by the script (the README tells coordinators to delete it by hand).
 - `Code.gs` finds an event's tab **only through the `sheet_name` cell**. If the cell is empty, the tab is missing, two events share a tab, or the tab's header row is not the layout above → `SERVER` (logged with the event id and tab name) and **nothing is written anywhere**. It never falls back to another tab. The status endpoint reports such an event as closed.
 - `setupSheet` is idempotent: it only adds a missing Events tab/row/column, event tab or header (new event rows start with `is_open` = **TRUE**); it never deletes, clears or overwrites data, and keeps coordinator edits. An older Events tab (with `seats`, no `sheet_name`) is upgraded in place.
 

@@ -43,15 +43,19 @@ var SHEET_EVENTS = 'Events';
 var SHEET_OLD_REGS = 'Registrations'; // retired shared tab — never read or written; setupSheet only mentions it in the log
 // whatsapp_url is optional: coordinators paste a group/channel invite link there (setupSheet adds the empty column).
 var EVENT_HEADERS = ['id', 'code', 'name_en', 'sheet_name', 'deadline_iso', 'is_open', 'whatsapp_url'];
-// Columns of every event tab (no event_id: the tab is the event).
+// Columns of every event tab (no event_id: the tab is the event). These 13 are always the first 13, in this order.
 var REG_HEADERS = [
   'timestamp', 'reg_id', 'category', 'name', 'usn_or_empid', 'department', 'semester',
   'phone', 'email', 'team_name', 'members_json', 'member_ids', 'consent_photo'
 ];
+// Columns added later. setupSheet APPENDS any that are missing at the END of an existing tab (after whatever is there,
+// even a coordinator's own extra column) and never moves, renames or clears anything. Found by header name.
+//   eligibility_confirmed  TRUE when the registrant confirmed Kannada is not their mother tongue (eligibility events)
+var REG_EXTRA_HEADERS = ['eligibility_confirmed'];
 var LOCK_WAIT_MS = 20000;
 // Config.gs (generated) must declare CONFIG_SCHEMA with this exact number, or every request answers CONFIG_MISMATCH.
 // Keep equal to GAS_CONFIG_SCHEMA in scripts/gas-config.ts (npm run gas:config fails if they differ).
-var EXPECTED_CONFIG_SCHEMA = 4;
+var EXPECTED_CONFIG_SCHEMA = 5;
 
 // Registration ID format: KR26-<event code>-<4 digits> (the same shape the website shows on the pass).
 var REG_ID_RE = /^KR26-([A-Z]{3})-(\d{4})$/;
@@ -208,7 +212,8 @@ function validate_(b) {
     email: normEmail_(b.email),
     teamName: '',
     members: [],
-    consentPhoto: b.consentPhoto === true
+    consentPhoto: b.consentPhoto === true,
+    eligibilityConfirmed: false
   };
 
   if (!validName_(p.name)) return fail('name');
@@ -229,6 +234,11 @@ function validate_(b) {
   if (!validPhone_(p.phone)) return fail('phone');
   if (p.email.length > CONFIG.rules.email.max || !matches_(CONFIG.rules.email.pattern, p.email)) return fail('email');
   if (b.consentRules !== true) return fail('consentRules');
+  // Events only for non-Kannadigas: the registrant must confirm Kannada is not their mother tongue.
+  if (ev.eligibility) {
+    if (b.eligibilityConfirmed !== true) return fail('eligibilityConfirmed');
+    p.eligibilityConfirmed = true;
+  }
 
   var members = Array.isArray(b.members) ? b.members : [];
   if (ev.teamSize.max > 1) {
@@ -353,7 +363,8 @@ function eventTab_(eventId, events) {
       SHEET_EVENTS + ' tab, or run setupSheet() to recreate the tab.');
   }
   var headers = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
-  REG_HEADERS.forEach(function (h) {
+  var required = REG_HEADERS.concat(CONFIG.events[eventId] && CONFIG.events[eventId].eligibility ? ['eligibility_confirmed'] : []);
+  required.forEach(function (h) {
     if (headers.indexOf(h) === -1) {
       throw fail_('EVENT_TAB_COLUMN_MISSING:' + eventId + ':' + h,
         'Tab "' + name + '" has no "' + h + '" column in row 1 — refusing to write to it.');
@@ -511,7 +522,8 @@ function register_(b) {
       team_name: p.teamName,
       members_json: p.members.length ? JSON.stringify(p.members) : '',
       member_ids: p.members.map(function (m) { return m.id; }).join(','),
-      consent_photo: p.consentPhoto ? 'TRUE' : 'FALSE'
+      consent_photo: p.consentPhoto ? 'TRUE' : 'FALSE',
+      eligibility_confirmed: p.eligibilityConfirmed ? 'TRUE' : ''
     });
     SpreadsheetApp.flush();
     CacheService.getScriptCache().remove(STATUS_CACHE_KEY);
@@ -794,9 +806,11 @@ function setupSheet() {
       existed.push(name);
       report[id].tab = 'tab "' + name + '" already existed';
     }
-    ensureHeaders_(sh, REG_HEADERS);
+    var added = ensureHeaders_(sh, REG_HEADERS, REG_EXTRA_HEADERS);
+    if (added.length) report[id].tab += '; column(s) ' + added.join(', ') + ' appended at the end';
     // Plain text for every data column (phone numbers, USNs, leading zeros) — also for rows typed in by hand.
-    if (sh.getMaxRows() > 1) sh.getRange(2, 1, sh.getMaxRows() - 1, REG_HEADERS.length).setNumberFormat('@');
+    // Format only: no cell value is read or written here.
+    if (sh.getMaxRows() > 1) sh.getRange(2, 1, sh.getMaxRows() - 1, sh.getLastColumn()).setNumberFormat('@');
     sh.setFrozenRows(1);
     console.log(id + ': Events row ' + report[id].row + '; ' + report[id].tab);
   });
@@ -852,20 +866,37 @@ function plainTextBelow_(sh, col) {
   if (sh.getMaxRows() > 1) sh.getRange(2, col, sh.getMaxRows() - 1, 1).setNumberFormat('@');
 }
 
-/** Event tab: create the header row on a brand-new tab; on an existing tab the header row must already match. */
-function ensureHeaders_(sh, headers) {
+/**
+ * Event tab header row. A brand-new tab gets headers + extras. On an existing tab the first columns must already be
+ * `headers` (in order); every extra column that is missing is APPENDED after the last used column — existing columns
+ * and rows never move, and no data cell is touched. Returns the names of the columns it appended.
+ */
+function ensureHeaders_(sh, headers, extras) {
+  extras = extras || [];
   var current = sh.getLastRow() >= 1 ? sh.getRange(1, 1, 1, headers.length).getDisplayValues()[0] : [];
-  if (current.join('') === '') {
-    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
-    sh.getRange(1, 1, 1, headers.length).setFontWeight('bold');
-    return;
+  if (current.join('') === '' && sh.getLastRow() <= 1) {
+    var all = headers.concat(extras);
+    sh.getRange(1, 1, 1, all.length).setValues([all]);
+    sh.getRange(1, 1, 1, all.length).setFontWeight('bold');
+    return [];
   }
   for (var i = 0; i < headers.length; i++) {
     if (String(current[i]).trim() !== headers[i]) {
-      throw new Error('Tab "' + sh.getName() + '" row 1 must be: ' + headers.join(' | '));
+      throw new Error('Tab "' + sh.getName() + '" row 1 must start with: ' + headers.join(' | '));
     }
   }
-  sh.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  var lastCol = sh.getLastColumn();
+  var row1 = sh.getRange(1, 1, 1, lastCol).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
+  var added = [];
+  extras.forEach(function (h) {
+    if (row1.indexOf(h) !== -1) return;
+    lastCol++;
+    sh.getRange(1, lastCol).setValues([[h]]);
+    row1.push(h);
+    added.push(h);
+  });
+  sh.getRange(1, 1, 1, lastCol).setFontWeight('bold');
+  return added;
 }
 
 /** Writes one cell, found by header name, as plain text. */

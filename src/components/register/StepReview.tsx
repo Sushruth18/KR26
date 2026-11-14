@@ -82,6 +82,7 @@ export function StepReview({ event, onEdit }: Props) {
 
       <div className="space-y-2">
         <GeneralInstructions />
+        {event.eligibility && <CheckboxField<F> name="eligibilityConfirmed" label={t('register.eligibility')} />}
         <CheckboxField<F> name="consentRules" label={t('register.consentRules')} />
         <CheckboxField<F> name="consentPhoto" label={t('register.consentPhoto')} />
       </div>

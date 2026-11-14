@@ -8,8 +8,8 @@
 
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
-var CONFIG_SCHEMA = 4;
-var CONFIG_VERSION = '6781310e';
+var CONFIG_SCHEMA = 5;
+var CONFIG_VERSION = '9a51ddee';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -98,6 +98,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422",
         "en": "BSN 422"
@@ -119,6 +120,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೨ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 2nd Floor Auditorium"
@@ -140,6 +142,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್)",
         "en": "Visvesvaraya Auditorium (Architecture Block)"
@@ -161,6 +164,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 1st Floor Auditorium"
@@ -182,6 +186,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -203,6 +208,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
         "en": "SJB 5th Floor Amphitheatre"
@@ -224,6 +230,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
@@ -245,6 +252,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
         "en": "BSN Auditorium"
@@ -266,11 +274,56 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "TODO-CONFIRM",
         "en": "TODO-CONFIRM"
       },
       "sheetName": "RGL – Rangoli",
+      "deadline": "2026-11-18T23:59:00+05:30"
+    },
+    "s-elocution": {
+      "code": "ELO",
+      "category": "students",
+      "name": {
+        "kn": "ಆಶುಭಾಷಣ (ಕನ್ನಡೇತರರಿಗೆ)",
+        "en": "Elocution – Pick & Speak (for non-Kannadigas)"
+      },
+      "teamSize": {
+        "min": 1,
+        "max": 1
+      },
+      "date": "2026-11-20",
+      "time": "12:30",
+      "endTime": "16:30",
+      "eligibility": "nonKannadiga",
+      "venue": {
+        "kn": "TODO-CONFIRM",
+        "en": "TODO-CONFIRM"
+      },
+      "sheetName": "ELO – Elocution – Pick & Speak (for non-Kannadigas)",
+      "deadline": "2026-11-18T23:59:00+05:30"
+    },
+    "s-simple-debate": {
+      "code": "SKD",
+      "category": "students",
+      "name": {
+        "kn": "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರರಿಗೆ)",
+        "en": "Simple Kannada Debate (for non-Kannadigas)"
+      },
+      "teamSize": {
+        "min": 1,
+        "max": 1
+      },
+      "date": "2026-11-20",
+      "time": "12:30",
+      "endTime": "16:30",
+      "eligibility": "nonKannadiga",
+      "venue": {
+        "kn": "TODO-CONFIRM",
+        "en": "TODO-CONFIRM"
+      },
+      "sheetName": "SKD – Simple Kannada Debate (for non-Kannadigas)",
       "deadline": "2026-11-18T23:59:00+05:30"
     },
     "f-debate": {
@@ -287,6 +340,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), ೧ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
         "en": "SMV Block (Academic Block), 1st Floor Auditorium"
@@ -308,6 +362,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ಎಸ್‌ಜೆಬಿ ೫ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
         "en": "SJB 5th Floor Amphitheatre"
@@ -329,6 +384,7 @@ var CONFIG = {
       "date": "2026-11-20",
       "time": "12:30",
       "endTime": "16:30",
+      "eligibility": "",
       "venue": {
         "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
         "en": "BSN Auditorium"

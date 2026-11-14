@@ -606,6 +606,26 @@ async function main() {
     return `registrant "abc-123" + members "zz 9/1", "1TD24EC010" → ${r.regId}; new team with member "ABC - 123" → DUPLICATE ${dup.regId}`;
   });
 
+  await scenario(browser, '15-eligibility-elocution-kn', 'kn', async (page) => {
+    const p: Person = { eventId: 's-elocution', name: 'Arjun Mehta', id: '1BY24ME501', dept: 'Mech', sem: '3', phone: '9845066660', email: 'arjun@example.com' };
+    await fillToReview(page, p);
+    const box = await page.$('#f-eligibilityConfirmed');
+    expect(box, 'the eligibility checkbox is on the review step');
+    const label = await page.$eval('label[for=f-eligibilityConfirmed]', (l) => l.textContent ?? '');
+    expect(label.includes('ಕನ್ನಡ ನನ್ನ ಮಾತೃಭಾಷೆ ಅಲ್ಲ ಎಂದು ದೃಢೀಕರಿಸುತ್ತೇನೆ'), `label "${label}"`);
+    // Without it the form does not submit and says why.
+    await page.click('[data-testid=submit]');
+    await page.waitForSelector('#f-eligibilityConfirmed-error');
+    expect(new URL(page.url()).pathname === '/register', 'still on the form');
+    await page.click('#f-eligibilityConfirmed');
+    const r = await submit(page);
+    expect(r.kind === 'success' && r.regId === 'KR26-ELO-0001', `expected KR26-ELO-0001, got ${JSON.stringify(r)}`);
+    // Other events never show it.
+    await fillToReview(page, { ...p, eventId: 's-poem', id: '1BY24ME502', phone: '9845066661' }, '', false);
+    expect(!(await page.$('#f-eligibilityConfirmed')), 'no eligibility checkbox for the Poem');
+    return `checkbox required (client error without it) → ${r.regId}; absent for other events`;
+  });
+
   await browser.close();
   writeFileSync(resolve(OUT, 'results.json'), JSON.stringify(results, null, 2));
   const failed = results.filter((r) => !r.ok);

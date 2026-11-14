@@ -1,5 +1,20 @@
 import { createElement } from 'react';
-import { Brain, Feather, FileText, Flower, Mic, Music, Palette, Search, Sparkles, Users, type LucideIcon, type LucideProps } from 'lucide-react';
+import {
+  Brain,
+  Feather,
+  FileText,
+  Flower,
+  Megaphone,
+  MessagesSquare,
+  Mic,
+  Music,
+  Palette,
+  Search,
+  Sparkles,
+  Users,
+  type LucideIcon,
+  type LucideProps,
+} from 'lucide-react';
 
 /** events.json `icon` names → lucide components (explicit map keeps the bundle tree-shaken). */
 const ICONS: Record<string, LucideIcon> = {
@@ -12,6 +27,8 @@ const ICONS: Record<string, LucideIcon> = {
   search: Search,
   music: Music,
   flower: Flower,
+  megaphone: Megaphone,
+  'messages-square': MessagesSquare,
 };
 
 export function EventIcon({ name, ...props }: { name: string } & LucideProps) {

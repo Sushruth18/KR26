@@ -53,6 +53,8 @@ export interface RegistrationValues {
   members: MemberValues[];
   consentRules: boolean;
   consentPhoto: boolean;
+  /** "Kannada is not my mother tongue" — required only for events with eligibility "nonKannadiga". */
+  eligibilityConfirmed: boolean;
   /** Honeypot — real users never see or fill it. */
   website: string;
 }
@@ -73,6 +75,7 @@ export function emptyRegistration(eventId = ''): RegistrationValues {
     members: [],
     consentRules: false,
     consentPhoto: false,
+    eligibilityConfirmed: false,
     website: '',
   };
 }
@@ -91,6 +94,7 @@ const shape = z.object({
   members: z.array(memberShape),
   consentRules: z.boolean(),
   consentPhoto: z.boolean(),
+  eligibilityConfirmed: z.boolean(),
   website: z.string(),
 });
 
@@ -143,6 +147,7 @@ export function registrationSchema(event: CompetitionEvent | undefined, site: Si
       });
     }
 
+    if (event.eligibility && !v.eligibilityConfirmed) add(['eligibilityConfirmed'], 'errors.eligibility');
     if (!v.consentRules) add(['consentRules'], 'errors.consentRules');
   });
 }
@@ -162,6 +167,8 @@ export interface RegisterPayload {
   members: MemberValues[];
   consentRules: boolean;
   consentPhoto: boolean;
+  /** Sent only for eligibility events (the server requires it there). */
+  eligibilityConfirmed: boolean;
   website: string;
   elapsedMs: number;
   lang: 'kn' | 'en';
@@ -184,6 +191,7 @@ export function toPayload(v: RegistrationValues, event: CompetitionEvent, elapse
     members: team ? v.members.map((m) => ({ name: normText(m.name), id: normId(m.id), phone: normPhone(m.phone) })) : [],
     consentRules: v.consentRules,
     consentPhoto: v.consentPhoto,
+    eligibilityConfirmed: !!event.eligibility && v.eligibilityConfirmed,
     website: v.website,
     elapsedMs: Math.round(elapsedMs),
     lang,
