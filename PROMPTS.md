@@ -96,7 +96,7 @@ Add netlify.toml per §11. Make sure the build works from a clean clone. Tell me
 | **8 Nov** | **Registration live** — post on Instagram + WhatsApp groups |
 | Daily | Check the `Registrations` sheet; close/expand events from the `Events` tab |
 | 15 Nov | "3 days left" reminder post (the site shows the deadline banner automatically) |
-| **18 Nov 23:59** | Registration closes |
+| **19 Nov 18:00** | Registration closes |
 | 19 Nov | Export per-event lists for coordinators and judges |
 | **20 Nov** | **Day 1 — Competitions.** Mark each event `completed: true` as it finishes |
 | **21 Nov** | **Day 2 — Rajyotsava & Dasara procession** 🎉 |

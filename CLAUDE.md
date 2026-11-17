@@ -14,7 +14,7 @@ When something here conflicts with your defaults, this file wins. When something
   - **Day 1 — Competitions:** **20 November 2026** (Friday). All 15 competitions (students + faculty) happen this day, 12:30 PM – 4:30 PM.
   - **Day 2 — Kannada Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — rally, inauguration & Dasara procession, club performances, fashion show, music concert & DJ.
   - All dates (both days, countdown targets, registration window, per-event `deadline`) come from `src/data/site.json` / `events.json` — never hard-code a date in a component.
-- **Registration:** **open from now** (no opening date; no seat limits except **Treasure Hunt: max 30 teams**); closes **18 Nov 2026, 23:59 IST** (one day of buffer before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
+- **Registration:** **open from now** (no opening date; no seat limits except **Treasure Hunt: max 30 teams**); closes **19 Nov 2026, 18:00 IST** (extended from 18 Nov 23:59; the evening before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
 - **Source of event data:** `Kannada_Rajyotsava_26_Budget_Proposal.docx` (schedule + prize breakdown) — §5.3 and §6 below are taken from it.
 - **Predecessor:** https://kr2k25-bmsit.netlify.app/ — keep every tab it had, redesign everything else.
 - **Audience:** students and faculty, ~90% on mobile phones, many on mid/low-end Android. Kannada is the default language.
@@ -254,7 +254,7 @@ All content lives in JSON; components never hard-code event data.
     "time": "14:00",
     "venue": { "kn": "TODO-CONFIRM", "en": "TODO-CONFIRM" },
     "teamSize": { "min": 1, "max": 1 },
-    "deadline": "2026-11-18T23:59:00+05:30",
+    "deadline": "2026-11-19T18:00:00+05:30",
     "prizes": { "type": "cash", "first": 2000, "second": 1000 },
     "rules": { "kn": ["TODO-CONFIRM"], "en": ["TODO-CONFIRM"] },
     "coordinators": [{ "name": "…", "phone": "98450xxxxx" }],
@@ -267,7 +267,7 @@ The prize-pool plaque sums only cash prizes. Add a build-time check in `validate
 total equals `site.json → prizePoolTotal` (45000) and fails the build if not.
 
 Seed with the **12 competitions from the 2026 budget proposal** (prizes are final per the proposal;
-times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the organisers, see the Competitions data notes below). **Every competition is on 20 Nov 2026 (Day 1)**, with `deadline` 2026-11-18T23:59:00+05:30:
+times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the organisers, see the Competitions data notes below). **Every competition is on 20 Nov 2026 (Day 1)**, with `deadline` 2026-11-19T18:00:00+05:30:
 
 | id | code | category | Kannada | English | 1st (₹) | 2nd (₹) | Team | Time |
 |---|---|---|---|---|---|---|---|---|
@@ -286,14 +286,14 @@ times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the 
 
 Cash total check: (5 × 3,000) + (4 × 6,000) = ₹39,000 from the proposal, **+ 2 × 3,000 for the two events added in Nov 2026 = ₹45,000**.
 
-**Added Nov 2026 — for students whose mother tongue is not Kannada** (20 Nov 12:30–16:30, venue TBA, individual, ₹2,000 / ₹1,000, deadline 18 Nov 23:59, coordinators to come — an event may have **zero** coordinators, the card then shows none):
+**Added Nov 2026 — for students whose mother tongue is not Kannada** (20 Nov 12:30–16:30, venue TBA, individual, ₹2,000 / ₹1,000, deadline 19 Nov 18:00, coordinators to come — an event may have **zero** coordinators, the card then shows none):
 
 | id | code | Kannada | English | icon |
 |---|---|---|---|---|
 | s-elocution | ELO | ಆಶುಭಾಷಣ (ಕನ್ನಡೇತರರಿಗೆ) | Elocution – Pick & Speak (for non-Kannadigas) | megaphone |
 | s-simple-debate | SKD | ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರರಿಗೆ) | Simple Kannada Debate (for non-Kannadigas) | messages-square |
 
-**Added Nov 2026 — the faculty version** (same pattern: `eligibility: "nonKannadiga"`, 20 Nov 12:30–16:30, venue TBA, individual, deadline 18 Nov 23:59, no coordinators yet, the same 8 rules with "faculty members" in rule 1; **`prizes: { type: "memento" }`**, so the cash pool stays ₹45,000):
+**Added Nov 2026 — the faculty version** (same pattern: `eligibility: "nonKannadiga"`, 20 Nov 12:30–16:30, venue TBA, individual, deadline 19 Nov 18:00, no coordinators yet, the same 8 rules with "faculty members" in rule 1; **`prizes: { type: "memento" }`**, so the cash pool stays ₹45,000):
 
 | id | code | category | Kannada | English | icon |
 |---|---|---|---|---|---|
@@ -320,7 +320,7 @@ Rangoli is new this year and fits the theme perfectly — give its card a kolam-
 - `guests.json` — `[{ name:{kn,en}, title:{kn,en}, photo }]`
 - `team.json` — now `[{ id, members:[{ id, name:{kn,en}, role:{kn,en}, photo, linkedin?, instagram? }] }]`: `id` is a troupe of `src/data/team-config.json`, which owns the group labels (`label:{kn,en}`), icons and the page order (replaces the earlier `[{ group:{kn,en}, members }]`)
 - `gallery.json` — `{ photos:[{ year, src, alt:{kn,en}, caption? }], reels:[{ year, poster, video?|url?, title }] }`
-- `site.json` — `competitionsStart` ("2026-11-20T12:30:00+05:30"), `competitionsEnd` ("2026-11-20T16:30:00+05:30"), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), the registration close time (`registrationClose` "2026-11-18T23:59:00+05:30"; there is **no** `registrationOpen` — registration is open from the start), `prizePoolTotal` (45000), Instagram URL, contact email.
+- `site.json` — `competitionsStart` ("2026-11-20T12:30:00+05:30"), `competitionsEnd` ("2026-11-20T16:30:00+05:30"), `eventStart` ("2026-11-21T09:00:00+05:30"), `eventEnd` ("2026-11-21T17:45:00+05:30"), the registration close time (`registrationClose` "2026-11-19T18:00:00+05:30"; there is **no** `registrationOpen` — registration is open from the start), `prizePoolTotal` (45000), Instagram URL, contact email.
 
 Validate every data file with a zod schema at build time (a small `scripts/validate-data.ts` run in `prebuild`).
 

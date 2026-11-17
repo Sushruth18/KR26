@@ -165,7 +165,7 @@ async function main() {
     expect(card.includes('Coordinators') && essay.coordinators.every((c) => card.includes(c.name)), 'coordinator names from events.json');
     expect(card.includes('Day 1 · 20 November'), 'Day 1 date');
     expect(card.includes('₹2,000') && card.includes('₹1,000'), 'cash prizes with ₹ grouping');
-    expect(card.includes('18 November, 11:59 PM'), 'deadline from data');
+    expect(card.includes('19 November, 6:00 PM'), 'deadline from data');
     expect(!card.includes('TODO'), 'no raw TODO-CONFIRM text');
     const hrefs = await page.$$eval('[data-testid=competition-grid] a[href^="/register"]', (as) => as.map((a) => a.getAttribute('href')));
     expect(hrefs.length === students.length && hrefs.every((h, i) => h === `/register?event=${students[i]!.id}`), `register hrefs ${hrefs.join(',')}`);

@@ -9,7 +9,7 @@
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
 var CONFIG_SCHEMA = 6;
-var CONFIG_VERSION = 'c82d0f3f';
+var CONFIG_VERSION = '9791ed8f';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -105,7 +105,7 @@ var CONFIG = {
         "en": "BSN 422"
       },
       "sheetName": "ESY – Essay Writing",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-poem": {
       "code": "POM",
@@ -128,7 +128,7 @@ var CONFIG = {
         "en": "SMV Block (Academic Block), 2nd Floor Auditorium"
       },
       "sheetName": "POM – Poem",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-painting": {
       "code": "PNT",
@@ -151,7 +151,7 @@ var CONFIG = {
         "en": "Visvesvaraya Auditorium (Architecture Block)"
       },
       "sheetName": "PNT – Painting",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-debate": {
       "code": "DEB",
@@ -174,7 +174,7 @@ var CONFIG = {
         "en": "SMV Block (Academic Block), 1st Floor Auditorium"
       },
       "sheetName": "DEB – Debate",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-quiz": {
       "code": "QIZ",
@@ -197,7 +197,7 @@ var CONFIG = {
         "en": "TODO-CONFIRM"
       },
       "sheetName": "QIZ – Quiz",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-group-dance": {
       "code": "GDN",
@@ -220,7 +220,7 @@ var CONFIG = {
         "en": "SJB 5th Floor Amphitheatre"
       },
       "sheetName": "GDN – Group Dance",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-treasure-hunt": {
       "code": "TRH",
@@ -243,7 +243,7 @@ var CONFIG = {
         "en": "TODO-CONFIRM"
       },
       "sheetName": "TRH – Treasure Hunt",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-group-singing": {
       "code": "GSG",
@@ -266,7 +266,7 @@ var CONFIG = {
         "en": "BSN Auditorium"
       },
       "sheetName": "GSG – Group Singing",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-rangoli": {
       "code": "RGL",
@@ -289,7 +289,7 @@ var CONFIG = {
         "en": "TODO-CONFIRM"
       },
       "sheetName": "RGL – Rangoli",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-elocution": {
       "code": "ELO",
@@ -312,7 +312,7 @@ var CONFIG = {
         "en": "TODO-CONFIRM"
       },
       "sheetName": "ELO – Elocution – Pick & Speak (for non-Kannadigas)",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "s-simple-debate": {
       "code": "SKD",
@@ -335,7 +335,7 @@ var CONFIG = {
         "en": "TODO-CONFIRM"
       },
       "sheetName": "SKD – Simple Kannada Debate (for non-Kannadigas)",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "f-debate": {
       "code": "FDB",
@@ -358,7 +358,7 @@ var CONFIG = {
         "en": "SMV Block (Academic Block), 1st Floor Auditorium"
       },
       "sheetName": "FDB – Faculty Debate",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "f-group-dance": {
       "code": "FGD",
@@ -381,7 +381,7 @@ var CONFIG = {
         "en": "SJB 5th Floor Amphitheatre"
       },
       "sheetName": "FGD – Faculty Group Dance",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "f-group-singing": {
       "code": "FGS",
@@ -404,7 +404,7 @@ var CONFIG = {
         "en": "BSN Auditorium"
       },
       "sheetName": "FGS – Faculty Group Singing",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     },
     "f-simple-debate": {
       "code": "FSD",
@@ -427,7 +427,7 @@ var CONFIG = {
         "en": "TODO-CONFIRM"
       },
       "sheetName": "FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)",
-      "deadline": "2026-11-18T23:59:00+05:30"
+      "deadline": "2026-11-19T18:00:00+05:30"
     }
   }
 };

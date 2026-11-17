@@ -1251,6 +1251,55 @@ function convertTimestampsToIST() {
   }
 }
 
+/**
+ * ONE-OFF — run once from the editor after pasting the latest Config.gs (README "Extending the deadline").
+ * setupSheet() never overwrites an existing row, so the Events tab keeps the old deadline until this runs. For every
+ * Events row whose event is in Config.gs it sets deadline_iso to that event's Config deadline, but ONLY when the
+ * current value is earlier (or unreadable): a deadline a coordinator already moved later is never shortened.
+ * Writes only the deadline_iso cell (plain text); no other column, row or event tab is touched. Safe to re-run.
+ */
+function extendDeadline() {
+  assertConfig_();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var evSheet = ss_().getSheetByName(SHEET_EVENTS);
+    if (!evSheet) throw fail_('EVENTS_TAB_MISSING', 'Missing tab "' + SHEET_EVENTS + '" — run setupSheet() first.');
+    var headers = evSheet.getRange(1, 1, 1, Math.max(1, evSheet.getLastColumn())).getDisplayValues()[0].map(function (h) { return String(h).trim(); });
+    var idCol = headers.indexOf('id') + 1;
+    var dlCol = headers.indexOf('deadline_iso') + 1;
+    if (!idCol || !dlCol) throw fail_('EVENTS_COLUMN_MISSING:' + (idCol ? 'deadline_iso' : 'id'), 'Events tab lacks id / deadline_iso — run setupSheet().');
+    var lastRow = evSheet.getLastRow();
+    var changed = 0;
+    var kept = 0;
+    if (lastRow >= 2) {
+      var ids = evSheet.getRange(2, idCol, lastRow - 1, 1).getDisplayValues();
+      var dls = evSheet.getRange(2, dlCol, lastRow - 1, 1).getDisplayValues();
+      ids.forEach(function (r, i) {
+        var id = String(r[0]).trim();
+        var cfg = CONFIG.events[id];
+        if (!cfg) return;
+        var target = Date.parse(cfg.deadline);
+        var current = Date.parse(String(dls[i][0]).trim());
+        if (!isNaN(current) && current >= target) {
+          kept++;
+          return;
+        }
+        var cell = evSheet.getRange(i + 2, dlCol);
+        cell.setNumberFormat('@');
+        cell.setValues([[cfg.deadline]]);
+        changed++;
+        console.log(id + ': deadline_iso -> ' + cfg.deadline);
+      });
+    }
+    SpreadsheetApp.flush();
+    console.log('extendDeadline: ' + changed + ' row(s) changed, ' + kept + ' already at or after the Config deadline.');
+    return changed;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 /** Run from the editor to see which Config.gs this project is using (version, schema, events) without changing anything. */
 function checkConfig() {
   assertConfig_();

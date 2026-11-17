@@ -438,7 +438,7 @@ async function main() {
       const note = text.includes('ಲೈವ್ ತೆರೆದ/ಮುಚ್ಚಿದ ಸ್ಥಿತಿ');
       const nextDisabled = await page.$eval('[data-testid=next]', (b) => (b as HTMLButtonElement).disabled);
       // Registration is open from the start, so without live data the fallback (events.json + clock) must allow it.
-      const beforeDeadline = Date.now() < Date.parse('2026-11-18T23:59:00+05:30');
+      const beforeDeadline = Date.now() < Date.parse('2026-11-19T18:00:00+05:30');
       expect(note, '"live open/closed status unavailable" note');
       expect(nextDisabled === !beforeDeadline, `fallback: Next disabled=${nextDisabled}, before deadline=${beforeDeadline}`);
       return `status GET failed → fallback to events.json + clock: "live open/closed status unavailable" shown; ${beforeDeadline ? 'before the deadline so registration stays open (Next enabled)' : 'deadline passed so Next is disabled'}`;

@@ -121,7 +121,7 @@ ok('numerals rule: Latin digits in both languages, Kannada words kept (format.ts
   const kn = [
     formatDate('2026-11-21', 'kn', { year: true }),
     formatDate('2026-11-21', 'kn', { weekday: true }),
-    formatDeadline('2026-11-18T23:59:00+05:30', 'kn'),
+    formatDeadline('2026-11-19T18:00:00+05:30', 'kn'),
     formatTime('09:00', 'kn'),
     formatTimeRange('09:00', '17:45', 'kn'),
     formatPrize(45000, 'kn'),
@@ -131,7 +131,7 @@ ok('numerals rule: Latin digits in both languages, Kannada words kept (format.ts
   ];
   for (const s of kn) assert.ok(!KN_DIGIT.test(s), `no Kannada digit in "${s}"`);
   assert.equal(formatDate('2026-11-21', 'kn', { year: true }), '21 ನವೆಂಬರ್ 2026');
-  assert.equal(formatDeadline('2026-11-18T23:59:00+05:30', 'kn'), '18 ನವೆಂಬರ್, ರಾತ್ರಿ 11:59');
+  assert.equal(formatDeadline('2026-11-19T18:00:00+05:30', 'kn'), '19 ನವೆಂಬರ್, ಸಂಜೆ 6:00');
   assert.equal(formatTime('09:00', 'kn'), 'ಬೆಳಿಗ್ಗೆ 9:00');
   assert.equal(formatTime('12:30', 'kn'), 'ಮಧ್ಯಾಹ್ನ 12:30');
   assert.equal(formatTime('09:00', 'en'), '9:00 AM');

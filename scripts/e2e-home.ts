@@ -508,10 +508,11 @@ async function main() {
   // ---------- Deadline banner ----------
   const banner: [string, boolean, string][] = [
     ['2026-11-06T12:00:00+05:30', false, 'registration not open yet'],
-    ['2026-11-14T12:00:00+05:30', false, '4 days left'],
-    ['2026-11-16T12:00:00+05:30', true, '2 days left'],
-    ['2026-11-18T22:00:00+05:30', true, 'Last day'],
-    ['2026-11-19T08:00:00+05:30', false, 'closed'],
+    ['2026-11-14T12:00:00+05:30', false, '5 days left'],
+    ['2026-11-16T12:00:00+05:30', true, '3 days left'],
+    ['2026-11-18T23:59:00+05:30', true, '1 day left'],
+    ['2026-11-19T17:59:00+05:30', true, 'Last day'],
+    ['2026-11-19T18:01:00+05:30', false, 'closed'],
   ];
   await scenario('deadline-banner', async (errors) => {
     const out: string[] = [];
@@ -527,7 +528,7 @@ async function main() {
     const kn = await open(browser, 'kn', `/?${at('2026-11-16T12:00:00+05:30')}`, errors);
     await ready(kn);
     const knText = await kn.$eval('[data-testid=deadline-banner]', (e) => e.textContent ?? '');
-    expect(knText.includes('2 ದಿನ') && !/[೦-೯]/.test(knText), `kn banner "${knText}"`);
+    expect(knText.includes('3 ದಿನ') && !/[೦-೯]/.test(knText), `kn banner "${knText}"`);
     await kn.browserContext().close();
     return `${out.join(', ')}; kn uses Latin digits`;
   });

@@ -148,9 +148,9 @@ t('status reports isOpen/deadline/registeredCount per event — seatsLeft only f
   rt.post(hunt);
   const s0 = st(rt);
   assert.equal(s0.ok, true);
-  assert.deepEqual(s0.events['s-essay'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 2 });
-  assert.deepEqual(s0.events['s-treasure-hunt'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 1, seatsLeft: 29 });
-  assert.deepEqual(s0.events['s-poem'], { isOpen: true, deadline: '2026-11-18T18:29:00.000Z', registeredCount: 0 });
+  assert.deepEqual(s0.events['s-essay'], { isOpen: true, deadline: '2026-11-19T12:30:00.000Z', registeredCount: 2 });
+  assert.deepEqual(s0.events['s-treasure-hunt'], { isOpen: true, deadline: '2026-11-19T12:30:00.000Z', registeredCount: 1, seatsLeft: 29 });
+  assert.deepEqual(s0.events['s-poem'], { isOpen: true, deadline: '2026-11-19T12:30:00.000Z', registeredCount: 0 });
   assert.ok(!Number.isNaN(Date.parse(s0.serverTime)));
   const capped = Object.keys(s0.events).filter((id) => 'seatsLeft' in s0.events[id]!);
   assert.deepEqual(capped, ['s-treasure-hunt'], 'no other event has a cap');
@@ -399,6 +399,36 @@ t('CLOSED/DEADLINE when the Sheet deadline has passed', () => {
   rt.setEventField('s-essay', 'deadline_iso', '2020-01-01T00:00:00+05:30');
   assert.deepEqual(reg(rt), { ok: false, code: 'CLOSED', reason: 'DEADLINE' });
 });
+/** Pin the clock Code.gs sees (it reads Date / Date.now from the VM context). */
+function setClock(rt: GasRuntime, iso: string): void {
+  const fixed = Date.parse(iso);
+  const Real = Date;
+  class FakeDate extends Real {
+    constructor(...a: unknown[]) {
+      super(...((a.length ? a : [fixed]) as [number]));
+    }
+    static now(): number {
+      return fixed;
+    }
+  }
+  (rt.ctx as unknown as { Date: unknown }).Date = FakeDate;
+}
+t('deadline 19 Nov 2026 18:00 IST: open at 17:59, closed at 18:01, and the old 18 Nov 23:59 cutoff no longer closes', () => {
+  const at = (iso: string) => {
+    const rt = createOpenRuntime();
+    setClock(rt, iso);
+    return rt;
+  };
+  assert.equal(reg(at('2026-11-18T23:59:00+05:30')).ok, true, 'old cutoff now succeeds');
+  assert.equal(reg(at('2026-11-19T00:30:00+05:30')).ok, true);
+  assert.equal(reg(at('2026-11-19T17:59:00+05:30')).ok, true, '17:59 succeeds');
+  assert.deepEqual(reg(at('2026-11-19T18:01:00+05:30')), { ok: false, code: 'CLOSED', reason: 'DEADLINE' });
+  const status = (rt: GasRuntime) => JSON.parse(String((rt.ctx.doGet as (e: unknown) => { getContent(): string })({ parameter: { action: 'status' } }).getContent()));
+  const open = status(at('2026-11-19T17:59:00+05:30'));
+  assert.equal(open.events['s-essay'].isOpen, true);
+  assert.equal(open.events['s-essay'].deadline, '2026-11-19T12:30:00.000Z');
+  assert.equal(status(at('2026-11-19T18:01:00+05:30')).events['s-essay'].isOpen, false);
+});
 t('a broken deadline cell fails closed (never silently open)', () => {
   const rt = createOpenRuntime();
   rt.setEventField('s-essay', 'deadline_iso', '18/11 midnight');
@@ -533,7 +563,7 @@ t('an email that passes format checks but starts with "=" is stored as text, nev
 });
 t('setupSheet writes the Events tab as plain text too (deadline stays ISO)', () => {
   const rt = createOpenRuntime();
-  assert.equal(rt.eventField('s-essay', 'deadline_iso'), '2026-11-18T23:59:00+05:30');
+  assert.equal(rt.eventField('s-essay', 'deadline_iso'), '2026-11-19T18:00:00+05:30');
 });
 
 console.log('\nLock');
@@ -1768,6 +1798,25 @@ t('a new registration stores its timestamp as plain text "yyyy-MM-dd HH:mm:ss IS
   const col = (sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0] ?? []).indexOf('timestamp') + 1;
   assert.equal(sh.formats[1]?.[col - 1], '@', 'plain-text cell');
   assert.equal(typeof sh.get(2, col), 'string');
+});
+t('extendDeadline(): moves old Events deadlines to the Config value, never shortens a later one, touches nothing else, re-run is a no-op', () => {
+  const rt = createOpenRuntime();
+  rt.setEventField('s-essay', 'deadline_iso', '2026-11-18T23:59:00+05:30');
+  rt.setEventField('s-poem', 'deadline_iso', '2026-11-25T10:00:00+05:30'); // coordinator moved it later
+  rt.setEventField('s-quiz', 'deadline_iso', 'garbage');
+  rt.setEventField('s-debate', 'is_open', 'FALSE');
+  const others = JSON.stringify(rt.ss.sheets.filter((x) => x.getName() !== 'Events').map((x) => x.cells));
+  const logs = captureLogs(rt);
+  const n = (rt.ctx.extendDeadline as () => number)();
+  assert.equal(rt.eventField('s-essay', 'deadline_iso'), '2026-11-19T18:00:00+05:30');
+  assert.equal(rt.eventField('s-poem', 'deadline_iso'), '2026-11-25T10:00:00+05:30');
+  assert.equal(rt.eventField('s-quiz', 'deadline_iso'), '2026-11-19T18:00:00+05:30');
+  assert.equal(rt.eventField('s-debate', 'is_open'), 'FALSE');
+  assert.equal(n, 2);
+  assert.ok(logs.some((l) => /^extendDeadline: 2 row\(s\) changed, 13 already/.test(l)), logs.join(' | '));
+  assert.equal(JSON.stringify(rt.ss.sheets.filter((x) => x.getName() !== 'Events').map((x) => x.cells)), others);
+  assert.equal((rt.ctx.extendDeadline as () => number)(), 0);
+  assert.equal(rt.lock.held, false);
 });
 t('convertTimestampsToIST(): rewrites old "…Z" timestamps in every tab, skips IST ones, leaves anything else and every other cell alone', () => {
   const rt = createOpenRuntime();

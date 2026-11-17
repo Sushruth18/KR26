@@ -5,6 +5,7 @@
  * file + client clock. Capped events (Treasure Hunt, Events → max_teams) are "full" when the server reports
  * seatsLeft 0, and "few seats left" at FEW_SEATS or fewer; without live data the cap is unknown, so they stay open.
  */
+import { now as siteNow } from './clock';
 import type { CompetitionEvent } from './schemas';
 import type { LiveEventStatus } from './api';
 
@@ -26,7 +27,7 @@ export interface ResolvedEvent {
 export function resolveEventState(
   event: CompetitionEvent,
   live: LiveEventStatus | undefined,
-  now: number = Date.now(),
+  now: number = siteNow(),
 ): ResolvedEvent {
   const deadline = live?.deadline ?? event.deadline;
   const seatsLeft = typeof live?.seatsLeft === 'number' ? Math.max(0, live.seatsLeft) : null;

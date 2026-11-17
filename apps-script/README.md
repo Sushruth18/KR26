@@ -95,7 +95,7 @@ The build refuses to publish on Netlify if this variable is missing, so a broken
 
 ## 7. Running registration (for coordinators)
 
-Registration is **open from the start**. An event accepts registrations until **either** a coordinator closes it **or** its deadline (18 Nov, 11:59 PM IST) passes. There is **no limit on the number of registrations, except Treasure Hunt: at most 30 teams** (see "Team cap" below).
+Registration is **open from the start**. An event accepts registrations until **either** a coordinator closes it **or** its deadline (19 Nov 2026, 6:00 PM IST) passes. There is **no limit on the number of registrations, except Treasure Hunt: at most 30 teams** (see "Team cap" below).
 
 Everything is controlled from the **Events** tab. The website reads it live, about every 30 seconds, so **you never need to redeploy anything** for these changes:
 
@@ -103,7 +103,7 @@ Everything is controlled from the **Events** tab. The website reads it live, abo
 |---|---|
 | **Close** an event (stop taking registrations) | `is_open` → **`FALSE`** |
 | **Reopen** it | `is_open` → **`TRUE`** (capital letters) |
-| Change an event's last date | `deadline_iso` → keep **exactly** this format: `2026-11-18T23:59:00+05:30` |
+| Change an event's last date | `deadline_iso` → keep **exactly** this format: `2026-11-19T18:00:00+05:30` |
 | Change how many teams an event takes | `max_teams` → a whole number (e.g. `30`, `32`); **empty = no limit**; `0` = no new registrations |
 
 On the website a closed event shows a "Closed" label and a disabled Register button.
@@ -205,6 +205,14 @@ You need this when a developer changes `Code.gs`, or when **`Config.gs`** change
 
 Event IDs come from the website's data. If a new competition is added there, run **`setupSheet`** again after updating `Config.gs`. It adds the missing Events row and the new event's tab, and never deletes or overwrites anything.
 
+### Extending the registration deadline to 19 Nov 2026, 6:00 PM IST (Config `9791ed8f`, schema 6)
+
+The server reads each event's deadline from the **Events** tab, and `setupSheet` never overwrites an existing row, so pasting the new files alone does **not** extend registration.
+
+1. Paste the new `Code.gs` and `Config.gs` (Ctrl + A, paste, Save), run **`checkConfig`** (must say version `9791ed8f`).
+2. Run **`extendDeadline`**. It sets `deadline_iso` to `2026-11-19T18:00:00+05:30` for every event whose date is earlier, and never shortens a later date a coordinator set. Log: `extendDeadline: N row(s) changed, M already at or after the Config deadline.` Only the `deadline_iso` cells change. Running it again changes nothing.
+3. **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**. `<your /exec URL>?action=status` must show `"configVersion":"9791ed8f"` and `"deadline":"2026-11-19T12:30:00.000Z"` for every event.
+
 ### Adding the faculty Simple Kannada Debate (Config `c82d0f3f`, schema 6)
 
 Do this after the November 2026 update below. Nothing is removed or rewritten; the schema stays 6.
@@ -239,6 +247,7 @@ Choose the function in the drop-down above the code and click **▶ Run**; the r
 |---|---|---|
 | `checkConfig` | Shows which `Config.gs` version is pasted. Read-only. | After every paste |
 | `setupSheet` | Adds what is missing (rows, tabs, columns at the end, Summary). Never deletes or overwrites. | After every `Config.gs` update |
+| `extendDeadline` | **One-off.** Moves every Events-tab deadline earlier than the Config value up to it (19 Nov 2026, 6:00 PM IST); never shortens a later one; only `deadline_iso` cells change. | Once, when the deadline is extended |
 | `convertTimestampsToIST` | **One-off.** Rewrites old `2026-11-10T05:00:00.000Z` timestamps in every event tab to `2026-11-10 10:30:00 IST`. Skips rows already in IST, leaves anything else alone, logs how many it changed. Only the `timestamp` cells change. | Once, after deploying the November 2026 version |
 | `notifyDebateMediumChange` | **One-off.** Emails every Debate (student and faculty) registrant who has not withdrawn: the Debate is now in Kannada only; tell a coordinator if you want to withdraw. Student Debate registrants also get links to the Simple Kannada Debate and Elocution; faculty Debate registrants a link to the faculty Simple Kannada Debate (their addresses are also recorded as `notified_facultySimpleDebate`). Each address at most once, ever (the list is kept in Script Properties as `notified_debateMedium`); failed sends are retried on the next run. Logs sent / failed / skipped. | Once, after the website is updated |
 | `notifyFacultyDebateOption` | **One-off.** Emails only faculty Debate registrants (not withdrawn) who already received the Debate notice before it mentioned the faculty Simple Kannada Debate, with just that option and its link. Each address at most once, ever (Script Properties `notified_facultySimpleDebate`); failed sends are retried on the next run. Logs sent / failed / skipped. | Once, after the website shows the new competition |

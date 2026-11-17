@@ -82,7 +82,7 @@ export function formatDate(input: string | Date, lang: Lang, opts: DateFormatOpt
   return out;
 }
 
-/** ISO instant → kn: "18 ನವೆಂಬರ್, ರಾತ್ರಿ 11:59" · en: "18 November, 11:59 PM" (read in IST). */
+/** ISO instant → kn: "19 ನವೆಂಬರ್, ಸಂಜೆ 6:00" · en: "19 November, 6:00 PM" (read in IST). */
 export function formatDeadline(iso: string, lang: Lang): string {
   const p = istParts(iso);
   const hhmm = `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
