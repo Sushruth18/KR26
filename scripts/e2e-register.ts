@@ -658,7 +658,7 @@ async function main() {
     await page.waitForSelector('[data-testid=event-summary]');
     await page.waitForFunction(() => !document.querySelector('[data-testid=event-summary] .skeleton'), { timeout: 15000 });
     const summary = await page.$eval('[data-testid=event-summary]', (e) => (e.textContent ?? '').replace(/\s+/g, ' '));
-    expect(summary.includes('Simple Kannada Debate – Faculty (for non-Kannadigas)'), `summary "${summary}"`);
+    expect(summary.includes('Simple Kannada Debate – Faculty & Staff (for non-Kannadigas)'), `summary "${summary}"`);
     expect(/Prizes\s*Memento/.test(summary) && !summary.includes('₹'), `the summary shows a memento, no cash: "${summary}"`);
     await page.click('[data-testid=next]');
     await waitStep(page, 'details');
@@ -672,13 +672,13 @@ async function main() {
     await page.click('[data-testid=submit]');
     await page.waitForSelector('#f-eligibilityConfirmed-error');
     const err = await page.$eval('#f-eligibilityConfirmed-error', (e) => e.textContent ?? '');
-    expect(err.includes('only for faculty members whose mother tongue is not Kannada'), `error "${err}"`);
+    expect(err.includes('only for faculty and staff members whose mother tongue is not Kannada'), `error "${err}"`);
     expect(new URL(page.url()).pathname === '/register', 'still on the form');
     await page.click('#f-eligibilityConfirmed');
     const r = await submit(page);
     expect(r.kind === 'success' && r.regId === 'KR26-FSD-0001', `expected KR26-FSD-0001, got ${JSON.stringify(r)}`);
     const pass = await page.$eval('[data-testid=pass-card]', (e) => e.textContent ?? '');
-    expect(pass.includes('Simple Kannada Debate – Faculty') && pass.includes('Meera Iyer'), 'pass shows event and name');
+    expect(pass.includes('Simple Kannada Debate – Faculty & Staff') && pass.includes('Meera Iyer'), 'pass shows event and name');
     return `faculty error wording without the checkbox → ${r.regId}; memento in summary`;
   });
 

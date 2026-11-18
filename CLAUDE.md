@@ -11,13 +11,13 @@ When something here conflicts with your defaults, this file wins. When something
 - **What:** Official website for Kannada Rajyotsava 2026 at BMS Institute of Technology & Management, organised by Honnudi Kannada Sangha.
 - **Theme:** **Mysuru Dasara procession (Jamboo Savari)** — the site is designed as the procession itself: palace lights switching on at night, the golden Ambari on the elephant, tableaux floats, folk troupes, torchlight.
 - **Two-day festival, BMSIT&M campus:**
-  - **Day 1 — Competitions:** **20 November 2026** (Friday). All 15 competitions (students + faculty) happen this day, 12:30 PM – 4:30 PM.
+  - **Day 1 — Competitions:** **20 November 2026** (Friday). All 15 competitions (students + faculty & staff) happen this day, 12:30 PM – 4:30 PM.
   - **Day 2 — Kannada Rajyotsava main event:** **21 November 2026** (Saturday), 9:00 AM – 5:45 PM — rally, inauguration & Dasara procession, club performances, fashion show, music concert & DJ.
   - All dates (both days, countdown targets, registration window, per-event `deadline`) come from `src/data/site.json` / `events.json` — never hard-code a date in a component.
 - **Registration:** **open from now** (no opening date; no seat limits except **Treasure Hunt: max 30 teams**); closes **19 Nov 2026, 18:00 IST** (extended from 18 Nov 23:59; the evening before competition day so coordinators can prepare lists; per-event deadlines can be earlier). Registration is for **competitions only** — Day 2 needs no registration.
 - **Source of event data:** `Kannada_Rajyotsava_26_Budget_Proposal.docx` (schedule + prize breakdown) — §5.3 and §6 below are taken from it.
 - **Predecessor:** https://kr2k25-bmsit.netlify.app/ — keep every tab it had, redesign everything else.
-- **Audience:** students and faculty, ~90% on mobile phones, many on mid/low-end Android. Kannada is the default language.
+- **Audience:** students and faculty & staff, ~90% on mobile phones, many on mid/low-end Android. Kannada is the default language.
 
 ### Quality bar
 This is a public-facing college fest site that will be shared widely. No placeholder styling, no
@@ -154,13 +154,13 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
   4. After `eventEnd` → "ಧನ್ಯವಾದಗಳು" / "Thank you" — **no gallery link** (the gallery is hidden — see "Gallery hidden" under Approved decisions).
 - A small **two-day strip** under the title: "20 ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು" ‖ "21 ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ ಮೆರವಣಿಗೆ" (Day 1 Competitions / Day 2 Rajyotsava Procession).
 - CTAs: primary **"ಮೆರವಣಿಗೆಗೆ ಸೇರಿ — ನೋಂದಾಯಿಸಿ"** → `/competitions`; secondary "ನಮ್ಮ ತಂಡ" → `/team`.
-- 3 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · number of competitions (computed from data — 15: 11 students, 4 faculty) · cash prize pool (computed from data — **₹45,000**; shown as "₹45,000 + mementos" because faculty events award mementos).
+- 3 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · number of competitions (computed from data — 15: 11 students, 4 faculty & staff) · cash prize pool (computed from data — **₹45,000**; shown as "₹45,000 + mementos" because faculty events award mementos).
 - "Procession preview" strip: horizontally scrolling row of mini tableau cards for the competitions (auto-scroll, pauses on hover/touch, reduced-motion = static).
 - Registration-deadline banner when ≤ 3 days remain.
 
 ### 5.2 Competitions `/competitions`
 - Title "ಸ್ಪರ್ಧೆಗಳು", subtitle "ನಿಮ್ಮ ಪ್ರತಿಭೆಯನ್ನು ತೋರಿಸಿ".
-- Segmented toggle **ವಿದ್ಯಾರ್ಥಿಗಳು / ಅಧ್ಯಾಪಕರು** (Students / Faculty), synced to `?for=students|faculty`.
+- Segmented toggle **ವಿದ್ಯಾರ್ಥಿಗಳು / ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ** (Students / Faculty & Staff), synced to `?for=students|faculty`.
 - Grid of **TableauCards** (1 col mobile, 2 tablet, 3 desktop). Each card:
   - icon, name, date, time, venue, team size, 1st/2nd prize — or a "ಸ್ಮರಣಿಕೆ / Memento" badge when `prizes.type === "memento"` (all faculty events)
   - status pill: **Open** (green) · **Closed** (a coordinator switched it off) · **Deadline passed** · **Completed** · **Few seats left** (amber, ≤ 4 places left) · **Full** (Register disabled) — the last two only for a capped event (Treasure Hunt); its card also says "Limited to 30 teams"
@@ -185,8 +185,8 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 |---|---|---|---|
 | 09:00 | ರ‍್ಯಾಲಿ | Rally | ಬಿಲ್‌ಬೋರ್ಡ್ / Bill Board |
 | 10:00 | ಉದ್ಘಾಟನೆ ಮತ್ತು ಮೆರವಣಿಗೆ | Inauguration & Procession (highlight, Ambari; "with Veeragase & Tamate troupes") | ಮುಖ್ಯ ವೇದಿಕೆ / Main Stage |
-| 12:05 | ನೃತ್ಯ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) | Dance Competition (Students & Faculty) | Main Stage |
-| 12:30 | ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು) | Music Competition (Students & Faculty) | Main Stage |
+| 12:05 | ನೃತ್ಯ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು, ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ) | Dance Competition (Students, Faculty & Staff) | Main Stage |
+| 12:30 | ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು, ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ) | Music Competition (Students, Faculty & Staff) | Main Stage |
 | 12:45 | ರಂಗಸ್ಥಳ ಪ್ರದರ್ಶನ | Rangasthala Performance (drama club) | Main Stage |
 | 13:00 | ರುಶಾಂಗ್ ಪ್ರದರ್ಶನ | Rushaang Performance (music club) | Main Stage |
 | 13:30 | ತಾಂಡವ ಪ್ರದರ್ಶನ | Tandava Performance (dance club) | Main Stage |
@@ -197,7 +197,7 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
   Tandava) in both languages, transliterated into Kannada script. Kannada titles are a first draft — TODO-CONFIRM wording.
   Programme names the college dropped must not appear anywhere on the site (text, alt, aria, data, built output);
   `npm run check:banned` (list in `scripts/banned-terms.ts`) enforces it.
-  ⚠️ TODO-CONFIRM: the programme lists "Dance Competition" and "Music Competition (Students & Faculty)" on the
+  ⚠️ TODO-CONFIRM: the programme lists "Dance Competition" and "Music Competition (Students, Faculty & Staff)" on the
   Day 2 main stage at 12:05 and 12:30, but competitions are held on Day 1. Until confirmed, keep these two slots
   in Day 2 labelled exactly as listed (they may be winners' / finalists' performances), and do NOT
   link them to registration. Add a **prize distribution** stop to Day 2 only once its time is confirmed.
@@ -280,9 +280,9 @@ times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the 
 | s-treasure-hunt | TRH | students | ಖಜಾನೆ ಹುಡುಕಾಟ | Treasure Hunt | 4000 | 2000 | 4 | TODO |
 | s-group-singing | GSG | students | ಸಮೂಹ ಗಾಯನ | Group Singing | 4000 | 2000 | 4–12 | TODO |
 | s-rangoli | RGL | students | ರಂಗೋಲಿ | Rangoli | 4000 | 2000 | 5 | TODO |
-| f-debate | FDB | faculty | ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು) | Faculty Debate | memento | — | 1 | TODO |
-| f-group-dance | FGD | faculty | ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು) | Faculty Group Dance | memento | — | 4–12 | TODO |
-| f-group-singing | FGS | faculty | ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು) | Faculty Group Singing | memento | — | 4–12 | TODO |
+| f-debate | FDB | faculty | ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ) | Faculty & Staff Debate | memento | — | 1 | TODO |
+| f-group-dance | FGD | faculty | ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ) | Faculty & Staff Group Dance | memento | — | 4–12 | TODO |
+| f-group-singing | FGS | faculty | ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ) | Faculty & Staff Group Singing | memento | — | 4–12 | TODO |
 
 Cash total check: (5 × 3,000) + (4 × 6,000) = ₹39,000 from the proposal, **+ 2 × 3,000 for the two events added in Nov 2026 = ₹45,000**.
 
@@ -297,9 +297,9 @@ Cash total check: (5 × 3,000) + (4 × 6,000) = ₹39,000 from the proposal, **+
 
 | id | code | category | Kannada | English | icon |
 |---|---|---|---|---|---|
-| f-simple-debate | FSD | faculty | ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗೆ) | Simple Kannada Debate – Faculty (for non-Kannadigas) | messages-square |
+| f-simple-debate | FSD | faculty | ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗೆ) | Simple Kannada Debate – Faculty & Staff (for non-Kannadigas) | messages-square |
 
-That makes **15 competitions: 11 for students, 4 for faculty** (toggle counts and the Home plaque are computed from `events.json`). The eligibility error names the category (`errors.eligibility` students / `errors.eligibilityFaculty` faculty).
+That makes **15 competitions: 11 for students, 4 for faculty & staff** (toggle counts and the Home plaque are computed from `events.json`). The eligibility error names the category (`errors.eligibility` students / `errors.eligibilityFaculty` faculty).
 
 Both carry `eligibility: "nonKannadiga"`: the Register review step shows a **required** checkbox "I confirm Kannada is not my mother tongue" / "ಕನ್ನಡ ನನ್ನ ಮಾತೃಭಾಷೆ ಅಲ್ಲ ಎಂದು ದೃಢೀಕರಿಸುತ್ತೇನೆ" (`eligibilityConfirmed`); the server answers `VALIDATION` field `eligibilityConfirmed` without it and stores TRUE in the event tab's `eligibility_confirmed` column.
 Icons (lucide): essay `file-text`, poem `feather`, painting `palette`, debate `mic`, quiz `brain`,
@@ -451,6 +451,7 @@ Validate every data file with a zod schema at build time (a small `scripts/valid
 - **One-off faculty follow-up (Nov 2026):** the faculty Debate note sent by `notifyDebateMediumChange()` now also names the faculty Simple Kannada Debate (link `/register?event=f-simple-debate`), and every faculty address it reaches is also recorded in Script Properties `notified_facultySimpleDebate`. `notifyFacultyDebateOption()` (run by hand once) emails only `f-debate` registrants (not withdrawn) who are already in `notified_debateMedium` and not yet in `notified_facultySimpleDebate`, with just the new option (bilingual; "your registration stays as it is"). Same safeguards: each address at most once (recorded after each send), failed sends retried next run, quota stop, broken property → loud error, never changes the Sheet. Run order does not matter. Both share `notifiedSet_()`.
 - **Team: Cultural group (Nov 2026):** `cultural` (ಸಾಂಸ್ಕೃತಿಕ / Cultural, mask icon) replaces `drama` in the same page position. A group with `roles` in `team-config.json` shows each member's own sub-role on the card (Cultural: Drama / ನಾಟಕ, Fashion / ಫ್ಯಾಷನ್; `validate-team` checks the role is one of them); the role map routes drama/fashion/cultural answers there. People added by hand (not in the form export, e.g. Samith Reddy S) get their photo from `npm run team:photo -- --photos <folder> --id <member id>`, mapped in `scripts/team-photo-map.json` — that file is committed, so name a photo by the piece of its file name before " - " (never a USN, e-mail, phone or drive path; `validate-data` fails otherwise).
 - **Team: names, Security group (Nov 2026):** member names are **English in both languages** (`name.kn` = `name.en` for everyone; the e2e fails on a Kannada-script name). Roles and group labels stay translated. Four people were added by hand with `npm run team:photo` (Aashish S Badiger first in Media, Dhimahi Rai last in Design & Décor, Jagadish Reddy and Nischala R in the new **Security** troupe, role *Garuda* / ಗರುಡ, placed **last** after Technical, folk icon `garuda`). `team:photo` now caps every served copy at 80,000 bytes (quality is lowered, an over-size larger copy is dropped). Originals stay outside the repo.
+- **"Faculty & Staff" (Nov 2026, display text only):** every user-facing "Faculty" / "ಅಧ್ಯಾಪಕರು" is now **"Faculty & Staff" / "ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ"** (toggle, event names, register form + errors, rules, prize captions, Event Details, Home plaques, pass, `.ics`, e-mails, descriptions, README). **Unchanged internal identifiers:** the category value `faculty`, event ids `f-*`, codes, `?for=faculty`, Sheet tab names, Events-tab ids, Script Property names, the Summary tab's "For" value. The tab names are pinned by `sheetName` in `events.json` for the four renamed events (e.g. `FGS – Faculty Group Singing`), and `setupSheet` finds tabs only through the Events tab's `sheet_name` cell, so renaming display names can never create a tab or an Events row (`test:server` proves it).
 - **Sheet column `member_ids`** (not `member_usns`): holds USNs or employee IDs. `user_agent` dropped. `Config.gs` carries each event's default `sheetName` (`npm run gas:config`; `validate-data` rejects invalid or duplicate tab names).
 - **Team size counts the registrant** (Group Dance 4–12 = registrant + 3–11 member rows; min = max events such as Rangoli 5 show exactly that many rows with no add/remove buttons). Photo/video consent optional; rules consent required.
 - **Extra codes:** `CLOSED` carries `reason: NOT_OPEN` (switched off by a coordinator) `| DEADLINE`; **every `SERVER` carries a machine-readable `reason`** (`EVENTS_TAB_MISSING`, `EVENTS_COLUMN_MISSING:<col>`, `EVENT_SHEET_NAME_MISSING|EVENT_TAB_RESERVED|EVENT_TAB_SHARED|EVENT_TAB_MISSING:<eventId>`, `EVENT_TAB_COLUMN_MISSING:<eventId>:<col>`, `LOCK_TIMEOUT`, `CONFIG_MISMATCH`, `CONFIG_EMPTY`, `UNEXPECTED`; never secrets, stacks or sheet contents). `Code.gs` raises them with `fail_()` and maps every exception in `doGet`/`doPost` through `serverError_()` (also `console.error`s reason + real message in the Apps Script log); `src/lib/api.ts` logs `[registration] <status|register|lookup>: server error, reason=…` to the browser console and the UI shows nothing extra (the website adds `BAD_RESPONSE` for non-JSON answers; `submit.BUSY` text is shown for `LOCK_TIMEOUT`); lookup returns `NOT_FOUND` / `RATE_LIMITED` (5 failures per ID per 10 min). Client adds `NETWORK` and `CONFIG` (endpoint not set).

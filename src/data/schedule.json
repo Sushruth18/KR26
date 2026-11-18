@@ -17,8 +17,8 @@
     "day": 2,
     "start": "12:05",
     "title": {
-      "kn": "ನೃತ್ಯ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು)",
-      "en": "Dance Competition (Students & Faculty)"
+      "kn": "ನೃತ್ಯ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು, ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ)",
+      "en": "Dance Competition (Students, Faculty & Staff)"
     },
     "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
   },
@@ -26,8 +26,8 @@
     "day": 2,
     "start": "12:30",
     "title": {
-      "kn": "ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು ಮತ್ತು ಅಧ್ಯಾಪಕರು)",
-      "en": "Music Competition (Students & Faculty)"
+      "kn": "ಸಂಗೀತ ಸ್ಪರ್ಧೆ (ವಿದ್ಯಾರ್ಥಿಗಳು, ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ)",
+      "en": "Music Competition (Students, Faculty & Staff)"
     },
     "venue": { "kn": "ಮುಖ್ಯ ವೇದಿಕೆ", "en": "Main Stage" }
   },

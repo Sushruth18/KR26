@@ -405,6 +405,27 @@
     background: linear-gradient(180deg, var(--gold-300), var(--gold-400));
     box-shadow: 0 0 14px rgba(255, 210, 122, 0.35);
   }
+  /* "Faculty & Staff" / "ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ" is long: on phones the two buttons share the row equally and a label wraps
+     inside its fixed 44 px button instead of pushing the control past the screen. */
+  @media (max-width: 599px) {
+    .segmented {
+      display: flex;
+      width: 100%;
+    }
+    .segmented-btn {
+      flex: 1 1 0;
+      min-width: 0;
+      padding-inline: 0.5rem;
+      font-size: 0.875rem;
+      line-height: 1.2;
+      white-space: normal;
+    }
+    .segmented-label {
+      max-width: 100%;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+  }
   .segmented-count {
     display: inline-grid;
     min-width: 1.6rem;

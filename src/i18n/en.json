@@ -59,7 +59,7 @@
     "chooseEvent": "Choose a competition",
     "eventPlaceholder": "— Choose a competition —",
     "groupStudents": "Students",
-    "groupFaculty": "Faculty",
+    "groupFaculty": "Faculty & Staff",
     "summary": {
       "date": "Date",
       "time": "Time",
@@ -75,7 +75,7 @@
     },
     "category": "Category",
     "categoryStudents": "Student",
-    "categoryFaculty": "Faculty",
+    "categoryFaculty": "Faculty & Staff",
     "categoryLocked": "Set by the competition you chose",
     "name": "Full name",
     "usn": "USN",
@@ -133,7 +133,7 @@
     "teamSizeExact": "This event needs exactly {{n}} members including you",
     "memberDuplicate": "This ID is already in the team",
     "eligibility": "Please confirm — this competition is only for students whose mother tongue is not Kannada.",
-    "eligibilityFaculty": "Please confirm — this competition is only for faculty members whose mother tongue is not Kannada.",
+    "eligibilityFaculty": "Please confirm — this competition is only for faculty and staff members whose mother tongue is not Kannada.",
     "consentRules": "You need to agree to the rules to continue",
     "server": "The server didn't accept this — please check it"
   },
@@ -192,7 +192,7 @@
   "competitions": {
     "forLabel": "Show competitions for",
     "students": "Students",
-    "faculty": "Faculty",
+    "faculty": "Faculty & Staff",
     "count": "{{n}} competitions",
     "deadline": "Register by",
     "capacity": "Limited to {{n}} teams",
@@ -247,7 +247,7 @@
       "venueUnit": "campus",
       "venueCaption": "Avalahalli, Yelahanka, Bengaluru",
       "prizeUnit": "+ mementos",
-      "prizeCaption": "Cash prizes · mementos for faculty events"
+      "prizeCaption": "Cash prizes · mementos for faculty & staff events"
     },
     "tabs": {
       "label": "Choose a day",
@@ -288,7 +288,7 @@
     "competitions": {
       "title": "Competitions",
       "subtitle": "Show your talent",
-      "description": "All competitions at Kannada Rajyotsava 2026 for students and faculty. Register today."
+      "description": "All competitions at Kannada Rajyotsava 2026 for students, faculty and staff. Register today."
     },
     "event": {
       "title": "Event Details",
@@ -353,9 +353,9 @@
       "heading": "The festival at a glance",
       "datesCaption": "Competitions on day one, the main event on day two",
       "eventsUnit": "competitions",
-      "eventsCaption": "{{students}} for students, {{faculty}} for faculty",
+      "eventsCaption": "{{students}} for students, {{faculty}} for faculty & staff",
       "prizeUnit": "+ mementos",
-      "prizeCaption": "In cash prizes, with mementos for faculty winners"
+      "prizeCaption": "In cash prizes, with mementos for faculty & staff winners"
     },
     "preview": {
       "title": "The procession of competitions",

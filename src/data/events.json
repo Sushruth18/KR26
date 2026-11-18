@@ -675,10 +675,11 @@
   {
     "id": "f-debate",
     "code": "FDB",
+    "sheetName": "FDB – Faculty Debate",
     "category": "faculty",
     "name": {
-      "kn": "ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು)",
-      "en": "Faculty Debate"
+      "kn": "ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ)",
+      "en": "Faculty & Staff Debate"
     },
     "icon": "mic",
     "date": "2026-11-20",
@@ -739,10 +740,11 @@
   {
     "id": "f-group-dance",
     "code": "FGD",
+    "sheetName": "FGD – Faculty Group Dance",
     "category": "faculty",
     "name": {
-      "kn": "ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು)",
-      "en": "Faculty Group Dance"
+      "kn": "ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ)",
+      "en": "Faculty & Staff Group Dance"
     },
     "icon": "users",
     "date": "2026-11-20",
@@ -783,10 +785,11 @@
   {
     "id": "f-group-singing",
     "code": "FGS",
+    "sheetName": "FGS – Faculty Group Singing",
     "category": "faculty",
     "name": {
-      "kn": "ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು)",
-      "en": "Faculty Group Singing"
+      "kn": "ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ)",
+      "en": "Faculty & Staff Group Singing"
     },
     "icon": "music",
     "date": "2026-11-20",
@@ -843,10 +846,11 @@
   {
     "id": "f-simple-debate",
     "code": "FSD",
+    "sheetName": "FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)",
     "category": "faculty",
     "name": {
-      "kn": "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗೆ)",
-      "en": "Simple Kannada Debate – Faculty (for non-Kannadigas)"
+      "kn": "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗೆ)",
+      "en": "Simple Kannada Debate – Faculty & Staff (for non-Kannadigas)"
     },
     "icon": "messages-square",
     "date": "2026-11-20",
@@ -867,7 +871,7 @@
     },
     "rules": {
       "kn": [
-        "ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ಅಧ್ಯಾಪಕರಿಗೆ ಮಾತ್ರ ಅವಕಾಶ.",
+        "ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗೆ ಮಾತ್ರ ಅವಕಾಶ.",
         "ಇದು ವೈಯಕ್ತಿಕ ಸ್ಪರ್ಧೆ.",
         "ವಿಷಯಗಳನ್ನು ಸ್ಥಳದಲ್ಲೇ ನೀಡಲಾಗುವುದು; ಸಿದ್ಧತೆಗೆ 5 ನಿಮಿಷ ಸಿಗುತ್ತದೆ.",
         "ಯಾರು ಪರವಾಗಿ, ಯಾರು ವಿರುದ್ಧವಾಗಿ ಮಾತನಾಡಬೇಕು ಎಂದು ನ್ಯಾಯಾಧೀಶರು ನಿರ್ಧರಿಸುತ್ತಾರೆ.",
@@ -877,7 +881,7 @@
         "ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮವಾಗಿರುತ್ತದೆ."
       ],
       "en": [
-        "Open only to faculty members whose mother tongue is not Kannada.",
+        "Open only to faculty and staff members whose mother tongue is not Kannada.",
         "Individual event.",
         "Topics are given on the spot, with 5 minutes to prepare.",
         "Judges decide who speaks for or against.",

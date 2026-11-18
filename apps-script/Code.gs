@@ -955,12 +955,12 @@ function notifiedSet_(props, key) {
   return set;
 }
 
-/** The faculty Simple Kannada Debate sentence, shared by the Debate notice and notifyFacultyDebateOption. */
+/** The faculty & staff Simple Kannada Debate sentence, shared by the Debate notice and notifyFacultyDebateOption. */
 function facultyOptionKn_(url) {
-  return 'ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲದಿದ್ದರೆ, ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಬಹುದು' + (url ? ': ' + url : '.');
+  return 'ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲದಿದ್ದರೆ, ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಬಹುದು' + (url ? ': ' + url : '.');
 }
 function facultyOptionEn_(url) {
-  return 'If Kannada is not your mother tongue, you can register for the Simple Kannada Debate – Faculty (for non-Kannadigas) instead' +
+  return 'If Kannada is not your mother tongue, you can register for the Simple Kannada Debate – Faculty & Staff (for non-Kannadigas) instead' +
     (url ? ': ' + url : '.');
 }
 
@@ -1043,7 +1043,7 @@ function buildFacultyOptionNotice_(row) {
   var html = '<div style="font-family:Arial,\'Noto Sans Kannada\',sans-serif;font-size:15px;line-height:1.6;color:#222222;max-width:560px">' +
     paras(kn) + '<hr style="border:none;border-top:1px solid #dddddd;margin:18px 0">' + paras(en) +
     '<p style="margin:16px 0 0;color:#555555">' + esc_(signoff) + '</p></div>';
-  return { subject: 'KR 2026 · ' + ev.name.en + ' — a Simple Kannada Debate for faculty / ಅಧ್ಯಾಪಕರಿಗೆ ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ', text: text, html: html };
+  return { subject: 'KR 2026 · ' + ev.name.en + ' — a Simple Kannada Debate for faculty & staff / ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗೆ ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ', text: text, html: html };
 }
 
 /** Run from the editor to see how many confirmation emails can still be sent today (README §8). */

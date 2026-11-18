@@ -1030,6 +1030,50 @@ t('re-running setupSheet reports "already there / already existed" for every eve
   }
   assert.match(logs[logs.length - 1] ?? '', /0 Events row\(s\) added; 0 event tab\(s\) created, 15 already existed\./);
 });
+t('renaming events to "Faculty & Staff …" creates no tab and no Events row: setupSheet keys on id / sheet_name, never on the display name', () => {
+  const rt = createGasRuntime();
+  const cfg = rt.ctx.CONFIG as { events: Record<string, { code: string; name: { en: string; kn: string }; sheetName: string }> };
+  const facultyIds = Object.keys(cfg.events).filter((id) => id.startsWith('f-'));
+  assert.ok(facultyIds.length === 4);
+  // The spreadsheet as it was set up with the OLD display names (tab names = what the deployed Sheet really has)…
+  const OLD: Record<string, string> = {
+    'f-debate': 'Faculty Debate',
+    'f-group-dance': 'Faculty Group Dance',
+    'f-group-singing': 'Faculty Group Singing',
+    'f-simple-debate': 'Simple Kannada Debate – Faculty (for non-Kannadigas)',
+  };
+  const current = Object.fromEntries(facultyIds.map((id) => [id, { en: cfg.events[id]!.name.en, sheetName: cfg.events[id]!.sheetName }]));
+  for (const id of facultyIds) {
+    cfg.events[id]!.name.en = OLD[id]!;
+    cfg.events[id]!.sheetName = `${cfg.events[id]!.code} – ${OLD[id]}`;
+  }
+  setup(rt);
+  assert.equal(reg(rt, { eventId: 'f-group-singing', id: 'EMP1', teamName: 'Gaana', members: membersFor(4, 'EMPQ') }).ok, true);
+  const before = rt.ss.snapshot();
+  const tabsBefore = rt.ss.sheets.map((s) => s.getName()).join('|');
+  // …then the new Config.gs with the new display names, and the WORST case: a derived tab name that differs from the stored one.
+  for (const id of facultyIds) {
+    cfg.events[id]!.name.en = current[id]!.en;
+    cfg.events[id]!.sheetName = `${cfg.events[id]!.code} – ${current[id]!.en}`;
+  }
+  const logs = captureLogs(rt);
+  setup(rt);
+  assert.equal(rt.ss.snapshot(), before, 'the spreadsheet is untouched');
+  assert.equal(rt.ss.sheets.map((s) => s.getName()).join('|'), tabsBefore, 'no tab was created');
+  assert.equal(rt.events().getLastRow(), N + 1, 'no Events row was added');
+  assert.match(logs[logs.length - 1] ?? '', /0 Events row\(s\) added; 0 event tab\(s\) created/);
+  assert.equal(rt.eventField('f-group-singing', 'sheet_name'), 'FGS – Faculty Group Singing');
+  // Registrations still land in the existing tab.
+  assert.equal(reg(rt, { eventId: 'f-group-singing', id: 'EMP2', teamName: 'Gaana 2', members: membersFor(4, 'EMPR') }).regId, 'KR26-FGS-0002');
+});
+t('the shipped Config.gs keeps the existing tab names (sheetName is pinned in events.json), so a fresh setup matches the deployed Sheet', () => {
+  const rt = createGasRuntime();
+  setup(rt);
+  assert.deepEqual(
+    ['f-debate', 'f-group-dance', 'f-group-singing', 'f-simple-debate'].map((id) => rt.tab(id).getName()),
+    ['FDB – Faculty Debate', 'FGD – Faculty Group Dance', 'FGS – Faculty Group Singing', 'FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)'],
+  );
+});
 t('a partly set-up spreadsheet: only the missing tab is added, and it is reported as such', () => {
   const rt = createGasRuntime();
   setup(rt);
@@ -2021,14 +2065,14 @@ t('the note is bilingual: Kannada only + withdraw via a coordinator; only the st
   assert.ok(student!.body.includes('https://kr2k26-bmsit.netlify.app/competitions?for=students#s-debate'));
   assert.ok(faculty!.body.includes('https://kr2k26-bmsit.netlify.app/competitions?for=faculty#f-debate'));
   assert.ok(!/Elocution|ಆಶುಭಾಷಣ|event=s-/.test(faculty!.body), 'faculty are not pointed at the student-only events');
-  assert.ok(!/f-simple-debate|Faculty \(for non/.test(student!.body), 'students are not pointed at the faculty event');
+  assert.ok(!/f-simple-debate|Faculty & Staff \(for non/.test(student!.body), 'students are not pointed at the faculty event');
 });
 t('the faculty note names the faculty Simple Kannada Debate, and records the address for notifyFacultyDebateOption', () => {
   const rt = debateRuntime();
   notify(rt);
   const faculty = rt.mail.sent.find((m) => m.to === 'anand@example.com')!;
-  assert.ok(faculty.body.includes('Simple Kannada Debate – Faculty (for non-Kannadigas)'));
-  assert.ok(faculty.body.includes('ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ"'));
+  assert.ok(faculty.body.includes('Simple Kannada Debate – Faculty & Staff (for non-Kannadigas)'));
+  assert.ok(faculty.body.includes('ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ"'));
   assert.ok(faculty.body.includes('https://kr2k26-bmsit.netlify.app/register?event=f-simple-debate'));
   assert.ok(faculty.htmlBody!.includes('register?event=f-simple-debate'));
   assert.deepEqual(JSON.parse(rt.props.getProperty('notified_facultySimpleDebate')!), ['anand@example.com'], 'only the faculty address');
@@ -2090,9 +2134,9 @@ t('the follow-up is bilingual, carries the reg ID and only the new option (with 
   alreadyNoticed(rt, ['anand@example.com']);
   notifyOption(rt);
   const m = rt.mail.sent[0]!;
-  assert.match(m.subject, /Faculty Debate — a Simple Kannada Debate for faculty \/ ಅಧ್ಯಾಪಕರಿಗೆ ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ/);
+  assert.match(m.subject, /Faculty & Staff Debate — a Simple Kannada Debate for faculty & staff \/ ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗೆ ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ/);
   assert.ok(m.body.includes('Prof Anand') && m.body.includes('KR26-FDB-0001'));
-  assert.ok(m.body.includes('Simple Kannada Debate – Faculty (for non-Kannadigas)') && m.body.includes('ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗಾಗಿ'));
+  assert.ok(m.body.includes('Simple Kannada Debate – Faculty & Staff (for non-Kannadigas)') && m.body.includes('ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗಾಗಿ'));
   assert.ok(m.body.includes('https://kr2k26-bmsit.netlify.app/register?event=f-simple-debate'));
   assert.ok(m.body.includes('Your current registration stays as it is'));
   assert.ok(!/Kannada only|Elocution|event=s-/.test(m.body), 'just the new option');

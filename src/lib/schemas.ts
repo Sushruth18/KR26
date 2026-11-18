@@ -16,6 +16,11 @@ export const eventSchema = z.object({
   code: z.string().regex(/^[A-Z]{3}$/),
   category: z.enum(['students', 'faculty']),
   name: bilingual,
+  /**
+   * Optional pinned Sheet tab name (default "<CODE> – <English name>"). Used by the four "Faculty & Staff" events so the display
+   * rename did not rename their tabs; Code.gs finds tabs only through the Events tab's sheet_name cell.
+   */
+  sheetName: z.string().optional(),
   icon: z.string(),
   /** Optional card decoration, e.g. a kolam-pattern corner for Rangoli. */
   ornament: z.enum(['kolam']).optional(),
@@ -33,7 +38,7 @@ export const eventSchema = z.object({
    */
   alternatives: z.array(z.string()).optional(),
   /**
-   * "nonKannadiga" = only for students / faculty members whose mother tongue is not Kannada: the Register page asks them to confirm it
+   * "nonKannadiga" = only for students / faculty and staff members whose mother tongue is not Kannada: the Register page asks them to confirm it
    * (required checkbox), the server rejects a registration without it and stores it in eligibility_confirmed.
    */
   eligibility: z.literal('nonKannadiga').optional(),

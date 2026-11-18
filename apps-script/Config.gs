@@ -9,7 +9,7 @@
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
 var CONFIG_SCHEMA = 6;
-var CONFIG_VERSION = '351788a0';
+var CONFIG_VERSION = '0dbf7c4a';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -341,8 +341,8 @@ var CONFIG = {
       "code": "FDB",
       "category": "faculty",
       "name": {
-        "kn": "ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು)",
-        "en": "Faculty Debate"
+        "kn": "ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ)",
+        "en": "Faculty & Staff Debate"
       },
       "teamSize": {
         "min": 1,
@@ -364,8 +364,8 @@ var CONFIG = {
       "code": "FGD",
       "category": "faculty",
       "name": {
-        "kn": "ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು)",
-        "en": "Faculty Group Dance"
+        "kn": "ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ)",
+        "en": "Faculty & Staff Group Dance"
       },
       "teamSize": {
         "min": 4,
@@ -387,8 +387,8 @@ var CONFIG = {
       "code": "FGS",
       "category": "faculty",
       "name": {
-        "kn": "ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು)",
-        "en": "Faculty Group Singing"
+        "kn": "ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ)",
+        "en": "Faculty & Staff Group Singing"
       },
       "teamSize": {
         "min": 4,
@@ -410,8 +410,8 @@ var CONFIG = {
       "code": "FSD",
       "category": "faculty",
       "name": {
-        "kn": "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗೆ)",
-        "en": "Simple Kannada Debate – Faculty (for non-Kannadigas)"
+        "kn": "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗೆ)",
+        "en": "Simple Kannada Debate – Faculty & Staff (for non-Kannadigas)"
       },
       "teamSize": {
         "min": 1,

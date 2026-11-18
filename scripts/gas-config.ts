@@ -22,9 +22,12 @@ export function computeConfigVersion(config: unknown): string {
 /** Google Sheets forbids these characters in a tab name, and caps it at 100 characters. */
 const BAD_TAB_CHARS = /[[\]*?:/\\]/;
 
-/** Default tab name for an event's registrations, e.g. "ESY – Essay Writing". */
-export function sheetNameFor(e: { code: string; name: { en: string } }): string {
-  const name = `${e.code} – ${e.name.en}`;
+/**
+ * Default tab name for an event's registrations, e.g. "ESY – Essay Writing". An event may pin it with `sheetName` in
+ * events.json, so renaming its display name (Faculty → Faculty & Staff) never changes the tab name a fresh setup creates.
+ */
+export function sheetNameFor(e: { code: string; name: { en: string }; sheetName?: string }): string {
+  const name = e.sheetName ?? `${e.code} – ${e.name.en}`;
   if (BAD_TAB_CHARS.test(name) || name.length > 100) throw new Error(`events.json: "${name}" is not a valid Google Sheets tab name`);
   return name;
 }

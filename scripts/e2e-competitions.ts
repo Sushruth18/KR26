@@ -153,6 +153,81 @@ async function main() {
   }
 
   // ---------- Behaviour ----------
+  // "Faculty & Staff" (Nov 2026): the longer labels must fit at every width (measured on element rects — <body> clips overflow-x,
+  // so scrollWidth cannot see it), in both languages.
+  for (const lang of ['kn', 'en'] as const) {
+    for (const width of [320, 360, 768, 1280]) {
+      await scenario(`faculty-and-staff-fits-${lang}-${width}`, async (errors) => {
+        const page = await open(browser, lang, width, '/competitions?for=faculty&mock=', errors);
+        await revealAll(page);
+        const m = await page.evaluate(() => {
+          const vw = document.documentElement.clientWidth;
+          const boxes = [...document.querySelectorAll('.segmented, .segmented-btn, .segmented-label, [data-testid=competition-grid] article, [data-testid=competition-grid] h2, [data-testid=competition-grid] h3')];
+          const outside = boxes.filter((e) => { const r = e.getBoundingClientRect(); return r.left < -0.5 || r.right > vw + 0.5; }).map((e) => `${e.tagName}.${e.className}`);
+          // A heading is clipped only when it, or an ancestor that hides overflow, is smaller than its content.
+          const hidesOverflow = (h: Element) => {
+            for (let el: Element | null = h; el; el = el.parentElement) {
+              const cs = getComputedStyle(el);
+              if (cs.overflow !== 'visible' && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1) && cs.position !== 'fixed') return true;
+            }
+            return false;
+          };
+          const clipped = [...document.querySelectorAll('.segmented-btn, [data-testid=competition-grid] h2, [data-testid=competition-grid] h3')]
+            .filter((e) => hidesOverflow(e) || (e.classList.contains('segmented-btn') && (e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1))).map((e) => e.textContent);
+          const btn = document.querySelector('[data-testid=toggle-faculty]')!.getBoundingClientRect();
+          const label = document.querySelector('[data-testid=toggle-faculty] .segmented-label')!.getBoundingClientRect();
+          return {
+            outside,
+            clipped,
+            toggle: document.querySelector('[data-testid=toggle-faculty]')!.textContent ?? '',
+            labelInside: label.left >= btn.left - 0.5 && label.right <= btn.right + 0.5 && label.top >= btn.top - 0.5 && label.bottom <= btn.bottom + 0.5,
+            heights: [...document.querySelectorAll('.segmented-btn')].map((b) => b.getBoundingClientRect().height),
+            names: [...document.querySelectorAll('[data-testid=competition-grid] h3')].map((h) => (h.textContent ?? '').trim()),
+          };
+        });
+        expect(m.outside.length === 0, `outside the viewport: ${m.outside.join(', ')}`);
+        expect(m.clipped.length === 0, `clipped text: ${m.clipped.join(' | ')}`);
+        expect(m.toggle.includes(lang === 'kn' ? 'ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ' : 'Faculty & Staff'), `toggle label "${m.toggle}"`);
+        expect(m.labelInside && m.heights.every((h) => h === 44), `label inside its 44 px button: ${m.labelInside} / ${m.heights}`);
+        const want = faculty.map((e) => e.name[lang]);
+        expect(want.every((n) => m.names.includes(n)), `card names ${m.names.join(' | ')} ≠ events.json ${want.join(' | ')}`);
+        await page.browserContext().close();
+        return `toggle "${m.toggle.replace(/\s+/g, ' ').trim()}" fits (44 px buttons), ${m.names.length} longer faculty card titles inside the viewport`;
+      });
+    }
+  }
+
+  // No user-facing text may still say plain "Faculty" / "ಅಧ್ಯಾಪಕರು" — it is "Faculty & Staff" / "ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿ" everywhere.
+  for (const lang of ['kn', 'en'] as const) {
+    await scenario(`faculty-and-staff-wording-${lang}`, async (errors) => {
+      const routes = ['/', '/competitions?for=students', '/competitions?for=faculty', '/event', '/event?day=1', '/event?day=2', '/register?event=f-debate', '/register?event=f-simple-debate', '/register?event=s-essay'];
+      const bad: string[] = [];
+      for (const route of routes) {
+        const ctx = await browser.createBrowserContext();
+        const page = await ctx.newPage();
+        await page.setViewport({ width: 1280, height: 900 });
+        await page.evaluateOnNewDocument((l) => {
+          localStorage.setItem('kr26.lang', l);
+          sessionStorage.setItem('seenIntro', '1');
+        }, lang);
+        page.on('console', (c) => (c.type() === 'error' || c.type() === 'warn') && errors.push(`${c.type()}: ${c.text()}`));
+        await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle0' });
+        await page.evaluate(() => document.fonts.ready);
+        const text = await page.evaluate(() => {
+          const t = [document.title, document.querySelector('meta[name=description]')?.getAttribute('content') ?? '', document.body.innerText];
+          for (const el of document.querySelectorAll('[alt],[aria-label],[title]')) t.push(el.getAttribute('alt') ?? '', el.getAttribute('aria-label') ?? '', el.getAttribute('title') ?? '');
+          return t.join(' | ');
+        });
+        const plain = (re: RegExp, ok: RegExp) => [...text.matchAll(re)].filter((x) => !ok.test(text.slice(x.index! + x[0].length))).map((x) => x[0]);
+        const hits = lang === 'en' ? plain(/\bfaculty\b/gi, /^ (?:&|and) staff/i) : plain(/ಅಧ್ಯಾಪಕ\S*/g, /^ ಮತ್ತು ಸಿಬ್ಬಂದಿ/);
+        if (hits?.length) bad.push(`${route}: ${[...new Set(hits)].join(', ')}`);
+        await ctx.close();
+      }
+      expect(bad.length === 0, `plain "faculty" wording left: ${bad.join(' ;; ')}`);
+      return `${routes.length} routes (title, description, text, alt/aria/title): every "faculty" is "Faculty & Staff"`;
+    });
+  }
+
   await scenario('toggle-syncs-url-kn', async (errors) => {
     const page = await open(browser, 'kn', 360, '/competitions?mock=', errors);
     expect((await page.$$('[data-testid=competition-grid] article')).length === students.length, 'default = students');
@@ -354,7 +429,7 @@ async function main() {
       await page.waitForSelector('[data-testid=rules-f-simple-debate] li');
       const rules = await page.$$eval('[data-testid=rules-f-simple-debate] li', (n) => n.map((x) => x.textContent));
       expect(rules.length === 8 && rules[0] === fsd.rules[lang][0], `rule 1 "${rules[0]}"`);
-      expect(lang === 'kn' ? rules[0]!.includes('ಅಧ್ಯಾಪಕರಿಗೆ') : rules[0] === 'Open only to faculty members whose mother tongue is not Kannada.', `rule 1 wording "${rules[0]}"`);
+      expect(lang === 'kn' ? rules[0]!.includes('ಅಧ್ಯಾಪಕರು ಮತ್ತು ಸಿಬ್ಬಂದಿಗೆ') : rules[0] === 'Open only to faculty and staff members whose mother tongue is not Kannada.', `rule 1 wording "${rules[0]}"`);
       await page.browserContext().close();
       return `toggle ${counts.join('/')}, memento, 1 coordinator + tel link, 8 rules, Register → ${c.register}`;
     });

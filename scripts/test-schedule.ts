@@ -25,8 +25,8 @@ ok('Day 2 lists exactly the confirmed stops, in order, with the confirmed names 
   const want: [string, string, string][] = [
     ['09:00', 'Rally', 'Bill Board'],
     ['10:00', 'Inauguration & Procession', 'Main Stage'],
-    ['12:05', 'Dance Competition (Students & Faculty)', 'Main Stage'],
-    ['12:30', 'Music Competition (Students & Faculty)', 'Main Stage'],
+    ['12:05', 'Dance Competition (Students, Faculty & Staff)', 'Main Stage'],
+    ['12:30', 'Music Competition (Students, Faculty & Staff)', 'Main Stage'],
     ['12:45', 'Rangasthala Performance', 'Main Stage'],
     ['13:00', 'Rushaang Performance', 'Main Stage'],
     ['13:30', 'Tandava Performance', 'Main Stage'],

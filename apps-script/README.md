@@ -205,6 +205,15 @@ You need this when a developer changes `Code.gs`, or when **`Config.gs`** change
 
 Event IDs come from the website's data. If a new competition is added there, run **`setupSheet`** again after updating `Config.gs`. It adds the missing Events row and the new event's tab, and never deletes or overwrites anything.
 
+### Updating to the 18 Nov 2026 version (Config `0dbf7c4a`, schema 6)
+
+What changed in the script's data: **Group Singing** (students and faculty & staff) now takes **4–12** people (it was 6–12); every competition has its **final venue** (shown on the pass, the calendar file and the confirmation email); the four faculty events are now called **"Faculty & Staff …"** in e-mails and on the site; the one-off notice e-mails use the new wording. Nothing in the spreadsheet is renamed or moved.
+
+1. **Code.gs** and **Config.gs**: paste both (Ctrl + A → paste → Save), then run **`checkConfig`**. The log must say `Config.gs OK — version 0dbf7c4a, schema 6, 15 events: …`.
+2. **`setupSheet` is not needed**, but running it is safe: it finds each event's tab through the **`sheet_name`** cell of the Events tab, never through the event's name, so the renamed events do **not** get a new tab or a new Events row. The four faculty & staff tabs keep their names (`FDB – Faculty Debate`, `FGD – Faculty Group Dance`, `FGS – Faculty Group Singing`, `FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)`); the Events tab's `name_en` column keeps the old wording (it is only a label for coordinators) and may be edited by hand. Expected log: `0 Events row(s) added; 0 event tab(s) created, 15 already existed.`
+3. **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy** (same URL). `<your /exec URL>?action=status` must contain `"configVersion":"0dbf7c4a"`.
+4. Existing Group Singing registrations (6 or more people) are untouched; teams of 4 and 5 are accepted from now on.
+
 ### Extending the registration deadline to 19 Nov 2026, 6:00 PM IST (Config `9791ed8f`, schema 6)
 
 The server reads each event's deadline from the **Events** tab, and `setupSheet` never overwrites an existing row, so pasting the new files alone does **not** extend registration.

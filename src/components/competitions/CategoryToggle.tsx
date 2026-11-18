@@ -42,8 +42,8 @@ export function CategoryToggle({ value, counts, onChange }: Props) {
                 aria-hidden="true"
               />
             )}
-            <span className="relative inline-flex items-center gap-2">
-              <Icon size={18} aria-hidden="true" className="max-[359px]:hidden" />
+            <span className="segmented-label relative inline-flex items-center gap-2">
+              <Icon size={18} aria-hidden="true" className="max-[479px]:hidden" />
               {t(`competitions.${c}`)}
               <span className="segmented-count">{formatNumber(counts[c], lang)}</span>
             </span>
