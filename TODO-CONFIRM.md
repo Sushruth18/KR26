@@ -83,7 +83,7 @@ Block names are transliterated; floors and room numbers use Latin digits (numera
 - [ ] Map pin — verify the embed for "BMS Institute of Technology and Management, Avalahalli, Yelahanka, Bengaluru"
 
 ## Event details
-- [ ] Chief guest names, titles, photos (`guests.json` is empty → "Announcing soon" frame)
+- [ ] **Chief guests** (`src/data/guests.json`, `public/guests/`): Shri Raghavendra Beejadi (Bhavageete singer) and Shri Mimicry Gopi (comedy artist). Confirm the **spelling of both names**, the **English titles** ("Renowned Bhavageete Singer", "Kannada Comedy Artist" — my translation; the Kannada names and titles are copied from the official invitation poster, a Kannada speaker should review), and **permission to use their photos** publicly. Gopi's source photo is only 204 px square (cropped to 153×204, not upscaled), so it may look soft at 1280 px — get a bigger portrait (≥ 600 px wide) if possible and re-export to `public/guests/` (update `width`/`height` in `guests.json`)
 - [ ] Day 2 Dance / Music Competition (Students & Faculty) slots (12:05, 12:30): listed on Day 2 although competitions are on Day 1 — kept as listed, no registration link
 - [ ] Prize-distribution stop for Day 2 — add once its time is confirmed
 

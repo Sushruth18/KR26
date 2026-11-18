@@ -128,7 +128,7 @@ export const artistsSchema = z
   });
 export type Artist = z.infer<typeof artistSchema>;
 
-export const guestsSchema = z.array(z.object({ name: bilingual, title: bilingual, photo: z.string() }));
+export const guestsSchema = z.array(z.object({ name: bilingual, title: bilingual, photo: z.string().min(1), width: z.number().int().positive(), height: z.number().int().positive() }));
 export type Guest = z.infer<typeof guestsSchema>[number];
 
 /** A team member. `photo` is a key of src/data/team-photos.generated.json ("" = no photo yet → initials frame). */

@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "name": { "kn": "ಶ್ರೀ ರಾಘವೇಂದ್ರ ಬೀಜಾಡಿ", "en": "Shri Raghavendra Beejadi" },
+    "title": { "kn": "ಹೆಸರಾಂತ ಭಾವಗೀತೆ ಗಾಯಕರು", "en": "Renowned Bhavageete Singer" },
+    "photo": "/guests/raghavendra-beejadi.webp",
+    "width": 418,
+    "height": 558
+  },
+  {
+    "name": { "kn": "ಶ್ರೀ ಮಿಮಿಕ್ರಿ ಗೋಪಿ", "en": "Shri Mimicry Gopi" },
+    "title": { "kn": "ಕನ್ನಡದ ಹಾಸ್ಯ ಕಲಾವಿದರು", "en": "Kannada Comedy Artist" },
+    "photo": "/guests/mimicry-gopi.webp",
+    "width": 153,
+    "height": 204
+  }
+]

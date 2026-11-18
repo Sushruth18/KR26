@@ -231,7 +231,8 @@
     "guests": {
       "title": "Chief guests",
       "soon": "Announcing soon",
-      "soonText": "Our chief guests will be announced shortly."
+      "soonText": "Our chief guests will be announced shortly.",
+      "alt": "{{name}}, chief guest"
     },
     "artist": {
       "title": "Headline artists",

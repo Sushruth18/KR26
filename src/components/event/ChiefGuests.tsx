@@ -25,16 +25,28 @@ export function ChiefGuests() {
           </DarbarFrame>
         </figure>
       ) : (
-        <ul className="m-0 flex list-none flex-wrap justify-center gap-10 p-0">
+        <ul className="guest-grid" data-testid="guest-list">
           {guests.map((g) => (
-            <li key={g.name.en} className="w-full max-w-[17.5rem]">
+            <li key={g.name.en} className="guest-item" data-testid="guest-card">
               <figure className="m-0">
-                <DarbarFrame>
-                  <img src={g.photo} alt={g.name[lang]} loading="lazy" decoding="async" />
+                <DarbarFrame className="guest-frame">
+                  <img
+                    src={g.photo}
+                    width={g.width}
+                    height={g.height}
+                    alt={t('eventPage.guests.alt', { name: g.name[lang] })}
+                    loading="lazy"
+                    decoding="async"
+                    data-testid="guest-photo"
+                  />
                 </DarbarFrame>
-                <figcaption className="mt-4 text-center">
-                  <p className="m-0 font-display text-xl text-gold-300">{g.name[lang]}</p>
-                  <p className="m-0 text-ivory-300">{g.title[lang]}</p>
+                <figcaption className="guest-caption">
+                  <p className="guest-name" data-testid="guest-name">
+                    {g.name[lang]}
+                  </p>
+                  <p className="guest-title" data-testid="guest-title">
+                    {g.title[lang]}
+                  </p>
                 </figcaption>
               </figure>
             </li>

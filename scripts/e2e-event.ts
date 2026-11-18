@@ -4,7 +4,7 @@
  *   2. npm run e2e:event    (E2E_BASE, E2E_OUT, CHROME_PATH env vars optional)
  * kn/en × 320/360/768/1280 px: no clipped or overflowing element, footer once, one h1, no console errors,
  * Day 2 timeline = schedule.json (order, start times only, Latin digits in both languages, no Break), Now/Next from the
- * dev clock, headline artists section (both artists, equal frames, stacked / side by side) + stop + banner, day tabs and ?day=, Day 1 stops, lazy map, reduced
+ * dev clock, chief guests (2 cards side by side, order, photos load, titles per language), headline artists section (both artists, equal frames, stacked / side by side) + stop + banner, day tabs and ?day=, Day 1 stops, lazy map, reduced
  * motion, and no banned programme names in the rendered text, alt or aria text.
  */
 import { mkdirSync } from 'node:fs';
@@ -12,6 +12,7 @@ import { resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
 import artists from '../src/data/artist.json' with { type: 'json' };
 import artistAssets from '../src/data/artist.generated.json' with { type: 'json' };
+import guests from '../src/data/guests.json' with { type: 'json' };
 import events from '../src/data/events.json' with { type: 'json' };
 import schedule from '../src/data/schedule.json' with { type: 'json' };
 import site from '../src/data/site.json' with { type: 'json' };
@@ -151,7 +152,7 @@ async function main() {
         expect(m.footers === 1 && m.h1 === 1, `footers ${m.footers}, h1 ${m.h1}`);
         expect(m.stops === day2.length, `stops ${m.stops}`);
         expect(m.banners === 5, `banners ${m.banners}`);
-        expect(m.frames === 1 + artists.length, `Darbar frames ${m.frames} (guests + ${artists.length} artists)`);
+        expect(m.frames === guests.length + artists.length, `Darbar frames ${m.frames} (${guests.length} guests + ${artists.length} artists)`);
         return `${m.stops} stops, ${m.banners} banners, ${m.frames} frames, no overflow/clipping, footer×1, h1×1`;
       });
     }
@@ -228,6 +229,60 @@ async function main() {
       return note;
     });
   }
+
+  // ---------- Chief guests ----------
+  await scenario('chief-guests-kn-en-toggle', async (errors) => {
+    expect(guests.length === 2, `guests.json has ${guests.length} entries`);
+    expect(guests.every((g) => g.title.kn.trim() && g.title.en.trim()), 'a guest has an empty title');
+    const read = (page: Page) =>
+      page.evaluate(() => ({
+        soon: !!document.querySelector('[data-testid=guests-soon]'),
+        cards: [...document.querySelectorAll<HTMLElement>('[data-testid=guest-card]')].map((li) => {
+          const img = li.querySelector<HTMLImageElement>('[data-testid=guest-photo]')!;
+          const r = li.getBoundingClientRect();
+          const tb = li.querySelector('[data-testid=guest-title]')!.getBoundingClientRect();
+          const nb = li.querySelector('[data-testid=guest-name]')!.getBoundingClientRect();
+          return {
+            left: r.left,
+            top: r.top,
+            name: li.querySelector('[data-testid=guest-name]')!.textContent,
+            title: li.querySelector('[data-testid=guest-title]')!.textContent,
+            titleVisible: tb.width > 0 && tb.height > 0 && tb.left >= r.left - 1 && tb.right <= r.right + 1,
+            nameVisible: nb.width > 0 && nb.height > 0 && nb.left >= r.left - 1 && nb.right <= r.right + 1,
+            alt: img.alt,
+            loaded: img.complete && img.naturalWidth > 0,
+            w: img.naturalWidth,
+          };
+        }),
+      }));
+    for (const width of [320, 360, 768, 1280]) {
+      const page = await open(browser, 'kn', width, `/event?${noon}&mock=`, errors);
+      await page.$eval('#guests-title', (e) => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>('[data-testid=guest-photo]')].every((i) => i.complete && i.naturalWidth > 0));
+      for (const lang of ['kn', 'en'] as const) {
+        if (lang === 'en') {
+          await page.evaluate(() => document.querySelector<HTMLButtonElement>('button[aria-label="Switch to English"]')!.click());
+          await sleep(400);
+          await page.$eval('#guests-title', (e) => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+          await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>('[data-testid=guest-photo]')].every((i) => i.complete && i.naturalWidth > 0));
+        }
+        const r = await read(page);
+        const hScroll = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+        const tag = `${lang}@${width}`;
+        expect(!r.soon, `${tag}: "announcing soon" frame still shown`);
+        expect(r.cards.length === 2, `${tag}: ${r.cards.length} guest cards`);
+        expect(r.cards[0]!.name === guests[0]!.name[lang] && r.cards[1]!.name === guests[1]!.name[lang], `${tag}: names/order ${r.cards.map((c) => c.name)}`);
+        expect(r.cards[0]!.left < r.cards[1]!.left && Math.abs(r.cards[0]!.top - r.cards[1]!.top) < 2, `${tag}: not side by side, Raghavendra first`);
+        expect(r.cards.every((c) => c.loaded), `${tag}: image failed to load`);
+        expect(r.cards.every((c, i) => c.title === guests[i]!.title[lang] && c.titleVisible && c.nameVisible), `${tag}: title/name missing or overflowing ${r.cards.map((c) => c.title)}`);
+        expect(r.cards.every((c) => c.alt.includes(c.name!)), `${tag}: alt "${r.cards.map((c) => c.alt)}"`);
+        expect(!hScroll, `${tag}: horizontal scroll`);
+        if (width === 360 || width === 1280) await page.screenshot({ path: resolve(OUT, `guests-${lang}-${width}.png`) });
+      }
+      await page.browserContext().close();
+    }
+    return 'two cards side by side, Raghavendra first, images load, titles in kn and en after toggle, no horizontal scroll at 320/360/768/1280';
+  });
 
   // ---------- Headline artists ----------
   // Tanmay's source photo is 200 px square: at 1x the browser may enlarge it at most this much (it is drawn at the arch's height).
