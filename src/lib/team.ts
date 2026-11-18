@@ -16,8 +16,7 @@ export type FolkIconName =
   | 'shield'
   | 'conch'
   | 'mask'
-  | 'gear'
-  | 'garuda';
+  | 'gear';
 
 interface Bilingual {
   kn: string;

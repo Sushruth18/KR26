@@ -82,7 +82,17 @@
         "kn": "ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ",
         "en": "Stage & Security"
       },
-      "icon": "shield"
+      "icon": "shield",
+      "roles": {
+        "garuda": {
+          "kn": "ಗರುಡ",
+          "en": "Garuda"
+        },
+        "stage": {
+          "kn": "ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ",
+          "en": "Stage & Security"
+        }
+      }
     },
     {
       "id": "anchoring",
@@ -117,20 +127,6 @@
         "en": "Technical"
       },
       "icon": "gear"
-    },
-    {
-      "id": "security",
-      "label": {
-        "kn": "ಭದ್ರತೆ",
-        "en": "Security"
-      },
-      "icon": "garuda",
-      "roles": {
-        "garuda": {
-          "kn": "ಗರುಡ",
-          "en": "Garuda"
-        }
-      }
     }
   ]
 }

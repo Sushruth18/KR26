@@ -415,6 +415,30 @@
     "id": "stage-security",
     "members": [
       {
+        "id": "jagadish-reddy",
+        "name": {
+          "kn": "Jagadish Reddy",
+          "en": "Jagadish Reddy"
+        },
+        "role": {
+          "kn": "ಗರುಡ",
+          "en": "Garuda"
+        },
+        "photo": "jagadish-reddy"
+      },
+      {
+        "id": "nischala-r",
+        "name": {
+          "kn": "Nischala R",
+          "en": "Nischala R"
+        },
+        "role": {
+          "kn": "ಗರುಡ",
+          "en": "Garuda"
+        },
+        "photo": "nischala-r"
+      },
+      {
         "id": "rohit-sundar",
         "name": {
           "kn": "Rohit Sundar",
@@ -507,35 +531,6 @@
           "en": "Fashion"
         },
         "photo": "samith-reddy-s"
-      }
-    ]
-  },
-  {
-    "id": "security",
-    "members": [
-      {
-        "id": "jagadish-reddy",
-        "name": {
-          "kn": "Jagadish Reddy",
-          "en": "Jagadish Reddy"
-        },
-        "role": {
-          "kn": "ಗರುಡ",
-          "en": "Garuda"
-        },
-        "photo": "jagadish-reddy"
-      },
-      {
-        "id": "nischala-r",
-        "name": {
-          "kn": "Nischala R",
-          "en": "Nischala R"
-        },
-        "role": {
-          "kn": "ಗರುಡ",
-          "en": "Garuda"
-        },
-        "photo": "nischala-r"
       }
     ]
   }

@@ -378,10 +378,12 @@ async function main() {
     const names = (id: string) => troupes.find((t) => t.id === id)?.members.map((m) => m.name.en) ?? [];
     expect(names('media')[0] === 'Aashish S Badiger', `Media must start with Aashish S Badiger: ${names('media')}`);
     expect(names('design-decor').at(-1) === 'Dhimahi Rai', `Dhimahi Rai must close Design & Décor: ${names('design-decor')}`);
-    expect(names('security').join() === 'Jagadish Reddy,Nischala R', `Security members: ${names('security')}`);
-    expect(troupes.at(-1)?.id === 'security', 'Security is the last troupe');
-    const sec = troupes.find((t) => t.id === 'security')!;
-    expect(sec.label.kn === 'ಭದ್ರತೆ' && sec.members.every((m) => m.role.kn === 'ಗರುಡ' && m.role.en === 'Garuda'), 'Security label / Garuda role');
+    expect(!troupes.some((t) => t.id === 'security') && !groupConfig.some((g) => g.id === 'security'), 'no separate Security group');
+    expect(names('stage-security').join() === 'Jagadish Reddy,Nischala R,Rohit Sundar,Swaroop B H,Dhanush Rajakumar,Sacheth Kumar P N', `Stage & Security members: ${names('stage-security')}`);
+    const sec = troupes.find((t) => t.id === 'stage-security')!;
+    expect(sec.label.en === 'Stage & Security' && sec.label.kn === 'ವೇದಿಕೆ ಮತ್ತು ಭದ್ರತೆ', 'Stage & Security label');
+    expect(sec.members.slice(0, 2).every((m) => m.role.kn === 'ಗರುಡ' && m.role.en === 'Garuda'), 'Jagadish and Nischala keep the Garuda role');
+    expect(troupes.at(-1)?.id === 'cultural', `last troupe is ${troupes.at(-1)?.id} (Technical has no members and is hidden)`);
     const total = troupes.reduce((n, t) => n + t.members.length, 0);
     expect(total === 40, `member count ${total} (expected 40 = 36 + 4)`);
     for (const id of ['aashish-s-badiger', 'dhimahi-rai', 'jagadish-reddy', 'nischala-r']) {
@@ -396,7 +398,7 @@ async function main() {
     }
     // English-only names: the Kannada name equals the English one for everybody, and is Latin script.
     for (const m of troupes.flatMap((t) => t.members)) expect(m.name.kn === m.name.en && !/[ಀ-೿]/.test(m.name.kn), `${m.id}: name must be English in both languages`);
-    return `${total} members, order Media/Design/Security as requested, photos < 80 KB, names English in both languages`;
+    return `${total} members, Garuda inside Stage & Security (first two), Media/Design order as requested, photos < 80 KB, names English in both languages`;
   });
 
   // ---------- Browser ----------
