@@ -15,6 +15,8 @@ import events from '../src/data/events.json' with { type: 'json' };
 import site from '../src/data/site.json' with { type: 'json' };
 
 const BASE = process.env.E2E_BASE ?? 'http://localhost:5173';
+/** Navbar / mobile-menu links: 6 routes, minus the Gallery while it is hidden (site.json → features.gallery). */
+const NAV_COUNT = 6 - (site.features.gallery ? 0 : 1);
 const OUT = resolve(process.env.E2E_OUT ?? 'e2e-output/home');
 const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 mkdirSync(OUT, { recursive: true });
@@ -384,7 +386,7 @@ async function main() {
     await page.waitForSelector('#mobile-menu', { visible: true, timeout: 5000 });
     await sleep(700);
     const links = await page.$$eval('#mobile-menu nav a', (as) => as.map((a) => getComputedStyle(a.parentElement!).opacity));
-    expect(links.length === 6 && links.every((o) => Number(o) > 0.98), `menu links ${links}`);
+    expect(links.length === NAV_COUNT && links.every((o) => Number(o) > 0.98), `menu links ${links}`);
     await page.keyboard.press('Escape');
     await page.waitForSelector('#mobile-menu', { hidden: true, timeout: 3000 });
     await page.click('button[aria-controls=mobile-menu]');
@@ -392,7 +394,37 @@ async function main() {
     await page.click('#mobile-menu button[aria-label]');
     await page.waitForSelector('#mobile-menu', { hidden: true, timeout: 3000 });
     await page.browserContext().close();
-    return 'opens on first tap (lazy chunk), 6 links staggered in, Esc and close button work, reopens';
+    return `opens on first tap (lazy chunk), ${NAV_COUNT} links staggered in, Esc and close button work, reopens`;
+  });
+
+  // ---------- Gallery switch (site.json → features.gallery) ----------
+  await scenario('gallery-hidden', async (errors) => {
+    expect(site.features.gallery === false, 'this test expects features.gallery = false (the gallery is hidden until after the festival)');
+    const out: string[] = [];
+    for (const lang of ['kn', 'en'] as const) {
+      // Desktop navbar: 5 links, none to /gallery. Footer and page: no /gallery link anywhere.
+      const page = await open(browser, lang, '/', errors, { width: 1280 });
+      await ready(page);
+      const nav = await page.$$eval('header nav a[href]', (as) => as.map((a) => a.getAttribute('href')).filter((h) => h?.startsWith('/')));
+      expect(nav.length === NAV_COUNT && !nav.includes('/gallery'), `navbar links ${nav}`);
+      const anywhere = await page.$$eval('a[href*="gallery"]', (as) => as.length);
+      expect(anywhere === 0, `${anywhere} link(s) to the gallery on Home`);
+      await page.browserContext().close();
+      // The old URL (and anything under it) goes to Home — not a dead page, not a 404.
+      for (const path of ['/gallery', '/gallery/2025']) {
+        const p = await open(browser, lang, path, errors, { width: 360 });
+        await ready(p);
+        const at = await p.evaluate(() => ({ path: location.pathname, h1: document.querySelector('h1')?.textContent ?? '', phase: !!document.querySelector('[data-testid=countdown]') }));
+        expect(at.path === '/' && at.phase, `${path} → ${at.path} (countdown ${at.phase})`);
+        await p.browserContext().close();
+      }
+      out.push(`${lang}: ${nav.length} nav links`);
+    }
+    const sitemap = await (await fetch(`${BASE}/sitemap.xml`)).text();
+    expect(!sitemap.includes('/gallery') && sitemap.split('<url>').length - 1 === NAV_COUNT, 'sitemap lists the visible routes only');
+    const robots = await (await fetch(`${BASE}/robots.txt`)).text();
+    expect(!robots.includes('gallery'), 'robots.txt');
+    return `${out.join(', ')}; /gallery and /gallery/2025 redirect to /; sitemap has ${NAV_COUNT} URLs, none for the gallery`;
   });
 
   // ---------- Reduced motion ----------

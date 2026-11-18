@@ -201,7 +201,7 @@ You need this when a developer changes `Code.gs`, or when **`Config.gs`** change
 
 ⚠️ Do **not** use "New deployment" for updates. That creates a *different* URL, and the website would keep talking to the old one. "Manage deployments → Edit → New version" keeps the same URL.
 
-**Check that the right Config is live.** Open `<your /exec URL>?action=status` in a browser: the answer contains `"configVersion":"4d8d0965"` (this release; it changes with the data). It must equal the `CONFIG_VERSION` printed by `npm run gas:config` (and found at the top of `Config.gs`). If it differs, or the answer is `CONFIG_MISMATCH`, the deployment is still running old code: paste, save, and deploy a New version.
+**Check that the right Config is live.** Open `<your /exec URL>?action=status` in a browser: the answer contains `"configVersion":"0dbf7c4a"` (this release; it changes with the data). It must equal the `CONFIG_VERSION` printed by `npm run gas:config` (and found at the top of `Config.gs`). If it differs, or the answer is `CONFIG_MISMATCH`, the deployment is still running old code: paste, save, and deploy a New version.
 
 Event IDs come from the website's data. If a new competition is added there, run **`setupSheet`** again after updating `Config.gs`. It adds the missing Events row and the new event's tab, and never deletes or overwrites anything.
 

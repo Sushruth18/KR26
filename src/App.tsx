@@ -1,9 +1,10 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './components/layout/Layout';
 import { AmbariElephant } from './components/art/AmbariElephant';
 import { useReducedMotion } from './hooks/useMotionPrefs';
+import { features } from './lib/features';
 import { loadHome } from './pages/homePreload';
 
 const Home = lazy(loadHome); // see pages/homePreload.ts
@@ -38,7 +39,8 @@ export default function App() {
             <Route index element={<Home />} />
             <Route path="competitions" element={<Competitions />} />
             <Route path="event" element={<EventDetails />} />
-            <Route path="gallery" element={<Gallery />} />
+            {/* Gallery is hidden until after the festival (site.json → features.gallery): the old URL goes home, never a dead page. */}
+            {features.gallery ? <Route path="gallery" element={<Gallery />} /> : <Route path="gallery/*" element={<Navigate to="/" replace />} />}
             <Route path="team" element={<Team />} />
             <Route path="register" element={<Register />} />
             <Route path="register/success" element={<RegisterSuccess />} />

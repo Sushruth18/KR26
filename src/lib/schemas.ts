@@ -175,6 +175,8 @@ export const siteSchema = z.object({
   eventEnd: isoDateTime,
   registrationClose: isoDateTime,
   prizePoolTotal: z.number().int().positive(),
+  /** Feature switches. `gallery: false` hides the Gallery everywhere (nav, menu, sitemap, route redirects to /); the page code and gallery.json stay. */
+  features: z.object({ gallery: z.boolean() }),
   /** Public origin of the deployed site, no trailing slash — used for canonical, og:url/og:image, sitemap and emails. */
   siteUrl: z
     .string()

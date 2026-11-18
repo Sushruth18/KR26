@@ -7,6 +7,9 @@
   "eventEnd": "2026-11-21T17:45:00+05:30",
   "registrationClose": "2026-11-19T18:00:00+05:30",
   "prizePoolTotal": 45000,
+  "features": {
+    "gallery": false
+  },
   "siteUrl": "https://kr2k26-bmsit.netlify.app",
   "instagramUrl": "",
   "contactEmail": "",

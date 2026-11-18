@@ -280,5 +280,8 @@ Fix by editing `name.kn` in `src/data/team.json`; a re-import never overwrites i
 - [ ] Kannada wording for the team step (`kn.json → register.teamIntroExact`, `register.teamCountExact`, `register.teamCount`, `errors.teamSizeExact`): "ಈ ಸ್ಪರ್ಧೆಗೆ ನಿಮ್ಮನ್ನೂ ಸೇರಿ ನಿಖರವಾಗಿ 5 ಸದಸ್ಯರು ಬೇಕು…", "ತಂಡದ ಸದಸ್ಯರು: 5ರಲ್ಲಿ 5", "(ಕನಿಷ್ಠ 4, ಗರಿಷ್ಠ 12)"
 - [ ] Kannada wording written by me, to be checked by a Kannada speaker: the confirmation email's "View your pass" lines ("ನಿಮ್ಮ ಪಾಸ್ ವೀಕ್ಷಿಸಿ", "ನೋಂದಣಿಯಲ್ಲಿ ನೀಡಿದ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ — ಐಡಿ ಮೊದಲೇ ತುಂಬಿರುತ್ತದೆ.") and the pass lookup text (`kn.json → pass.lookup.*`)
 
+## Gallery (hidden until after the festival)
+- [ ] `src/data/site.json → features.gallery` is `false`: the Gallery is out of the navbar, menu and sitemap and `/gallery` redirects to Home. After the festival: add the 2026 photos/reels to `gallery.json`, finish the page (Phase 6), set the switch to `true`, run `npm run seo`, and change `NAV_COUNT` in `scripts/e2e-home.ts`.
+
 ## Pages not built yet (Phase 6)
 - [ ] `/gallery` is still a "coming soon" placeholder. It is linked from the navbar, so either build it or hide the link before sharing widely
