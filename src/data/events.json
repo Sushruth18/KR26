@@ -12,8 +12,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422",
-      "en": "BSN 422"
+      "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+      "en": "EAB 2nd Floor"
     },
     "teamSize": {
       "min": 1,
@@ -128,8 +128,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್)",
-      "en": "Visvesvaraya Auditorium (Architecture Block)"
+      "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+      "en": "EAB 2nd Floor"
     },
     "teamSize": {
       "min": 1,
@@ -198,8 +198,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
-      "en": "SMV Block (Academic Block), 1st Floor Auditorium"
+      "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+      "en": "EAB 2nd Floor"
     },
     "medium": "kannada",
     "alternatives": [
@@ -265,8 +265,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 4ನೇ ಮಹಡಿ",
+      "en": "SMV Block (Academic Block), 4th Floor"
     },
     "teamSize": {
       "min": 1,
@@ -325,8 +325,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "ಎಸ್‌ಜೆಬಿ 5ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
-      "en": "SJB 5th Floor Amphitheatre"
+      "kn": "ಸಿ.ವಿ. ರಾಮನ್ ಬ್ಲಾಕ್ (ಲ್ಯಾಬ್ ಬ್ಲಾಕ್), 6ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+      "en": "CV Raman Block (Lab Block), 6th Floor Auditorium"
     },
     "teamSize": {
       "min": 4,
@@ -385,8 +385,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಬಾಸ್ಕೆಟ್‌ಬಾಲ್ ಕೋರ್ಟ್",
+      "en": "Basketball Court"
     },
     "teamSize": {
       "min": 4,
@@ -454,8 +454,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
-      "en": "BSN Auditorium"
+      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸೆಮಿನಾರ್ ಹಾಲ್",
+      "en": "SMV Block (Academic Block), 1st Floor Seminar Hall"
     },
     "teamSize": {
       "min": 4,
@@ -517,8 +517,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್) ಪ್ರವೇಶದ್ವಾರ",
+      "en": "SMV Block (Academic Block) Entrance"
     },
     "teamSize": {
       "min": 5,
@@ -571,8 +571,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+      "en": "EAB 2nd Floor"
     },
     "eligibility": "nonKannadiga",
     "teamSize": {
@@ -628,8 +628,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+      "en": "EAB 2nd Floor"
     },
     "eligibility": "nonKannadiga",
     "teamSize": {
@@ -685,8 +685,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
-      "en": "SMV Block (Academic Block), 1st Floor Auditorium"
+      "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+      "en": "EAB 2nd Floor"
     },
     "medium": "kannada",
     "alternatives": [
@@ -749,8 +749,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "ಎಸ್‌ಜೆಬಿ 5ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
-      "en": "SJB 5th Floor Amphitheatre"
+      "kn": "ಸಿ.ವಿ. ರಾಮನ್ ಬ್ಲಾಕ್ (ಲ್ಯಾಬ್ ಬ್ಲಾಕ್), 6ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+      "en": "CV Raman Block (Lab Block), 6th Floor Auditorium"
     },
     "teamSize": {
       "min": 4,
@@ -793,8 +793,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
-      "en": "BSN Auditorium"
+      "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸೆಮಿನಾರ್ ಹಾಲ್",
+      "en": "SMV Block (Academic Block), 1st Floor Seminar Hall"
     },
     "teamSize": {
       "min": 4,
@@ -853,8 +853,8 @@
     "time": "12:30",
     "endTime": "16:30",
     "venue": {
-      "kn": "TODO-CONFIRM",
-      "en": "TODO-CONFIRM"
+      "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+      "en": "EAB 2nd Floor"
     },
     "eligibility": "nonKannadiga",
     "teamSize": {

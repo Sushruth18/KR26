@@ -25,7 +25,7 @@ function expect(cond: unknown, msg: string): asserts cond {
   if (!cond) throw new Error(msg);
 }
 
-async function open(browser: Browser, lang: Lang, width: number, path: string, errors: string[], reduced = false) {
+async function open(browser: Browser, lang: Lang, width: number, path: string, errors: string[], reduced = false, rewrite?: (url: string, body: string) => string | null) {
   const ctx = await browser.createBrowserContext();
   const page = await ctx.newPage();
   await page.setViewport({ width, height: 900, deviceScaleFactor: 1 });
@@ -36,6 +36,22 @@ async function open(browser: Browser, lang: Lang, width: number, path: string, e
   if (reduced) await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
   page.on('console', (m) => (m.type() === 'error' || m.type() === 'warn') && errors.push(`${m.type()}: ${m.text()}`));
   page.on('pageerror', (e) => errors.push(String(e)));
+  if (rewrite) {
+    // Serve a modified copy of one module (used to put a "TODO-CONFIRM" venue back for the TBA fallback check).
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      const url = req.url();
+      if (req.resourceType() !== 'script' && req.resourceType() !== 'fetch' && req.resourceType() !== 'xhr') return void req.continue();
+      fetch(url)
+        .then(async (r) => {
+          const body = await r.text();
+          const out = rewrite(url, body);
+          if (out === null) return req.continue();
+          return req.respond({ status: 200, contentType: 'text/javascript', body: out });
+        })
+        .catch(() => req.continue());
+    });
+  }
   await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle0' });
   await page.waitForSelector('[data-testid=competition-grid] article');
   await page.waitForFunction(() => !document.querySelector('[data-testid=competition-grid] .skeleton'), { timeout: 15000 });
@@ -158,10 +174,11 @@ async function main() {
   await scenario('cards-content-en', async (errors) => {
     const page = await open(browser, 'en', 1280, '/competitions?for=students&mock=', errors);
     const card = await page.$eval('[data-testid=card-s-essay]', (e) => e.textContent ?? '');
-    expect(card.includes('12:30 PM – 4:30 PM') && card.includes('BSN 422'), 'time range + venue');
-    const quiz = await page.$eval('[data-testid=card-s-quiz]', (e) => e.textContent ?? '');
-    expect(quiz.includes('12:30 PM – 4:30 PM') && quiz.includes('To be announced'), 'quiz: time known, venue TBA');
     const essay = events.find((e) => e.id === 's-essay')!;
+    expect(card.includes('12:30 PM – 4:30 PM') && card.includes(essay.venue.en), `time range + venue "${essay.venue.en}"`);
+    const quiz = await page.$eval('[data-testid=card-s-quiz]', (e) => e.textContent ?? '');
+    const quizVenue = events.find((e) => e.id === 's-quiz')!.venue.en;
+    expect(quiz.includes('12:30 PM – 4:30 PM') && quiz.includes(quizVenue) && !quiz.includes('To be announced'), `quiz: time and final venue "${quizVenue}" from data`);
     expect(card.includes('Coordinators') && essay.coordinators.every((c) => card.includes(c.name)), 'coordinator names from events.json');
     expect(card.includes('Day 1 · 20 November'), 'Day 1 date');
     expect(card.includes('₹2,000') && card.includes('₹1,000'), 'cash prizes with ₹ grouping');
@@ -176,8 +193,28 @@ async function main() {
     const url = new URL(page.url());
     expect(url.pathname === '/register' && url.searchParams.get('event') === 's-quiz', `navigated to ${page.url()}`);
     await page.browserContext().close();
-    return `TBA shown for time/venue, coordinator names shown, no raw TODO; ${hrefs.length} Register links → /register?event=<id>; clicking Quiz opens the form preselected`;
+    return `final venues from data, coordinator names shown, no raw TODO; ${hrefs.length} Register links → /register?event=<id>; clicking Quiz opens the form preselected`;
   });
+
+  // The "venue to be announced" fallback must keep working even though every event has a venue now:
+  // serve events.json with the Quiz venue set back to the TODO-CONFIRM placeholder.
+  for (const lang of ['kn', 'en'] as const) {
+    await scenario(`venue-tba-fallback-${lang}`, async (errors) => {
+      const quizVenue = events.find((e) => e.id === 's-quiz')!.venue;
+      const rewrite = (url: string, body: string) => {
+        if (!/\/src\/data\/events\.json/.test(url)) return null;
+        expect(body.includes(quizVenue.en), 'events.json module not recognised');
+        return body.split(quizVenue.en).join('TODO-CONFIRM').split(quizVenue.kn).join('TODO-CONFIRM');
+      };
+      const page = await open(browser, lang, 360, '/competitions?for=students&mock=', errors, false, rewrite);
+      const quiz = await page.$eval('[data-testid=card-s-quiz]', (e) => (e.textContent ?? '').replace(/\s+/g, ' '));
+      const essay = await page.$eval('[data-testid=card-s-essay]', (e) => e.textContent ?? '');
+      expect(quiz.includes(lang === 'kn' ? 'ಶೀಘ್ರದಲ್ಲೇ ಘೋಷಣೆ' : 'To be announced'), `quiz venue falls back to "to be announced": ${quiz}`);
+      expect(!quiz.includes('TODO') && essay.includes(events.find((e) => e.id === 's-essay')!.venue[lang]), 'no raw TODO; other events keep their venue');
+      await page.browserContext().close();
+      return `${lang}: a TODO-CONFIRM venue shows "to be announced", other cards unchanged`;
+    });
+  }
 
   await scenario('rules-disclosure-kn', async (errors) => {
     const page = await open(browser, 'kn', 360, '/competitions?mock=', errors);

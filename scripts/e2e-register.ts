@@ -9,6 +9,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
 import sharp from 'sharp';
+import events from '../src/data/events.json' with { type: 'json' };
 import scheduleData from '../src/data/schedule.json' with { type: 'json' };
 import siteData from '../src/data/site.json' with { type: 'json' };
 
@@ -254,7 +255,7 @@ async function main() {
     expect(!/[೦-೯]/.test(passText), 'pass has no Kannada digits (numerals rule)');
     expect(passText.includes('ಪ್ರಬಂಧ ಬರಹ'), 'pass shows Kannada event name');
     expect(passText.includes('ಮಧ್ಯಾಹ್ನ 12:30 – ಸಂಜೆ 4:30'), 'pass shows the Day 1 time range in Kannada');
-    expect(passText.includes('ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422'), 'pass shows the Essay venue in Kannada');
+    expect(passText.includes(events.find((e) => e.id === 's-essay')!.venue.kn), 'pass shows the Essay venue in Kannada');
     expect(!passText.includes('TBA'), 'no TBA once time and venue are set');
     expect(passText.includes('21 ನವೆಂಬರ್'), 'pass invites to Day 2 (21 Nov)');
     await page.screenshot({ path: resolve(OUT, '01-pass-screen.png') });

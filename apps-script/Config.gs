@@ -9,7 +9,7 @@
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
 var CONFIG_SCHEMA = 6;
-var CONFIG_VERSION = '6f2b44ed';
+var CONFIG_VERSION = '351788a0';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -101,8 +101,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422",
-        "en": "BSN 422"
+        "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+        "en": "EAB 2nd Floor"
       },
       "sheetName": "ESY – Essay Writing",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -147,8 +147,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್)",
-        "en": "Visvesvaraya Auditorium (Architecture Block)"
+        "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+        "en": "EAB 2nd Floor"
       },
       "sheetName": "PNT – Painting",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -170,8 +170,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
-        "en": "SMV Block (Academic Block), 1st Floor Auditorium"
+        "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+        "en": "EAB 2nd Floor"
       },
       "sheetName": "DEB – Debate",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -193,8 +193,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 4ನೇ ಮಹಡಿ",
+        "en": "SMV Block (Academic Block), 4th Floor"
       },
       "sheetName": "QIZ – Quiz",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -216,8 +216,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಜೆಬಿ 5ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
-        "en": "SJB 5th Floor Amphitheatre"
+        "kn": "ಸಿ.ವಿ. ರಾಮನ್ ಬ್ಲಾಕ್ (ಲ್ಯಾಬ್ ಬ್ಲಾಕ್), 6ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+        "en": "CV Raman Block (Lab Block), 6th Floor Auditorium"
       },
       "sheetName": "GDN – Group Dance",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -239,8 +239,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 30,
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಬಾಸ್ಕೆಟ್‌ಬಾಲ್ ಕೋರ್ಟ್",
+        "en": "Basketball Court"
       },
       "sheetName": "TRH – Treasure Hunt",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -262,8 +262,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
-        "en": "BSN Auditorium"
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸೆಮಿನಾರ್ ಹಾಲ್",
+        "en": "SMV Block (Academic Block), 1st Floor Seminar Hall"
       },
       "sheetName": "GSG – Group Singing",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -285,8 +285,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್) ಪ್ರವೇಶದ್ವಾರ",
+        "en": "SMV Block (Academic Block) Entrance"
       },
       "sheetName": "RGL – Rangoli",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -308,8 +308,8 @@ var CONFIG = {
       "eligibility": "nonKannadiga",
       "maxTeams": 0,
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+        "en": "EAB 2nd Floor"
       },
       "sheetName": "ELO – Elocution – Pick & Speak (for non-Kannadigas)",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -331,8 +331,8 @@ var CONFIG = {
       "eligibility": "nonKannadiga",
       "maxTeams": 0,
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+        "en": "EAB 2nd Floor"
       },
       "sheetName": "SKD – Simple Kannada Debate (for non-Kannadigas)",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -354,8 +354,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
-        "en": "SMV Block (Academic Block), 1st Floor Auditorium"
+        "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+        "en": "EAB 2nd Floor"
       },
       "sheetName": "FDB – Faculty Debate",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -377,8 +377,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಎಸ್‌ಜೆಬಿ 5ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್",
-        "en": "SJB 5th Floor Amphitheatre"
+        "kn": "ಸಿ.ವಿ. ರಾಮನ್ ಬ್ಲಾಕ್ (ಲ್ಯಾಬ್ ಬ್ಲಾಕ್), 6ನೇ ಮಹಡಿ ಸಭಾಂಗಣ",
+        "en": "CV Raman Block (Lab Block), 6th Floor Auditorium"
       },
       "sheetName": "FGD – Faculty Group Dance",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -400,8 +400,8 @@ var CONFIG = {
       "eligibility": "",
       "maxTeams": 0,
       "venue": {
-        "kn": "ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ",
-        "en": "BSN Auditorium"
+        "kn": "ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸೆಮಿನಾರ್ ಹಾಲ್",
+        "en": "SMV Block (Academic Block), 1st Floor Seminar Hall"
       },
       "sheetName": "FGS – Faculty Group Singing",
       "deadline": "2026-11-19T18:00:00+05:30"
@@ -423,8 +423,8 @@ var CONFIG = {
       "eligibility": "nonKannadiga",
       "maxTeams": 0,
       "venue": {
-        "kn": "TODO-CONFIRM",
-        "en": "TODO-CONFIRM"
+        "kn": "ಇಎಬಿ 2ನೇ ಮಹಡಿ",
+        "en": "EAB 2nd Floor"
       },
       "sheetName": "FSD – Simple Kannada Debate – Faculty (for non-Kannadigas)",
       "deadline": "2026-11-19T18:00:00+05:30"

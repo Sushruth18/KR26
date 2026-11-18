@@ -5,11 +5,11 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 ## Competitions (`src/data/events.json`)
 - Time: every competition is on 20 Nov 2026, **12:30 PM – 4:30 PM** (`time` 12:30, `endTime` 16:30; `site.json` competitionsStart/End 12:30/16:30) — from the college schedule
 - Venues from the college schedule are filled in. Coordinators (1–3 per event, each with its own `tel:` link) and rules are filled in for every event except the items below.
-- [ ] **Venue still to be announced** (time is known): Quiz (`s-quiz`), Treasure Hunt (`s-treasure-hunt`), Rangoli (`s-rangoli`), Elocution (`s-elocution`), Simple Kannada Debate (`s-simple-debate`), Simple Kannada Debate – Faculty (`f-simple-debate`)
+- [x] Venues: all 15 events have a final venue (Nov 2026, see "Final venues" below). The "venue to be announced" fallback still exists in the code and is tested.
 
 ### New events for non-Kannadiga students (Nov 2026): Elocution (`s-elocution`, ELO) and Simple Kannada Debate (`s-simple-debate`, SKD)
 - [x] **Coordinators** (given Nov 2026): Elocution → Jasvita; Simple Kannada Debate → Rachita T (same contact as the student Debate coordinator). An event may still have zero coordinators (the card then shows none)
-- [ ] **Venue** for both (time 12:30–16:30 is set)
+- [x] **Venue** for both: EAB 2nd Floor (Nov 2026)
 - [ ] Kannada wording — drafts for a Kannada speaker:
   - Names (given): ಆಶುಭಾಷಣ (ಕನ್ನಡೇತರರಿಗೆ) · ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರರಿಗೆ)
   - Register checkbox (given): "ಕನ್ನಡ ನನ್ನ ಮಾತೃಭಾಷೆ ಅಲ್ಲ ಎಂದು ದೃಢೀಕರಿಸುತ್ತೇನೆ." — its error message (draft): "ದಯವಿಟ್ಟು ದೃಢೀಕರಿಸಿ — ಈ ಸ್ಪರ್ಧೆ ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮಾತ್ರ."
@@ -20,7 +20,7 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 
 ### Faculty Simple Kannada Debate (Nov 2026): `f-simple-debate`, FSD — memento, eligibility "nonKannadiga"
 - [x] **Coordinator** (given Nov 2026): Eeshwari (same contact as the faculty Debate coordinator)
-- [ ] **Venue** (time 12:30–16:30 is set)
+- [x] **Venue**: EAB 2nd Floor (Nov 2026)
 - [ ] Kannada name (given): ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗೆ)
 - [ ] Rule 1 (draft, the only change from the student version): "ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ಅಧ್ಯಾಪಕರಿಗೆ ಮಾತ್ರ ಅವಕಾಶ." (Open only to faculty members whose mother tongue is not Kannada.) — rules 2–8 are the student version's drafts above
 - [ ] Eligibility error for faculty (draft, `kn.json → errors.eligibilityFaculty`): "ದಯವಿಟ್ಟು ದೃಢೀಕರಿಸಿ — ಈ ಸ್ಪರ್ಧೆ ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ಅಧ್ಯಾಪಕರಿಗೆ ಮಾತ್ರ."
@@ -33,14 +33,16 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 - [ ] Debate notice email (`Code.gs → buildDebateNotice_`, sent once by `notifyDebateMediumChange`) — **check before running it**: subject "… — now in Kannada only / ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ"; "ನಮಸ್ಕಾರ <name>," · ""<event>" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು (ನೋಂದಣಿ ಐಡಿ: …)." · "ಒಂದು ಬದಲಾವಣೆ: ಚರ್ಚೆ ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ." · "ನೀವು ಹಿಂದೆ ಸರಿಯಲು ಬಯಸಿದರೆ, ದಯವಿಟ್ಟು ಸ್ಪರ್ಧೆಯ ಸಂಯೋಜಕರಿಗೆ ತಿಳಿಸಿ — ಅವರ ಸಂಖ್ಯೆಗಳು ಇಲ್ಲಿವೆ: <link>" · student Debate only: "ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲದಿದ್ದರೆ, ಕನ್ನಡೇತರರಿಗಾಗಿ ಇರುವ "ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ" ಅಥವಾ "ಆಶುಭಾಷಣ" ಸ್ಪರ್ಧೆಗೆ ನೋಂದಾಯಿಸಬಹುದು: <links>"
 - [ ] Site name "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ" everywhere on the website; the pass card, its PNG, the `.ics` and the confirmation email keep "ಕರ್ನಾಟಕ ರಾಜ್ಯೋತ್ಸವ" / "Karnataka Rajyotsava" as asked — confirm that split is intended
 
-### Kannada venue names — drafts for a Kannada speaker (`events.json → venue.kn`)
-Block names are transliterated; floors and room numbers use Latin digits (numerals rule, Nov 2026: no Kannada numerals anywhere).
-- [ ] BSN Auditorium → ಬಿಎಸ್‌ಎನ್ ಸಭಾಂಗಣ (Group Singing, Faculty Group Singing)
-- [ ] Visvesvaraya Auditorium (Architecture Block) → ವಿಶ್ವೇಶ್ವರಯ್ಯ ಸಭಾಂಗಣ (ಆರ್ಕಿಟೆಕ್ಚರ್ ಬ್ಲಾಕ್) (Painting)
-- [ ] BSN 422 → ಬಿಎಸ್‌ಎನ್ ಕೊಠಡಿ 422 ("room 422") (Essay Writing)
-- [ ] SJB 5th Floor Amphitheatre → ಎಸ್‌ಜೆಬಿ 5ನೇ ಮಹಡಿ, ಆಂಫಿಥಿಯೇಟರ್ (Group Dance, Faculty Group Dance)
-- [ ] SMV Block (Academic Block), 2nd Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 2ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Poem)
-- [ ] SMV Block (Academic Block), 1st Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Debate, Faculty Debate)
+### Final venues (Nov 2026, from the college — Friday 20 Nov, 12:30 PM – 4:30 PM) — Kannada drafts for a Kannada speaker
+Every competition now has a venue in `events.json` (student and faculty versions of an event share one). The Kannada names are transliterations / drafts; floors use Latin digits. "EAB" is deliberately not expanded.
+- [ ] EAB 2nd Floor → ಇಎಬಿ 2ನೇ ಮಹಡಿ (Essay Writing, Painting, Debate, Faculty Debate, Simple Kannada Debate ×2, Elocution)
+- [ ] SMV Block (Academic Block), 2nd Floor Auditorium → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 2ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Poem — existing Kannada kept)
+- [ ] SMV Block (Academic Block), 4th Floor → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 4ನೇ ಮಹಡಿ (Quiz)
+- [ ] CV Raman Block (Lab Block), 6th Floor Auditorium → ಸಿ.ವಿ. ರಾಮನ್ ಬ್ಲಾಕ್ (ಲ್ಯಾಬ್ ಬ್ಲಾಕ್), 6ನೇ ಮಹಡಿ ಸಭಾಂಗಣ (Group Dance, Faculty Group Dance)
+- [ ] SMV Block (Academic Block), 1st Floor Seminar Hall → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್), 1ನೇ ಮಹಡಿ ಸೆಮಿನಾರ್ ಹಾಲ್ (Group Singing, Faculty Group Singing)
+- [ ] Basketball Court → ಬಾಸ್ಕೆಟ್‌ಬಾಲ್ ಕೋರ್ಟ್ (Treasure Hunt)
+- [ ] SMV Block (Academic Block) Entrance → ಎಸ್‌ಎಂವಿ ಬ್ಲಾಕ್ (ಅಕಾಡೆಮಿಕ್ ಬ್ಲಾಕ್) ಪ್ರವೇಶದ್ವಾರ (Rangoli)
+- The general rule "The venue will be informed in the WhatsApp groups" (`site.json → generalRules`) was NOT changed — now that venues are on the site, ask the organisers whether it should be reworded or removed.
 
 ### Faculty Group Dance (`f-group-dance`)
 - [ ] **Rules** — the rules PDF has no faculty dance section; the card still says "Rules will be announced soon"
