@@ -30,6 +30,8 @@ async function open(browser: Browser, lang: Lang, width: number, path: string, e
   const page = await ctx.newPage();
   await page.setViewport({ width, height: 900, deviceScaleFactor: 1 });
   await page.evaluateOnNewDocument((l) => {
+    // __name: tsx/esbuild wraps named inner functions of page.evaluate callbacks with this helper.
+    (globalThis as { __name?: (f: unknown) => unknown }).__name = (f) => f;
     localStorage.setItem('kr26.lang', l);
     sessionStorage.setItem('seenIntro', '1');
   }, lang);

@@ -576,8 +576,6 @@ async function main() {
         { name: 'ಅಕ್ಷತಾ ಭಟ್', id: '1BY21EC078', phone: '9845055556' },
         { name: 'ದ್ವಾರಕೀಶ್', id: '1BY21EC079', phone: '9845055557' },
         { name: 'ಲಕ್ಷ್ಮೀ ನಾರಾಯಣ', id: '1BY21EC080', phone: '9845055558' },
-        { name: 'ಪ್ರಜ್ವಲ್ ಕೆ.', id: '1BY21EC081', phone: '9845055559' },
-        { name: 'ಸೌಮ್ಯಾ ರಾವ್', id: '1BY21EC082', phone: '9845055560' },
       ] },
     });
     const r = await submit(page);
