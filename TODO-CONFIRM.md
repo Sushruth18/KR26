@@ -45,7 +45,7 @@ Every competition now has a venue in `events.json` (student and faculty versions
 - The general rule "The venue will be informed in the WhatsApp groups" (`site.json → generalRules`) was NOT changed — now that venues are on the site, ask the organisers whether it should be reworded or removed.
 
 ### Faculty Group Dance (`f-group-dance`)
-- [ ] **Rules** — the rules PDF has no faculty dance section; the card still says "Rules will be announced soon"
+- [ ] Faculty & Staff Group Dance rules are copied from the student event; confirm with the coordinators (all 8 rules, both languages, same order and wording)
 - [ ] **Team size 4–12** — the student Group Dance change (PDF: Kannada says min 6, English min 4 → 4–12 used in both languages) was applied to the faculty dance as well (it was 4–10). Confirm it applies to faculty
 
 ### Team sizes changed from the earlier draft (counts include the registrant)
@@ -57,7 +57,7 @@ Every competition now has a venue in `events.json` (student and faculty versions
 2. **Quiz** rule 7: "Teams must report on time" → "Participants must report on time for their rounds." / "ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಸುತ್ತುಗಳಿಗೆ ಸಮಯಕ್ಕೆ ಸರಿಯಾಗಿ ವರದಿ ಮಾಡಬೇಕು." (quiz is individual)
 3. ~~**Painting** rule 11 (theme a day prior)~~ — removed in Nov 2026: the painting rules were replaced by the organisers' new 13 (see "Essay & Painting rules" below); the theme is no longer announced a day earlier.
 4. **General instructions** rule 1 (10:15) → "Be at the venue 15 minutes before your event's start time." / "ನಿಮ್ಮ ಸ್ಪರ್ಧೆ ಆರಂಭವಾಗುವ ಸಮಯಕ್ಕಿಂತ 15 ನಿಮಿಷಗಳ ಮೊದಲು ಸ್ಥಳದಲ್ಲಿರಿ."
-5. **Faculty Group Dance**: no section → placeholder kept (above)
+5. **Faculty & Staff Group Dance**: no section in the PDF → exact copy of the student Group Dance rules (above)
 6. **Group Singing** (both events) rule 4 "The song should be folk or cultural based" exists only in English → added to the Kannada as a draft (same treatment as 3) so both languages list the same 9 rules: "ಹಾಡು ಜಾನಪದ ಅಥವಾ ಸಾಂಸ್ಕೃತಿಕ ಆಧಾರಿತವಾಗಿರಬೇಕು." Remove it if the Kannada list was meant to be shorter
 7. **Debate** rule 5: the English adds "Also there will be swapping of sides so be well prepared"; the Kannada lacked it → draft added: "ಪಕ್ಷಗಳ ಅದಲು-ಬದಲು ಕೂಡ ಇರುತ್ತದೆ, ಆದ್ದರಿಂದ ಚೆನ್ನಾಗಿ ಸಿದ್ಧರಾಗಿ ಬನ್ನಿ." The stray leading "And" / "ಮತ್ತು" was dropped in both
 8. **Faculty Debate** rule 4: "Students" → "Participants" / "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ" → "ಭಾಗವಹಿಸುವವರಿಗೆ" (same rules as the student debate otherwise)

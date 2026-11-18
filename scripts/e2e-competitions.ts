@@ -310,15 +310,18 @@ async function main() {
     await page.screenshot({ path: resolve(OUT, 'rules-open-kn-360.png') });
     await page.keyboard.press('Space');
     await page.waitForFunction(() => !document.querySelector('[data-testid=rules-s-debate]'));
-    // Faculty Group Dance has no rules in the PDF yet → "announced soon".
+    // Faculty & Staff Group Dance carries an exact copy of the student Group Dance rules (no "announced soon").
     await page.click('[data-testid=toggle-faculty]');
     await page.waitForSelector('[data-testid=rules-toggle-f-group-dance]');
     await page.click('[data-testid=rules-toggle-f-group-dance]');
     await page.waitForSelector('[data-testid=rules-f-group-dance]');
-    const tba = await page.$eval('[data-testid=rules-f-group-dance]', (e) => e.textContent);
-    expect(tba?.includes('ಶೀಘ್ರದಲ್ಲೇ'), `TODO rules → announced soon, got "${tba}"`);
+    const fgd = await page.$$eval('[data-testid=rules-f-group-dance] li', (li) => li.map((x) => x.textContent));
+    const sgdRules = events.find((e) => e.id === 's-group-dance')!.rules.kn;
+    const fgdText = await page.$eval('[data-testid=rules-f-group-dance]', (e) => e.textContent ?? '');
+    expect(fgd.length === 8 && fgd.join('|') === sgdRules.join('|'), `f-group-dance shows the student Group Dance rules, got ${fgd.length}`);
+    expect(!fgdText.includes('ಶೀಘ್ರದಲ್ಲೇ'), `no "announced soon" for f-group-dance, got "${fgdText}"`);
     await page.browserContext().close();
-    return `Enter opens (aria-expanded=true, controls panel), Space closes; ${items.length} Kannada debate rules from data; f-group-dance → "${tba}"`;
+    return `Enter opens (aria-expanded=true, controls panel), Space closes; ${items.length} Kannada debate rules from data; f-group-dance → ${fgd.length} rules = student Group Dance`;
   });
 
   for (const lang of ['kn', 'en'] as const) {

@@ -764,10 +764,24 @@
     },
     "rules": {
       "kn": [
-        "TODO-CONFIRM"
+        "ಪ್ರತಿ ಪ್ರದರ್ಶನದ ಅವಧಿ 3+1 ನಿಮಿಷಗಳು.",
+        "ಆಯ್ದ ಹಾಡು ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರಬೇಕು.",
+        "ಯಾವುದೇ ನಿರ್ದಿಷ್ಟ ಧಾರ್ಮಿಕ ಹಾಡುಗಳನ್ನು ಪ್ರೋತ್ಸಾಹಿಸಲಾಗುವುದಿಲ್ಲ.",
+        "ಭಾಗವಹಿಸುವವರು ಪ್ರಸ್ತುತಿಗೆ ಸೂಕ್ತವಾದ ಮತ್ತು ಯೋಗ್ಯವಾದ ವೇಷಭೂಷಣಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಬೇಕು.",
+        "ಗುಂಪಿನಲ್ಲಿ ಕನಿಷ್ಠ 4 ಮತ್ತು ಗರಿಷ್ಠ 12 ಭಾಗವಹಿಸುವವರು ಇರಬಹುದು.",
+        "ತಂಡದ ನಾಯಕರು ಈ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ತಂಡವನ್ನು ನೋಂದಾಯಿಸುತ್ತಾರೆ.",
+        "ಬೆಲ್ಲಿ ಡ್ಯಾನ್ಸ್ ಮತ್ತು ಟ್ಯಾಂಗೋಗೆ ಅವಕಾಶವಿಲ್ಲ.",
+        "ಭಾಗವಹಿಸುವವರು ಯೋಗ್ಯ ಮತ್ತು ಸೂಕ್ತವಾದ ವೇಷಭೂಷಣಗಳನ್ನು ಧರಿಸುವುದು ಕಡ್ಡಾಯವಾಗಿದೆ."
       ],
       "en": [
-        "TODO-CONFIRM"
+        "Duration for each performance will be 3+1 mins.",
+        "Song selected should be in Kannada only.",
+        "No religious specific songs are encouraged.",
+        "Participants must choose proper and decent costumes for the presentation.",
+        "The group can contain a minimum of 4 and a maximum of 12 participants.",
+        "The team leader registers the team on this website.",
+        "Belly dance and tango are not allowed.",
+        "Participants are required to wear decent and appropriate costumes."
       ]
     },
     "coordinators": [
