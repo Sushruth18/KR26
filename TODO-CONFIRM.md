@@ -8,7 +8,7 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 - [ ] **Venue still to be announced** (time is known): Quiz (`s-quiz`), Treasure Hunt (`s-treasure-hunt`), Rangoli (`s-rangoli`), Elocution (`s-elocution`), Simple Kannada Debate (`s-simple-debate`), Simple Kannada Debate – Faculty (`f-simple-debate`)
 
 ### New events for non-Kannadiga students (Nov 2026): Elocution (`s-elocution`, ELO) and Simple Kannada Debate (`s-simple-debate`, SKD)
-- [ ] **Coordinators** for both — none yet (allowed for now: the card shows no coordinator block). Add 1–3 `{ name, phone }` to `events.json`
+- [x] **Coordinators** (given Nov 2026): Elocution → Jasvita; Simple Kannada Debate → Rachita T (same contact as the student Debate coordinator). An event may still have zero coordinators (the card then shows none)
 - [ ] **Venue** for both (time 12:30–16:30 is set)
 - [ ] Kannada wording — drafts for a Kannada speaker:
   - Names (given): ಆಶುಭಾಷಣ (ಕನ್ನಡೇತರರಿಗೆ) · ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರರಿಗೆ)
@@ -19,7 +19,7 @@ Placeholders are used in the site until these are filled in. Nothing here has be
 - Prize pool is now ₹45,000 (`site.json → prizePoolTotal`), 15 competitions (11 students, 4 faculty)
 
 ### Faculty Simple Kannada Debate (Nov 2026): `f-simple-debate`, FSD — memento, eligibility "nonKannadiga"
-- [ ] **Coordinators** — none yet (the card shows no coordinator block). Add 1–3 `{ name, phone }` to `events.json`
+- [x] **Coordinator** (given Nov 2026): Eeshwari (same contact as the faculty Debate coordinator)
 - [ ] **Venue** (time 12:30–16:30 is set)
 - [ ] Kannada name (given): ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರ ಅಧ್ಯಾಪಕರಿಗೆ)
 - [ ] Rule 1 (draft, the only change from the student version): "ಕನ್ನಡ ಮಾತೃಭಾಷೆಯಲ್ಲದ ಅಧ್ಯಾಪಕರಿಗೆ ಮಾತ್ರ ಅವಕಾಶ." (Open only to faculty members whose mother tongue is not Kannada.) — rules 2–8 are the student version's drafts above

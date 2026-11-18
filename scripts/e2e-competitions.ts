@@ -286,11 +286,11 @@ async function main() {
       return `"${text}" → ${after.url}, card in view`;
     });
 
-    // The faculty Simple Kannada Debate card: memento, no coordinators, time range, venue TBA, open, Register link; 15 events.
+    // The faculty Simple Kannada Debate card: memento, one coordinator (tel: link), time range, venue TBA, open, Register link; 15 events.
     await scenario(`faculty-simple-debate-card-${lang}-360`, async (errors) => {
       const fsd = events.find((e) => e.id === 'f-simple-debate')!;
       expect(fsd && fsd.category === 'faculty' && fsd.code === 'FSD' && (fsd as { eligibility?: string }).eligibility === 'nonKannadiga', 'events.json record');
-      expect(fsd.prizes.type === 'memento' && fsd.coordinators.length === 0 && fsd.rules.en.length === 8 && fsd.rules.kn.length === 8, 'memento, no coordinators, 8 rules');
+      expect(fsd.prizes.type === 'memento' && fsd.coordinators.length === 1 && fsd.rules.en.length === 8 && fsd.rules.kn.length === 8, 'memento, one coordinator, 8 rules');
       expect(events.length === 15, `${events.length} events`);
       const page = await open(browser, lang, 360, '/competitions?for=faculty&mock=', errors, true);
       const counts = await page.$$eval('[data-testid^=toggle-] .segmented-count', (n) => n.map((x) => x.textContent));
@@ -304,12 +304,12 @@ async function main() {
         memento: !!n.querySelector('[data-testid=prize-memento]'),
         cash: !!n.querySelector('[data-testid=prize-cash]'),
         coordinators: !!n.querySelector('[data-testid^=coordinators-]'),
-        tel: n.querySelectorAll('a[href^="tel:"]').length,
+        tel: [...n.querySelectorAll('a[href^="tel:"]')].map((a) => a.getAttribute('href')),
         register: n.querySelector('[data-testid=register-f-simple-debate]')?.getAttribute('href'),
       }));
       expect(c.text.includes(fsd.name[lang]), `name "${fsd.name[lang]}" missing`);
       expect(c.memento && !c.cash, `memento ${c.memento}, cash ${c.cash}`);
-      expect(!c.coordinators && c.tel === 0, 'no coordinator block or tel: link');
+      expect(c.coordinators && c.tel.join() === fsd.coordinators.map((x) => `tel:+91${x.phone}`).join() && fsd.coordinators.every((x) => c.text.includes(x.name)), `coordinator block / tel links ${c.tel}`);
       expect(c.text.includes(lang === 'kn' ? 'ಮಧ್ಯಾಹ್ನ 12:30 – ಸಂಜೆ 4:30' : '12:30 PM – 4:30 PM'), 'time range');
       expect(c.register === '/register?event=f-simple-debate', `register href ${c.register}`);
       expect(!(await page.$('[data-testid=medium-f-simple-debate]')), 'no Kannada-only notice on the simple debate itself');
@@ -319,7 +319,7 @@ async function main() {
       expect(rules.length === 8 && rules[0] === fsd.rules[lang][0], `rule 1 "${rules[0]}"`);
       expect(lang === 'kn' ? rules[0]!.includes('ಅಧ್ಯಾಪಕರಿಗೆ') : rules[0] === 'Open only to faculty members whose mother tongue is not Kannada.', `rule 1 wording "${rules[0]}"`);
       await page.browserContext().close();
-      return `toggle ${counts.join('/')}, memento, no coordinators, 8 rules, Register → ${c.register}`;
+      return `toggle ${counts.join('/')}, memento, 1 coordinator + tel link, 8 rules, Register → ${c.register}`;
     });
 
     await scenario(`treasure-hunt-three-coordinators-${lang}-360`, async (errors) => {

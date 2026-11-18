@@ -286,14 +286,14 @@ times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the 
 
 Cash total check: (5 × 3,000) + (4 × 6,000) = ₹39,000 from the proposal, **+ 2 × 3,000 for the two events added in Nov 2026 = ₹45,000**.
 
-**Added Nov 2026 — for students whose mother tongue is not Kannada** (20 Nov 12:30–16:30, venue TBA, individual, ₹2,000 / ₹1,000, deadline 19 Nov 18:00, coordinators to come — an event may have **zero** coordinators, the card then shows none):
+**Added Nov 2026 — for students whose mother tongue is not Kannada** (20 Nov 12:30–16:30, venue TBA, individual, ₹2,000 / ₹1,000, deadline 19 Nov 18:00; coordinators since Nov 2026: Elocution → Jasvita, Simple Kannada Debate → Rachita T — an event may still have **zero** coordinators, the card then shows none):
 
 | id | code | Kannada | English | icon |
 |---|---|---|---|---|
 | s-elocution | ELO | ಆಶುಭಾಷಣ (ಕನ್ನಡೇತರರಿಗೆ) | Elocution – Pick & Speak (for non-Kannadigas) | megaphone |
 | s-simple-debate | SKD | ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ (ಕನ್ನಡೇತರರಿಗೆ) | Simple Kannada Debate (for non-Kannadigas) | messages-square |
 
-**Added Nov 2026 — the faculty version** (same pattern: `eligibility: "nonKannadiga"`, 20 Nov 12:30–16:30, venue TBA, individual, deadline 19 Nov 18:00, no coordinators yet, the same 8 rules with "faculty members" in rule 1; **`prizes: { type: "memento" }`**, so the cash pool stays ₹45,000):
+**Added Nov 2026 — the faculty version** (same pattern: `eligibility: "nonKannadiga"`, 20 Nov 12:30–16:30, venue TBA, individual, deadline 19 Nov 18:00, coordinator Eeshwari (as the faculty Debate), the same 8 rules with "faculty members" in rule 1; **`prizes: { type: "memento" }`**, so the cash pool stays ₹45,000):
 
 | id | code | category | Kannada | English | icon |
 |---|---|---|---|---|---|
