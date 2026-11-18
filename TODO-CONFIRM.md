@@ -47,7 +47,7 @@ Block names are transliterated; floors and room numbers use Latin digits (numera
 - [ ] **Team size 4–12** — the student Group Dance change (PDF: Kannada says min 6, English min 4 → 4–12 used in both languages) was applied to the faculty dance as well (it was 4–10). Confirm it applies to faculty
 
 ### Team sizes changed from the earlier draft (counts include the registrant)
-- [ ] **Student Group Singing 6–12** (was 3–8): it uses the same rules as the faculty singing, which say 6 to 12. Faculty Group Singing also went 3–8 → 6–12 from those rules
+- [x] **Group Singing (students and faculty) 4–12** (Nov 2026, organisers: "minimum of 4 and a maximum of 12 participants"; it was 6–12 from the rules PDF and 3–8 before that). Existing registrations are untouched
 - Student Group Dance 6–12 → 4–12 (see above) · Quiz 2 → individual (rules: "each participant must compete individually") · Treasure Hunt 3–4 → exactly 4 · Rangoli 2–4 → exactly 5 (both from the rules)
 
 ### Rules — adaptations of the PDF (`RULES_AND_REGULATIONS_final.pdf`, pages 2–10) for review

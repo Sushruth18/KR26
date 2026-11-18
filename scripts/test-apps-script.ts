@@ -381,7 +381,7 @@ t('faculty team member employee IDs are duplicate-checked too', () => {
     eventId: 'f-group-singing',
     id: 'EMP1',
     teamName: 'Gaana',
-    // Group Singing needs 6–12 people: the registrant + 5 members.
+    // Group Singing needs 4–12 people: the registrant + 3 to 11 members (here 5).
     members: [{ name: 'Asha', id: 'EMP2', phone: '9845000002' }, { name: 'Bindu', id: 'EMP3', phone: '9845000003' }, ...membersFor(4, 'EMPA')],
   };
   assert.equal(rt.post(fac).ok, true);
@@ -516,11 +516,16 @@ t('team: exact size — Rangoli needs exactly 5: 4 and 6 rejected, 5 accepted', 
   const ok = rt.post({ ...rangoli, members: membersFor(5, 'RGC') });
   assert.equal(ok.regId, 'KR26-RGL-0001');
 });
-t('team: Group Singing (students) now needs 6–12 people: 5 rejected, 6 accepted', () => {
+t('team: Group Singing needs 4–12 people incl. the registrant, students and faculty', () => {
   const rt = createOpenRuntime();
   const sing = { ...hunt, eventId: 's-group-singing' };
-  assert.equal(rt.post({ ...sing, members: membersFor(5, 'GSA') }).field, 'members');
-  assert.equal(rt.post({ ...sing, members: membersFor(6, 'GSB') }).ok, true);
+  assert.equal(rt.post({ ...sing, members: membersFor(3, 'GSA') }).field, 'members'); // 3 people: too few
+  assert.equal(rt.post({ ...sing, members: membersFor(4, 'GSB') }).ok, true); // 4 people: the new minimum
+  assert.equal(rt.post({ ...sing, id: '1BY23CS901', members: membersFor(12, 'GSC') }).ok, true); // 12 people: the maximum
+  assert.equal(rt.post({ ...sing, id: '1BY23CS902', members: membersFor(13, 'GSD') }).field, 'members'); // 13 people: too many
+  const fac = { ...hunt, eventId: 'f-group-singing', id: 'EMP100' };
+  assert.equal(rt.post({ ...fac, members: membersFor(3, 'EMPX') }).field, 'members');
+  assert.equal(rt.post({ ...fac, members: membersFor(4, 'EMPY') }).ok, true);
 });
 t('Quiz is individual now: no team name needed, and members sent anyway → members', () => {
   const rt = createOpenRuntime();

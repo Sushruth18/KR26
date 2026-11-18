@@ -278,11 +278,11 @@ times/venues are TODO-CONFIRM; team sizes, rules and coordinators come from the 
 | s-quiz | QIZ | students | ಪ್ರಶ್ನೋತ್ತರ ಸ್ಪರ್ಧೆ | Quiz | 2000 | 1000 | 1 | TODO |
 | s-group-dance | GDN | students | ಸಾಮೂಹಿಕ ನೃತ್ಯ | Group Dance | 4000 | 2000 | 4–12 | TODO |
 | s-treasure-hunt | TRH | students | ಖಜಾನೆ ಹುಡುಕಾಟ | Treasure Hunt | 4000 | 2000 | 4 | TODO |
-| s-group-singing | GSG | students | ಸಮೂಹ ಗಾಯನ | Group Singing | 4000 | 2000 | 6–12 | TODO |
+| s-group-singing | GSG | students | ಸಮೂಹ ಗಾಯನ | Group Singing | 4000 | 2000 | 4–12 | TODO |
 | s-rangoli | RGL | students | ರಂಗೋಲಿ | Rangoli | 4000 | 2000 | 5 | TODO |
 | f-debate | FDB | faculty | ವಾದ-ವಿವಾದ (ಅಧ್ಯಾಪಕರು) | Faculty Debate | memento | — | 1 | TODO |
 | f-group-dance | FGD | faculty | ಸಾಮೂಹಿಕ ನೃತ್ಯ (ಅಧ್ಯಾಪಕರು) | Faculty Group Dance | memento | — | 4–12 | TODO |
-| f-group-singing | FGS | faculty | ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು) | Faculty Group Singing | memento | — | 6–12 | TODO |
+| f-group-singing | FGS | faculty | ಸಮೂಹ ಗಾಯನ (ಅಧ್ಯಾಪಕರು) | Faculty Group Singing | memento | — | 4–12 | TODO |
 
 Cash total check: (5 × 3,000) + (4 × 6,000) = ₹39,000 from the proposal, **+ 2 × 3,000 for the two events added in Nov 2026 = ₹45,000**.
 

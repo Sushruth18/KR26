@@ -9,7 +9,7 @@
 // Format number Code.gs checks (CONFIG_MISMATCH if it differs) and a hash of everything below.
 // GET ?action=status returns configVersion — compare it with the value printed by `npm run gas:config`.
 var CONFIG_SCHEMA = 6;
-var CONFIG_VERSION = '9791ed8f';
+var CONFIG_VERSION = '6f2b44ed';
 
 var CONFIG = {
   "minFormMs": 3000,
@@ -253,7 +253,7 @@ var CONFIG = {
         "en": "Group Singing"
       },
       "teamSize": {
-        "min": 6,
+        "min": 4,
         "max": 12
       },
       "date": "2026-11-20",
@@ -391,7 +391,7 @@ var CONFIG = {
         "en": "Faculty Group Singing"
       },
       "teamSize": {
-        "min": 6,
+        "min": 4,
         "max": 12
       },
       "date": "2026-11-20",

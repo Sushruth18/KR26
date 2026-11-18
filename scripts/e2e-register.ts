@@ -570,7 +570,7 @@ async function main() {
     // Kannada-heavy pass: Kannada names with conjuncts, Kannada event name, team.
     await fillToReview(page, {
       eventId: 's-group-singing', name: 'ಶ್ರೀನಿವಾಸ್ ಕೃಷ್ಣಮೂರ್ತಿ', id: '1BY21EC077', dept: 'ECE', sem: '7', phone: '9845055555', email: 'sri@example.com',
-      // Group Singing: 6–12 people incl. the registrant → 5 members.
+      // Group Singing: 4–12 people incl. the registrant → 3 members is the smallest team.
       team: { teamName: 'ಸ್ವರ ಸಂಗಮ', members: [
         { name: 'ಅಕ್ಷತಾ ಭಟ್', id: '1BY21EC078', phone: '9845055556' },
         { name: 'ದ್ವಾರಕೀಶ್', id: '1BY21EC079', phone: '9845055557' },
