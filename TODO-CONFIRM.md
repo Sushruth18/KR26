@@ -53,7 +53,7 @@ Block names are transliterated; floors and room numbers use Latin digits (numera
 ### Rules — adaptations of the PDF (`RULES_AND_REGULATIONS_final.pdf`, pages 2–10) for review
 1. **Group Dance** rule 5: Kannada said min 6, English min 4 → 4 to 12 in both. Rule 6 ("team leaders should only fill the Google Sheet and others need not") → "The team leader registers the team on this website." / "ತಂಡದ ನಾಯಕರು ಈ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ತಂಡವನ್ನು ನೋಂದಾಯಿಸುತ್ತಾರೆ."
 2. **Quiz** rule 7: "Teams must report on time" → "Participants must report on time for their rounds." / "ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಸುತ್ತುಗಳಿಗೆ ಸಮಯಕ್ಕೆ ಸರಿಯಾಗಿ ವರದಿ ಮಾಡಬೇಕು." (quiz is individual)
-3. **Painting** rule 11 (theme a day prior) exists only in English → added to the Kannada as a draft: "ಚಿತ್ರಕಲೆ ಸ್ಪರ್ಧೆಯಲ್ಲಿ ಭಾಗವಹಿಸುವವರಿಗೆ ವಿಷಯವನ್ನು ಒಂದು ದಿನ ಮುಂಚಿತವಾಗಿ ತಿಳಿಸಲಾಗುವುದು."
+3. ~~**Painting** rule 11 (theme a day prior)~~ — removed in Nov 2026: the painting rules were replaced by the organisers' new 13 (see "Essay & Painting rules" below); the theme is no longer announced a day earlier.
 4. **General instructions** rule 1 (10:15) → "Be at the venue 15 minutes before your event's start time." / "ನಿಮ್ಮ ಸ್ಪರ್ಧೆ ಆರಂಭವಾಗುವ ಸಮಯಕ್ಕಿಂತ 15 ನಿಮಿಷಗಳ ಮೊದಲು ಸ್ಥಳದಲ್ಲಿರಿ."
 5. **Faculty Group Dance**: no section → placeholder kept (above)
 6. **Group Singing** (both events) rule 4 "The song should be folk or cultural based" exists only in English → added to the Kannada as a draft (same treatment as 3) so both languages list the same 9 rules: "ಹಾಡು ಜಾನಪದ ಅಥವಾ ಸಾಂಸ್ಕೃತಿಕ ಆಧಾರಿತವಾಗಿರಬೇಕು." Remove it if the Kannada list was meant to be shorter
@@ -67,6 +67,8 @@ Block names are transliterated; floors and room numbers use Latin digits (numera
 
 ### Essay & Painting rules — Kannada drafts for a Kannada speaker (Nov 2026; the English text is the organisers')
 - [ ] **Essay Writing rule 7** (replaced; the other 8 rules are unchanged). EN: "Participants must write their assigned serial number at the top of the sheet (USN, name and department must NOT be mentioned anywhere)." KN (draft): "ಭಾಗವಹಿಸುವವರು ತಮಗೆ ನೀಡಿದ ಕ್ರಮಸಂಖ್ಯೆಯನ್ನು ಹಾಳೆಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಬರೆಯಬೇಕು (USN, ಹೆಸರು ಮತ್ತು ವಿಭಾಗವನ್ನು ಎಲ್ಲಿಯೂ ಬರೆಯಬಾರದು)."
+
+- [ ] **Painting — all 13 rules replaced** (the old 11, incl. "theme a day prior", are gone; the English is the organisers'). KN drafts for review: 1 ವಿಷಯ: ಕರ್ನಾಟಕ, ಕನ್ನಡ ಸಂಸ್ಕೃತಿ, ಪರಂಪರೆ ಅಥವಾ ರಾಜ್ಯೋತ್ಸವಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಯಾವುದೇ ವಿಷಯ. · 2 ಸಮಯದ ಮಿತಿ: 2 ಗಂಟೆಗಳು. · 3 A3 ಗಾತ್ರದ ಹಾಳೆಗಳನ್ನು ಒದಗಿಸಲಾಗುವುದು. · 4 ಭಾಗವಹಿಸುವವರು ತಮ್ಮ ಸ್ವಂತ ಚಿತ್ರಕಲಾ ಸಾಮಗ್ರಿಗಳನ್ನು ತರಬೇಕು. · 5 ಜಲವರ್ಣ, ಪೋಸ್ಟರ್ ಬಣ್ಣಗಳು, ಕ್ರಯೋನ್‌ಗಳು ಮತ್ತು ಪೆನ್ಸಿಲ್‌ಗಳನ್ನು ಬಳಸಲು ಅನುಮತಿ ಇದೆ. · 6 ಮುದ್ರಿತ ಚಿತ್ರಗಳು, ಟ್ರೇಸಿಂಗ್, ಸ್ಟೆನ್ಸಿಲ್‌ಗಳು ಮತ್ತು ನಕಲು ಮಾಡುವುದನ್ನು ಕಟ್ಟುನಿಟ್ಟಾಗಿ ನಿಷೇಧಿಸಲಾಗಿದೆ. · 7 ಸ್ಥಳದಲ್ಲೇ ರಚಿಸಿದ ಮೂಲ ಕಲಾಕೃತಿಗೆ ಮಾತ್ರ ಅವಕಾಶ. · 8 ಹಾಳೆಯ ಮೇಲೆ ಎಲ್ಲಿಯೂ ಹೆಸರು, USN, ತರಗತಿ ಮತ್ತು ವಿಭಾಗವನ್ನು ಬರೆಯಬಾರದು. · 9 ಮೊಬೈಲ್ ಫೋನ್‌ಗಳು ಮತ್ತು ಬಾಹ್ಯ ಉಲ್ಲೇಖಗಳನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ. · 10 ಭಾಗವಹಿಸುವವರು ಶಿಸ್ತು ಮತ್ತು ಸ್ವಚ್ಛತೆಯನ್ನು ಕಾಪಾಡಬೇಕು. · 11 ಅಸಭ್ಯ ಅಥವಾ ಆಕ್ರಮಣಕಾರಿ ವಿಷಯವನ್ನು ನಿಷೇಧಿಸಲಾಗಿದೆ. · 12 ನಿರ್ಣಯಿಸುವ ಮಾನದಂಡಗಳು: ಸೃಜನಶೀಲತೆ, ಸ್ವಂತಿಕೆ, ವಿಷಯ ಪ್ರಸ್ತುತತೆ, ಬಣ್ಣ ಬಳಕೆ ಮತ್ತು ಅಚ್ಚುಕಟ್ಟು. · 13 ನ್ಯಾಯಾಧೀಶರ ತೀರ್ಮಾನವು ಅಂತಿಮ ಮತ್ತು ಬದ್ಧವಾಗಿರುತ್ತದೆ.
 
 ### Debate notice — Kannada drafts for review (`kn.json → competitions.medium`)
 - [ ] "ಮಾಧ್ಯಮ: ಕನ್ನಡ ಮಾತ್ರ." (Medium: Kannada only.) — on both Debate cards and in the register summary
