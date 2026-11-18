@@ -1,25 +1,23 @@
 /**
- * Time-dependent festival state for the Home page: the four countdown phases (CLAUDE.md §5.1),
+ * Time-dependent festival state for the Home page: the countdown phases (CLAUDE.md §5.1),
  * the registration window, and the ≤ 3-days deadline banner. Pure functions of (site, now).
  */
 import type { SiteConfig } from './schemas';
 import { istParts } from './format';
 
 export type CountdownPhase =
-  /** Before Day 1 starts → count down to competitionsStart. */
-  | { kind: 'competitions'; target: string }
-  /** During Day 1 competitions → "Competitions are on!" + count down to eventStart. */
-  | { kind: 'competitionsOn'; target: string }
-  /** After competitions, before Day 2 → count down to eventStart. */
+  /** Before Day 2 starts (and outside the competition window) → count down to eventStart. */
   | { kind: 'procession'; target: string }
+  /** During the Day 1 competition window → "Competitions are on!" above the same countdown to eventStart. */
+  | { kind: 'competitionsOn'; target: string }
   /** During Day 2. */
   | { kind: 'live' }
   /** After eventEnd. */
   | { kind: 'over' };
 
 export function countdownPhase(site: SiteConfig, t: number): CountdownPhase {
-  if (t < Date.parse(site.competitionsStart)) return { kind: 'competitions', target: site.competitionsStart };
-  if (t < Date.parse(site.competitionsEnd)) return { kind: 'competitionsOn', target: site.eventStart };
+  // The main countdown always targets eventStart (21 Nov, 9:00 AM); the competition window only adds a line above it.
+  if (t >= Date.parse(site.competitionsStart) && t < Date.parse(site.competitionsEnd)) return { kind: 'competitionsOn', target: site.eventStart };
   if (t < Date.parse(site.eventStart)) return { kind: 'procession', target: site.eventStart };
   if (t < Date.parse(site.eventEnd)) return { kind: 'live' };
   return { kind: 'over' };

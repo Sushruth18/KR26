@@ -12,6 +12,7 @@ import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
 import events from '../src/data/events.json' with { type: 'json' };
+import site from '../src/data/site.json' with { type: 'json' };
 
 const BASE = process.env.E2E_BASE ?? 'http://localhost:5173';
 const OUT = resolve(process.env.E2E_OUT ?? 'e2e-output/home');
@@ -460,10 +461,12 @@ async function main() {
   });
 
   // ---------- Countdown phases (dev clock override) ----------
+  // [clock, phase, text that must show (kn), text that must show (en), target day count must match eventStart]
   const phases: [string, string, string, string][] = [
-    ['2026-11-06T12:00:00+05:30', 'competitions', 'ಸ್ಪರ್ಧೆಗಳಿಗೆ', 'Competitions begin in'],
-    // Competitions run 12:30–16:30 on 20 Nov (site.json competitionsStart / competitionsEnd).
-    ['2026-11-20T12:29:00+05:30', 'competitions', 'ಸ್ಪರ್ಧೆಗಳಿಗೆ', 'Competitions begin in'],
+    ['2026-11-06T12:00:00+05:30', 'procession', 'ಮೆರವಣಿಗೆಗೆ', 'The procession begins in'],
+    // Before the competition window the countdown already targets 21 Nov 09:00 (no "Competitions begin in" phase any more).
+    ['2026-11-20T12:29:00+05:30', 'procession', 'ಮೆರವಣಿಗೆಗೆ', 'The procession begins in'],
+    // Competitions run 12:30–16:30 on 20 Nov (site.json competitionsStart / competitionsEnd): small line + the same countdown.
     ['2026-11-20T12:30:00+05:30', 'competitionsOn', 'ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!', 'Competitions are on!'],
     ['2026-11-20T16:29:00+05:30', 'competitionsOn', 'ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!', 'Competitions are on!'],
     ['2026-11-20T16:30:00+05:30', 'procession', 'ಮೆರವಣಿಗೆಗೆ', 'The procession begins in'],
@@ -471,6 +474,7 @@ async function main() {
     ['2026-11-21T12:00:00+05:30', 'live', 'ಉತ್ಸವ ಆರಂಭವಾಗಿದೆ!', 'The festival has begun!'],
     ['2026-11-22T09:00:00+05:30', 'over', 'ಧನ್ಯವಾದಗಳು', 'Thank you'],
   ];
+  const EVENT_START = Date.parse(site.eventStart);
   for (const [iso, kind, kn, en] of phases) {
     await scenario(`countdown-${kind}-${iso.slice(5, 16)}`, async (errors) => {
       const out: string[] = [];
@@ -481,11 +485,23 @@ async function main() {
           phase: s.getAttribute('data-phase'),
           text: s.textContent ?? '',
           days: s.querySelector('[data-testid=cd-days]')?.textContent ?? null,
+          hours: s.querySelector('[data-testid=cd-hours]')?.textContent ?? null,
+          minutes: s.querySelector('[data-testid=cd-minutes]')?.textContent ?? null,
           gallery: !!s.querySelector('a[href="/gallery"]'),
         }));
         expect(m.phase === kind, `phase ${m.phase}`);
         expect(m.text.includes(lang === 'kn' ? kn : en), `missing "${lang === 'kn' ? kn : en}"`);
-        if (kind === 'over') expect(m.gallery, 'no gallery link');
+        // The gallery is hidden: no phase may link to it (the Thank-you state included).
+        expect(!m.gallery, 'countdown links to the hidden gallery');
+        if (kind === 'competitionsOn' || kind === 'procession') {
+          // Same label above the tiles in both phases, and the tiles count down to eventStart.
+          expect(m.text.includes(lang === 'kn' ? 'ಮೆರವಣಿಗೆಗೆ' : 'The procession begins in'), 'procession heading missing');
+          expect(!/Competitions begin in|ಸ್ಪರ್ಧೆಗಳಿಗೆ/.test(m.text), 'old "Competitions begin in" phase is back');
+          const left = Math.floor((EVENT_START - Date.parse(iso)) / 60000);
+          const shown = Number(m.days) * 1440 + Number(m.hours) * 60 + Number(m.minutes);
+          expect(Math.abs(shown - left) <= 1, `tiles show ${shown} min, eventStart is ${left} min away`);
+        }
+        if (kind === 'over') expect(!/gallery|ಗ್ಯಾಲರಿ/i.test(m.text), 'Thank-you state mentions the gallery');
         if (m.days) expect(/^\d{2,}$/.test(m.days), `days "${m.days}" must be Latin digits in ${lang}`);
         out.push(`${lang}: days=${m.days ?? '—'}`);
         await page.browserContext().close();

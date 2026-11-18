@@ -23,7 +23,7 @@ export function Countdown() {
         </p>
       )}
       <h2 id="countdown-title" className={phase.kind === 'live' || phase.kind === 'over' ? 'text-glow text-3xl text-gold-300 sm:text-4xl' : 'text-xl text-ivory-50 sm:text-2xl'}>
-        {t(`home.countdown.${phase.kind === 'competitionsOn' ? 'mainEventIn' : phase.kind}`)}
+        {t(`home.countdown.${phase.kind === 'competitionsOn' ? 'procession' : phase.kind}`)}
       </h2>
 
       {'target' in phase ? (
@@ -36,12 +36,7 @@ export function Countdown() {
           </LinkButton>
         </>
       ) : (
-        <>
-          <p className="mt-3 max-w-[40ch] text-ivory-300">{t('home.countdown.overText')}</p>
-          <LinkButton to="/gallery" variant="primary" className="mt-2">
-            {t('home.countdown.galleryLink')}
-          </LinkButton>
-        </>
+        <p className="mt-3 max-w-[40ch] text-ivory-300">{t('home.countdown.overText')}</p>
       )}
 
       {phase.kind === 'competitionsOn' && (

@@ -147,11 +147,11 @@ Scroll to top on route change. Active nav item has a gold underline. Lazy-load r
 - College logo + "ಬಿ.ಎಂ.ಎಸ್. ತಾಂತ್ರಿಕ ಮತ್ತು ವ್ಯವಸ್ಥಾಪನಾ ಮಹಾವಿದ್ಯಾಲಯ" row; Honnudi logo (assets in `public/brand/`).
 - Hero: lit palace at night, parallax layers (sky → palace → crowd silhouettes → Ambari elephant walking across the foreground).
 - Eyebrow "ಪ್ರಸ್ತುತಪಡಿಸುತ್ತಿರುವ", title "ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ" with gold glow, subtitle "2026", tagline "ದಸರಾ ಮೆರವಣಿಗೆ" / "The Dasara Procession".
-- **Countdown** (days/hours/mins/secs in plaque tiles; Latin digits in both languages) that moves through phases automatically:
-  1. Before 20 Nov 09:00 → "ಸ್ಪರ್ಧೆಗಳಿಗೆ" / "Competitions begin in" → `site.json → competitionsStart`.
-  2. During 20 Nov → "ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!" / "Competitions are on!" + "Main event in" countdown to `eventStart`.
-  3. Before 21 Nov 09:00 → "ಮೆರವಣಿಗೆಗೆ" / "The procession begins in" → `eventStart`.
-  4. During 21 Nov → "ಉತ್ಸವ ಆರಂಭವಾಗಿದೆ!"; after `eventEnd` → "ಧನ್ಯವಾದಗಳು" + link to gallery.
+- **Countdown** (days/hours/mins/secs in plaque tiles; Latin digits in both languages) **always counts down to `site.json → eventStart` (21 Nov 09:00 IST)** and moves through states automatically (there is no countdown to `competitionsStart` any more):
+  1. Before `eventStart` → "ಮೆರವಣಿಗೆಗೆ" / "The procession begins in" → `eventStart`.
+  2. During the competition window on 20 Nov (`competitionsStart`..`competitionsEnd`) → the same countdown, with a small "ಸ್ಪರ್ಧೆಗಳು ನಡೆಯುತ್ತಿವೆ!" / "Competitions are on!" line above it (and a "Today's competitions" link).
+  3. From `eventStart` to `eventEnd` → "ಉತ್ಸವ ಆರಂಭವಾಗಿದೆ!" / "The festival has begun!".
+  4. After `eventEnd` → "ಧನ್ಯವಾದಗಳು" / "Thank you" — **no gallery link** (the gallery is hidden — see "Gallery hidden" under Approved decisions).
 - A small **two-day strip** under the title: "20 ನವೆಂಬರ್ · ಸ್ಪರ್ಧೆಗಳು" ‖ "21 ನವೆಂಬರ್ · ರಾಜ್ಯೋತ್ಸವ ಮೆರವಣಿಗೆ" (Day 1 Competitions / Day 2 Rajyotsava Procession).
 - CTAs: primary **"ಮೆರವಣಿಗೆಗೆ ಸೇರಿ — ನೋಂದಾಯಿಸಿ"** → `/competitions`; secondary "ನಮ್ಮ ತಂಡ" → `/team`.
 - 3 BrassPlaques: dates (20 Nov competitions · 21 Nov main event) · number of competitions (computed from data — 15: 11 students, 4 faculty) · cash prize pool (computed from data — **₹45,000**; shown as "₹45,000 + mementos" because faculty events award mementos).
