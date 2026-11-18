@@ -65,6 +65,9 @@ Block names are transliterated; floors and room numbers use Latin digits (numera
 11. **Debate** rule 8 (both debates), **Poem** rule 1, **Essay** rule 1 (Kannada): the PDF said "in **both** Kannada and English" (… ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಎರಡರಲ್ಲಿಯೂ); changed to "Kannada **or** English" (ಕನ್ನಡ ಅಥವಾ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ) so it agrees with the English "English or Kannada"
 12. **Debate medium (Nov 2026):** both Debates (`s-debate`, `f-debate`) are now **Kannada only** — rule 8 replaced by "The debate will be in Kannada only." / "ಚರ್ಚೆ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ." (the "Kannada or English" change in 11 no longer applies to them). Ids, codes and Sheet tab names are unchanged
 
+### Essay & Painting rules — Kannada drafts for a Kannada speaker (Nov 2026; the English text is the organisers')
+- [ ] **Essay Writing rule 7** (replaced; the other 8 rules are unchanged). EN: "Participants must write their assigned serial number at the top of the sheet (USN, name and department must NOT be mentioned anywhere)." KN (draft): "ಭಾಗವಹಿಸುವವರು ತಮಗೆ ನೀಡಿದ ಕ್ರಮಸಂಖ್ಯೆಯನ್ನು ಹಾಳೆಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಬರೆಯಬೇಕು (USN, ಹೆಸರು ಮತ್ತು ವಿಭಾಗವನ್ನು ಎಲ್ಲಿಯೂ ಬರೆಯಬಾರದು)."
+
 ### Debate notice — Kannada drafts for review (`kn.json → competitions.medium`)
 - [ ] "ಮಾಧ್ಯಮ: ಕನ್ನಡ ಮಾತ್ರ." (Medium: Kannada only.) — on both Debate cards and in the register summary
 - [ ] Student Debate only: "ಕನ್ನಡ ನಿಮ್ಮ ಮಾತೃಭಾಷೆಯಲ್ಲವೇ? ಕನ್ನಡೇತರರಿಗಾಗಿ ಇರುವ **ಸರಳ ಕನ್ನಡ ವಾದ-ವಿವಾದ** ಅಥವಾ **ಆಶುಭಾಷಣ** ಸ್ಪರ್ಧೆಯಲ್ಲಿ ಭಾಗವಹಿಸಿ." (Not a Kannada speaker? Try the Simple Kannada Debate or Elocution (for non-Kannadigas).)
