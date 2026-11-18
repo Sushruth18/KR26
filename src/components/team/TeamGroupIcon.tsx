@@ -4,7 +4,7 @@ import type { FolkIconName } from '../../lib/team';
 /**
  * Folk icons for the troupes: flat, single-weight gold line-work (24×24), one per group —
  * chatri (royal parasol), ratha (temple-car wheel), kombu (processional horn), lens, rangoli,
- * palm-leaf scroll, kalasha (welcome pot), stall, shield, conch, Yakshagana mask, gear.
+ * palm-leaf scroll, kalasha (welcome pot), stall, shield, conch, Yakshagana mask, gear, garuda (winged guardian).
  */
 const PATHS: Record<FolkIconName, ReactNode> = {
   chatri: (
@@ -86,6 +86,13 @@ const PATHS: Record<FolkIconName, ReactNode> = {
       <path d="M7 8.5v5c0 4 2 7.5 5 7.5s5-3.5 5-7.5v-5Z" />
       <path d="M9 12c1-.8 2-.8 3 0M12 12c1-.8 2-.8 3 0M9.5 17c1.5 1 3.5 1 5 0" />
       <path d="M12 12.5v2.5" />
+    </>
+  ),
+  garuda: (
+    <>
+      <path d="M12 12.5C9 12.5 5 10.5 2.5 6c3 .5 5 1.5 6.5 3.5C9.5 7 10.5 5 12 3.5c1.5 1.5 2.5 3.5 3 6 1.5-2 3.5-3 6.5-3.5-2.5 4.5-6.5 6.5-9.5 6.5Z" />
+      <path d="M12 12.5v4M9.5 21 12 16.5 14.5 21" />
+      <path d="M11 6.2h2" />
     </>
   ),
   gear: (

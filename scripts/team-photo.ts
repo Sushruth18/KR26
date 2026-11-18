@@ -15,6 +15,9 @@ import type { TeamPhoto } from '../src/lib/team';
 import type { TeamGroupData } from './lib/team-import';
 import { filesForOverride, listSourceFiles, processPhoto, type PhotoOverride } from './lib/team-photos';
 
+/** Every copy served for a hand-added person stays under 80 KB (80,000 bytes). */
+const MAX_COPY_BYTES = 80_000;
+
 const args = process.argv.slice(2);
 const opt = (name: string) => {
   const i = args.indexOf(`--${name}`);
@@ -39,7 +42,7 @@ if (!override?.file) throw new Error(`scripts/team-photo-map.json has no "file" 
 const hits = filesForOverride(listSourceFiles(resolve(photos)), override.file);
 if (hits.length !== 1) throw new Error(`team-photo-map.json: the "file" for ${id} matches ${hits.length} photos — it must match exactly one`);
 
-const done = await processPhoto(hits[0]!, id, p('public/team'), '/team', override);
+const done = await processPhoto(hits[0]!, id, p('public/team'), '/team', override, MAX_COPY_BYTES);
 manifest[id] = done.photo;
 member.photo = id;
 if (done.flags.length) notes[id] = done.flags;

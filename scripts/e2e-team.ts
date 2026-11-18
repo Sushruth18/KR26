@@ -19,7 +19,7 @@ import roleMap from '../src/data/team-role-map.json' with { type: 'json' };
 import team from '../src/data/team.json' with { type: 'json' };
 import type { TeamMember } from '../src/lib/schemas';
 import { cleanInstagram, cleanLinkedin } from '../src/lib/social';
-import { buildTroupes, groupConfig, type TeamGroupConfig } from '../src/lib/team';
+import { buildTroupes, getTeamPhoto, groupConfig, type TeamGroupConfig } from '../src/lib/team';
 import { mapRole, type RoleMap } from '../src/lib/teamRoles';
 import { importTeam, type ImportInput, type TeamGroupData } from './lib/team-import';
 import { mergeReport, renderReport, REPORT_END, REPORT_START } from './lib/team-report';
@@ -372,6 +372,33 @@ async function main() {
     return `${shown.length} troupes in config order, Heads before Co-Heads, roles are group labels, no personal data`;
   });
 
+  // ---------- Added by hand (Nov 2026) ----------
+  await scenario('team-additions', async () => {
+    const troupes = buildTroupes(team as never);
+    const names = (id: string) => troupes.find((t) => t.id === id)?.members.map((m) => m.name.en) ?? [];
+    expect(names('media')[0] === 'Aashish S Badiger', `Media must start with Aashish S Badiger: ${names('media')}`);
+    expect(names('design-decor').at(-1) === 'Dhimahi Rai', `Dhimahi Rai must close Design & Décor: ${names('design-decor')}`);
+    expect(names('security').join() === 'Jagadish Reddy,Nischala R', `Security members: ${names('security')}`);
+    expect(troupes.at(-1)?.id === 'security', 'Security is the last troupe');
+    const sec = troupes.find((t) => t.id === 'security')!;
+    expect(sec.label.kn === 'ಭದ್ರತೆ' && sec.members.every((m) => m.role.kn === 'ಗರುಡ' && m.role.en === 'Garuda'), 'Security label / Garuda role');
+    const total = troupes.reduce((n, t) => n + t.members.length, 0);
+    expect(total === 40, `member count ${total} (expected 40 = 36 + 4)`);
+    for (const id of ['aashish-s-badiger', 'dhimahi-rai', 'jagadish-reddy', 'nischala-r']) {
+      const m = troupes.flatMap((t) => t.members).find((x) => x.id === id)!;
+      expect(!m.linkedin && !m.instagram, `${id} must have no social links`);
+      const photo = getTeamPhoto(m.photo);
+      expect(!!photo && photo.variants.length >= 1, `${id} has no processed photo`);
+      for (const v of photo!.variants) {
+        const f = resolve(process.cwd(), 'public', v.src.replace(/^\//, ''));
+        expect(statSync(f).size < 80_000, `${v.src} is ${statSync(f).size} bytes (limit 80,000)`);
+      }
+    }
+    // English-only names: the Kannada name equals the English one for everybody, and is Latin script.
+    for (const m of troupes.flatMap((t) => t.members)) expect(m.name.kn === m.name.en && !/[ಀ-೿]/.test(m.name.kn), `${m.id}: name must be English in both languages`);
+    return `${total} members, order Media/Design/Security as requested, photos < 80 KB, names English in both languages`;
+  });
+
   // ---------- Browser ----------
   let browser: Browser | null = null;
   try {
@@ -408,6 +435,7 @@ async function main() {
             }).map((h) => h.textContent);
             const imgs = [...document.querySelectorAll<HTMLImageElement>('.team-photo img')];
             return {
+              kannadaNames: [...document.querySelectorAll('.team-name')].filter((n) => /[ಀ-೿]/.test(n.textContent ?? '')).map((n) => n.textContent),
               hScroll: document.documentElement.scrollWidth > vw,
               outside: out,
               clipped,
@@ -434,6 +462,7 @@ async function main() {
           expect(m.cards === team.reduce((n, g) => n + g.members.length, 0), `cards ${m.cards}`);
           expect(m.h1 === 1 && m.footers === 1, `h1 ${m.h1}, footers ${m.footers}`);
           expect(m.socials === team.flatMap((g) => g.members).filter((x) => (x as TeamMember).linkedin || (x as TeamMember).instagram).length, 'icons without a URL are rendered');
+          expect(m.kannadaNames.length === 0, `member names must be Latin script in both languages: ${m.kannadaNames}`);
           expect(m.broken === 0, `${m.broken} photos did not load`);
           expect(m.noSize === 0, 'photo without width/height');
           expect(m.first.every((l) => l === 'eager') && m.lazy > 0, `loading attrs ${m.first} / lazy ${m.lazy}`);

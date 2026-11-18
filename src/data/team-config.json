@@ -117,6 +117,20 @@
         "en": "Technical"
       },
       "icon": "gear"
+    },
+    {
+      "id": "security",
+      "label": {
+        "kn": "ಭದ್ರತೆ",
+        "en": "Security"
+      },
+      "icon": "garuda",
+      "roles": {
+        "garuda": {
+          "kn": "ಗರುಡ",
+          "en": "Garuda"
+        }
+      }
     }
   ]
 }

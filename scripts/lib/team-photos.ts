@@ -305,6 +305,8 @@ export async function processPhoto(
   outDir: string,
   publicBase: string,
   override: PhotoOverride = {},
+  /** Optional size cap per copy: quality is lowered step by step until the copy fits; a copy that still does not fit is left out (the smallest is always kept). */
+  maxBytes?: number,
 ): Promise<ProcessedPhoto> {
   const { buf: src, trimmed } = await loadRotated(file.path);
   const meta = await sharp(src).metadata();
@@ -325,10 +327,14 @@ export async function processPhoto(
   const variants: TeamPhoto['variants'] = [];
   for (const w of widths) {
     const h = Math.round(w / ASPECT);
-    const buf = await sharp(cropped)
-      .resize(w, h, { fit: 'cover', kernel: 'lanczos3' })
-      .webp({ quality: w >= 1600 ? 72 : 78, effort: 5, smartSubsample: true })
-      .toBuffer();
+    const resized = sharp(cropped).resize(w, h, { fit: 'cover', kernel: 'lanczos3' });
+    let quality = w >= 1600 ? 72 : 78;
+    let buf = await resized.clone().webp({ quality, effort: 5, smartSubsample: true }).toBuffer();
+    while (maxBytes && buf.length > maxBytes && quality > 40) {
+      quality -= 6;
+      buf = await resized.clone().webp({ quality, effort: 5, smartSubsample: true }).toBuffer();
+    }
+    if (maxBytes && buf.length > maxBytes && variants.length > 0) continue; // too big even at the lowest quality
     const name = `${id}-${w}w.${createHash('sha1').update(buf).digest('hex').slice(0, 8)}.webp`;
     writeFileSync(join(outDir, name), buf);
     variants.push({ w, src: `${publicBase}/${name}` });

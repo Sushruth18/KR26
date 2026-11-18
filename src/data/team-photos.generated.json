@@ -554,5 +554,69 @@
         "src": "/team/samith-reddy-s-1600w.248f3421.webp"
       }
     ]
+  },
+  "aashish-s-badiger": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRpgAAABXRUJQVlA4IIwAAABQBACdASoQABQAPt1cpkyopSOiMAgBEBuJQBdkGQQWojLobp/dCguVSE14AP6NN3XkXt2i2LjYDTiffQ5px6HlZCvWrRAVXnYXeqEgq6N4QZ1tZJGUze4DNi6D0nlDa8yr6IlDuPhvUMxQ24TqBKtvh6511XX9+H71j35YYSeqpppCNNQ//FbtDyQAAA==",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/aashish-s-badiger-480w.14653fec.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/aashish-s-badiger-960w.1ad58f32.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/aashish-s-badiger-1600w.d4c532a9.webp"
+      }
+    ]
+  },
+  "dhimahi-rai": {
+    "width": 480,
+    "height": 600,
+    "blur": "data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAABwBACdASoQABQAPt1apkyopSOiMAgBEBuJbACdMoRgBPAB2ACEq6cKMQp8AAD+0NVrdVifuSQuiHUsLXbfeXnckNVOkIkYSh9VplLgXqXbae5Mn9HfG7KQRIq5WJ4NxfexbCNjb1C1HVgeOLSc8SyfxGqH34SB5D1kei1wntrcf4p2NYpq2ZQKLG6cYVAaeK+MPVYG19oJ6CHK8rZr5iEEVz8sm2JmXb73UqjWQAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/dhimahi-rai-480w.84a48a2b.webp"
+      }
+    ]
+  },
+  "jagadish-reddy": {
+    "width": 960,
+    "height": 1200,
+    "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAAAwBACdASoQABQAPt1apkyopSOiMAgBEBuJYwCsACHfNdX6z2KRVMENvYAA/lv5Qmuc7kQu4gBDhHBEq2r7nh7Ghs2ho8PU0x81moPRMJYjPhalnflWhcCpqiq0RbaOIiXgQI5VwZr+ObA902tt96wU0rMe9tCSorNZDW+1dTqKTXj9X7gqIB8g6awSzH2dN+bd8AAA",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/jagadish-reddy-480w.3ef08724.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/jagadish-reddy-960w.8b3161dd.webp"
+      }
+    ]
+  },
+  "nischala-r": {
+    "width": 1600,
+    "height": 2000,
+    "blur": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAACQBACdASoQABQAPt1apkyopSOiMAgBEBuJZgCdBagWwAxmbkC52Vs168BC1CAA/uqf9svkyYPvbi+8xE0Yuge/+H+1a55WXzGMrNdfE/udQmXXJMk2eJmAsUFvBYBJk0XzKxBkSU2DyHiddbjt/SBeE9K+o5IsFDwQW4LTqHPcrGlyBtGK3jGs/z3XosoAAAA=",
+    "variants": [
+      {
+        "w": 480,
+        "src": "/team/nischala-r-480w.b5aa51bf.webp"
+      },
+      {
+        "w": 960,
+        "src": "/team/nischala-r-960w.4486084c.webp"
+      },
+      {
+        "w": 1600,
+        "src": "/team/nischala-r-1600w.8a801e41.webp"
+      }
+    ]
   }
 }

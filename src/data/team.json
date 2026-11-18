@@ -114,6 +114,18 @@
     "id": "media",
     "members": [
       {
+        "id": "aashish-s-badiger",
+        "name": {
+          "kn": "Aashish S Badiger",
+          "en": "Aashish S Badiger"
+        },
+        "role": {
+          "kn": "ಮಾಧ್ಯಮ",
+          "en": "Media"
+        },
+        "photo": "aashish-s-badiger"
+      },
+      {
         "id": "pranjal-raj",
         "name": {
           "kn": "Pranjal Raj",
@@ -237,6 +249,18 @@
           "en": "Design & Décor"
         },
         "photo": "abhishek-s-hebbar"
+      },
+      {
+        "id": "dhimahi-rai",
+        "name": {
+          "kn": "Dhimahi Rai",
+          "en": "Dhimahi Rai"
+        },
+        "role": {
+          "kn": "ವಿನ್ಯಾಸ ಮತ್ತು ಅಲಂಕಾರ",
+          "en": "Design & Décor"
+        },
+        "photo": "dhimahi-rai"
       }
     ]
   },
@@ -475,7 +499,7 @@
       {
         "id": "samith-reddy-s",
         "name": {
-          "kn": "ಸಮಿತ್ ರೆಡ್ಡಿ ಎಸ್",
+          "kn": "Samith Reddy S",
           "en": "Samith Reddy S"
         },
         "role": {
@@ -483,6 +507,35 @@
           "en": "Fashion"
         },
         "photo": "samith-reddy-s"
+      }
+    ]
+  },
+  {
+    "id": "security",
+    "members": [
+      {
+        "id": "jagadish-reddy",
+        "name": {
+          "kn": "Jagadish Reddy",
+          "en": "Jagadish Reddy"
+        },
+        "role": {
+          "kn": "ಗರುಡ",
+          "en": "Garuda"
+        },
+        "photo": "jagadish-reddy"
+      },
+      {
+        "id": "nischala-r",
+        "name": {
+          "kn": "Nischala R",
+          "en": "Nischala R"
+        },
+        "role": {
+          "kn": "ಗರುಡ",
+          "en": "Garuda"
+        },
+        "photo": "nischala-r"
       }
     ]
   }

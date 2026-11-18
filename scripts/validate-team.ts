@@ -11,7 +11,7 @@ import type { TeamPhoto } from '../src/lib/team';
 export function validateTeam(team: TeamGroup[] | null, errors: string[]): void {
   const groupIds = config.groups.map((g) => g.id);
   if (new Set(groupIds).size !== groupIds.length) errors.push('team-config.json: duplicate group id');
-  const icons = new Set(['chatri', 'ratha', 'kombu', 'lens', 'rangoli', 'scroll', 'kalasha', 'stall', 'shield', 'conch', 'mask', 'gear']);
+  const icons = new Set(['chatri', 'ratha', 'kombu', 'lens', 'rangoli', 'scroll', 'kalasha', 'stall', 'shield', 'conch', 'mask', 'gear', 'garuda']);
   for (const g of config.groups) {
     if (!icons.has(g.icon)) errors.push(`team-config.json: ${g.id} uses unknown icon "${g.icon}"`);
     if (!g.label.kn || !g.label.en) errors.push(`team-config.json: ${g.id} needs a Kannada and an English label`);
